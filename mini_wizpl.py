@@ -107,17 +107,13 @@ def print_exp(e):
         if e.op == 'relu':
             x = print_exp(e.args[0])
             r = gensym('result_mat')
-            r1, r2 = e.val().shape
-            print(f'  static Integer {r}[{r1}][{r2}];')
-            print(mk_relu(e.args[0], x, r))
+            print(f'  QSMatrix<Float> {r} = relu({x});')
             print()
             return r
         elif e.op == 'softmax':
             x = print_exp(e.args[0])
             r = gensym('result_mat_softmax')
-            r1, r2 = e.val().shape
-            print(f'  static Integer {r}[{r1}][{r2}];')
-            print(mk_relu(e.args[0], x, r))
+            print(f'  QSMatrix<Float> {r} = {x};')
             print()
             return r
         elif e.op == 'matmul':
@@ -126,11 +122,7 @@ def print_exp(e):
             x2 = print_exp(e2)
             r = gensym('result_mat')
 
-            n1, n2 = e1.val().shape
-            m1, m2 = e2.val().shape
-            r1, r2 = e.val().shape
-            print(f'  static Integer {r}[{r1}][{r2}];');
-            print(mk_matmul(e1, e2, x1, x2, r))
+            print(f'  QSMatrix<Float> {r} = {x1} * {x2};')
             return r
         elif e.op == 'matplus':
             e1, e2 = e.args
@@ -138,79 +130,13 @@ def print_exp(e):
             x2 = print_exp(e2)
             r = gensym('result_mat')
 
-            n1, n2 = e1.val().shape
-            e2s = e2.val().shape
-            if len(e2s) == 1:
-                m1 = 1
-                m2 = e2s[0]
-            elif len(e2s) == 2:
-                m1 = e2s[0]
-                m2 = e2s[1]
-
-            r1, r2 = e.val().shape
-            print(f'  static Integer {r}[{r1}][{r2}];');
-            print(mk_matplus(e1, e2, x1, x2, r))
-            #print(f'wizpl_matmul({x1}, {x2}, {r}, {n1}, {n2}, {m1}, {m2});')
+            print(f'  QSMatrix<Float> {r} = {x1} + {x2};')
             print()
             return r
         else:
             raise Exception(e)
     else:
         raise Exception(e)
-
-def mk_relu(x1, x1_name, out):
-    r1, c1 = x1.val().shape
-    return f'  matrix_relu(*{x1_name}, {r1}, {c1}, *{out});\n'
-#     return f"""
-#   for(int i = 0; i < {r1}; ++i)
-#       for(int j = 0; j < {c1}; ++j)
-#       {{
-#           {out}[i][j]={x1_name}[i][j].select({x1_name}[i][j] > Integer(32, 0, PUBLIC), Integer(32, 0, PUBLIC));
-#       }}
-# """
-#     return f"""
-#   for(int i = 0; i < {r1}; ++i)
-#       for(int j = 0; j < {c1}; ++j)
-#       {{
-#           {out}[i][j]={x1_name}[i][j].select({x1_name}[i][j] > Integer(32, 0, PUBLIC), Integer(32, 0, PUBLIC));
-#       }}
-# """
-    
-
-def mk_matmul(x1, x2, x1_name, x2_name, out):
-    r1, c1 = x1.val().shape
-    r2, c2 = x2.val().shape
-
-    return f'  matrix_mult(*{x1_name}, *{x2_name}, {r1}, {c1}, {r2}, {c2}, *{out});\n'
-
-def mk_matplus(x1, x2, x1_name, x2_name, out):
-    r1, c1 = x1.val().shape
-
-    e2s = x2.val().shape
-    if len(e2s) == 1:
-        r2 = 1
-        c2 = e2s[0]
-    elif len(e2s) == 2:
-        r2 = e2s[0]
-        c2 = e2s[1]
-
-
-    return f'  matrix_plus(*{x1_name}, *{x2_name}, {r1}, {c1}, {r2}, {c2}, *{out});\n'
-
-#     return f"""
-#   for(int i = 0; i < {r1}; ++i)
-#       for(int j = 0; j < {c2}; ++j)
-#       {{
-#           {out}[i][j]=Integer(32, 0, PUBLIC);
-#       }}
-
-#   for(int i = 0; i < {r1}; ++i)
-#       for(int j = 0; j < {c2}; ++j)
-#           for(int k = 0; k < {c1}; ++k)
-#           {{
-#               {out}[i][j] = {out}[i][j] + ({x1_name}[i][k] * {x2_name}[k][j]);
-#           }}
-# """
 
 def print_defs(defs):
     for d in defs:
@@ -225,12 +151,16 @@ def print_defs(defs):
             n1 = e2s[0]
             n2 = e2s[1]
 
+  # (Test*)malloc(sizeof(Test) * N)
+  # Float* {name} = (Float*)malloc(sizeof(Float) * {n1} * {n2})
+  #   // static Float {name}[{n1}][{n2}];
         p = f"""
-  int {name}_init[{n1}][{n2}] = {print_mat(x)};
-  static Integer {name}[{n1}][{n2}];
+  float {name}_init[{n1}][{n2}] = {print_mat(x)};
+  QSMatrix<Float> {name}({n1}, {n2}, pub_zero);
   for (int i = 0; i < {n1}; ++i)
-    for (int j = 0; j < {n2}; ++j)
-      {name}[i][j] = Integer(32, {name}_init[i][j], ALICE);
+    for (int j = 0; j < {n2}; ++j) {{
+      {name}(i, j) = Float({name}_init[i][j], ALICE);
+    }}
 """
         print(p)
 
@@ -239,10 +169,10 @@ def print_mat(x):
     x = x.detach().numpy()
 
     if len(x.shape) == 1:
-        return '{{' + ', '.join([str(int(i)) for i in x]) + '}}'
+        return '{{' + ', '.join([str(i) for i in x]) + '}}'
 
     elif len(x.shape) == 2:
-        return '{' + ', '.join(['{' + ', '.join([str(int(x)) for x in row]) + '}'
+        return '{' + ', '.join(['{' + ', '.join([str(x) for x in row]) + '}'
                             for row in x]) + '}'
 
 def print_emp(outp, filename):
@@ -259,6 +189,8 @@ def print_emp(outp, filename):
         print(top_boilerplate)
 
         print_defs(all_defs)
+        print()
+        print('  cout << "defs complete\\n";')
         print()
         print_exp(outp)
 

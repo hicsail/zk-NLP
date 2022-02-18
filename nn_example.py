@@ -3,9 +3,9 @@ from mini_wizpl import SecretArray, relu, print_emp
 
 # simple neural network
 
-N_FEATURES = 784
+N_FEATURES = 7
 N_EXAMPLES = 1
-N_HIDDEN = 128
+N_HIDDEN = 12
 
 # initialize inputs randomly
 inputs = SecretArray(np.random.randint(-10, high=10, size=(N_EXAMPLES, N_FEATURES)))
