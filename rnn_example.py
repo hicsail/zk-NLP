@@ -25,7 +25,7 @@ def predict(model, character):
     out, hidden = model(character)
 
     prob = nn.functional.softmax(out[-1], dim=0).data
-    print(prob)
+    # print(prob)
     # Taking the class with the highest probability score from the output
     char_ind = torch.max(prob, dim=0)[1].item()
 
@@ -59,15 +59,14 @@ def init_model_for_emp(model, input_str):
             return out
 
 def init_input_str_for_emp(input_str):
-    out = []
-    for character in input_str:
-        # One-hot encoding our input to fit into the model
-        character = np.array([[char2int[c] for c in character]])
-        character = one_hot_encode(character, dict_size, character.shape[1], 1)
-        out.append(character)
-    out = np.array(out)
-    out = torch.from_numpy(out)
-    return out
+    chars = [c for c in input_str]
+    print(chars)
+    # One-hot encoding our input to fit into the model
+    chars = np.array([[char2int[c] for c in chars]])
+    chars = one_hot_encode(chars, dict_size, chars.shape[1], 1)
+    chars = torch.from_numpy(chars)
+    chars = chars.to(device)
+    return chars
 
 
 class Model(nn.Module):
@@ -196,7 +195,9 @@ for epoch in range(1, n_epochs + 1):
         print('Epoch: {}/{}.............'.format(epoch, n_epochs), end=' ')
         print("Loss: {:.4f}".format(loss.item()))
 
-# print(sample(model, 15, 'hey'))
+print(sample(model, 15, 'hey'))
 out = init_model_for_emp(model, "hey")
-SecretTensor(init_input_str_for_emp("hey"))
+input_tensor = init_input_str_for_emp("hey")
+print(input_tensor)
+SecretTensor(input_tensor)
 print_emp(out, 'rnn_test.cpp')
