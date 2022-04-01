@@ -5,9 +5,9 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
-from mini_wizpl import SecretTensor, Prim, print_emp
+from miniwizpl import SecretTensor, Prim, print_emp
 from mnist_model import Net
-import mini_wizpl_torch
+import miniwizpl.torch
 
 model = Net()
 model.load_state_dict(torch.load('mnist.pt'))

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import os
 
 all_defs = []
+emp_output_string = ""
 
 gensym_num = 0
 def gensym(x):
@@ -99,6 +100,10 @@ def eval(e):
     else:
         raise Exception(e)
 
+def emit(s=''):
+    global emp_output_string
+    emp_output_string += s + '\n'
+
 def print_exp(e):
     if isinstance(e, SecretArray):
         return e.name
@@ -108,14 +113,14 @@ def print_exp(e):
         if e.op == 'relu':
             x = print_exp(e.args[0])
             r = gensym('result_mat')
-            print(f'  QSMatrix<Float> {r} = relu({x});')
-            print()
+            emit(f'  QSMatrix<Float> {r} = relu({x});')
+            emit()
             return r
         elif e.op == 'softmax':
             x = print_exp(e.args[0])
             r = gensym('result_mat_softmax')
-            print(f'  QSMatrix<Float> {r} = {x};')
-            print()
+            emit(f'  QSMatrix<Float> {r} = {x};')
+            emit()
             return r
         elif e.op == 'matmul':
             e1, e2 = e.args
@@ -123,7 +128,7 @@ def print_exp(e):
             x2 = print_exp(e2)
             r = gensym('result_mat')
 
-            print(f'  QSMatrix<Float> {r} = {x1} * {x2};')
+            emit(f'  QSMatrix<Float> {r} = {x1} * {x2};')
             return r
         elif e.op == 'matplus':
             e1, e2 = e.args
@@ -131,8 +136,8 @@ def print_exp(e):
             x2 = print_exp(e2)
             r = gensym('result_mat')
 
-            print(f'  QSMatrix<Float> {r} = {x1} + {x2};')
-            print()
+            emit(f'  QSMatrix<Float> {r} = {x1} + {x2};')
+            emit()
             return r
         else:
             raise Exception(e)
@@ -151,10 +156,9 @@ def print_defs(defs):
         elif len(e2s) == 2:
             n1 = e2s[0]
             n2 = e2s[1]
+        else:
+            raise Exception(f'unsupported array shape: {e2s}')
 
-  # (Test*)malloc(sizeof(Test) * N)
-  # Float* {name} = (Float*)malloc(sizeof(Float) * {n1} * {n2})
-  #   // static Float {name}[{n1}][{n2}];
         p = f"""
   float {name}_init[{n1}][{n2}] = {print_mat(x)};
   QSMatrix<Float> {name}({n1}, {n2}, pub_zero);
@@ -163,10 +167,15 @@ def print_defs(defs):
       {name}(i, j) = Float({name}_init[i][j], ALICE);
     }}
 """
-        print(p)
+        emit(p)
 
 
 def print_mat(x):
+    typ = type(x).__name__
+    if typ == 'ndarray':
+        pass
+    else:
+        raise Exception(f'unsupported matrix type: {typ}')
     #x = x.detach().numpy()
 
     if len(x.shape) == 1:
@@ -178,28 +187,25 @@ def print_mat(x):
 
 def print_emp(outp, filename):
     global all_defs
+    global emp_output_string
 
-    original_stdout = sys.stdout
+    with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_top.cpp', 'r') as f1:
+        top_boilerplate = f1.read()
+            
+    emit(top_boilerplate)
+
+    print_defs(all_defs)
+    emit()
+    emit('  cout << "defs complete\\n";')
+    emit()
+    print_exp(outp)
+
+    with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_bottom.cpp', 'r') as f2:
+        bottom_boilerplate = f2.read()
+            
+    emit(bottom_boilerplate)
 
     with open(filename, 'w') as f:
-        sys.stdout = f
-
-        with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_top.cpp', 'r') as f1:
-            top_boilerplate = f1.read()
-            
-        print(top_boilerplate)
-
-        print_defs(all_defs)
-        print()
-        print('  cout << "defs complete\\n";')
-        print()
-        print_exp(outp)
-
-        with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_bottom.cpp', 'r') as f2:
-            bottom_boilerplate = f2.read()
-            
-        print(bottom_boilerplate)
-
-        sys.stdout = original_stdout
+        f.write(emp_output_string)
 
 

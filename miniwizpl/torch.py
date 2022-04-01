@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from mini_wizpl import SecretTensor, Prim, print_emp
+from . import SecretTensor, Prim, print_emp
 
 old_relu = F.relu
 def my_relu(x):
