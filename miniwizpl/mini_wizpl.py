@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from dataclasses import dataclass
+import os
 
 all_defs = []
 
@@ -166,7 +167,7 @@ def print_defs(defs):
 
 
 def print_mat(x):
-    x = x.detach().numpy()
+    #x = x.detach().numpy()
 
     if len(x.shape) == 1:
         return '{{' + ', '.join([str(i) for i in x]) + '}}'
@@ -183,7 +184,7 @@ def print_emp(outp, filename):
     with open(filename, 'w') as f:
         sys.stdout = f
 
-        with open('mini_wizpl_top.cpp', 'r') as f1:
+        with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_top.cpp', 'r') as f1:
             top_boilerplate = f1.read()
             
         print(top_boilerplate)
@@ -194,7 +195,7 @@ def print_emp(outp, filename):
         print()
         print_exp(outp)
 
-        with open('mini_wizpl_bottom.cpp', 'r') as f2:
+        with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_bottom.cpp', 'r') as f2:
             bottom_boilerplate = f2.read()
             
         print(bottom_boilerplate)
