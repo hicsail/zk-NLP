@@ -6,7 +6,7 @@ from .globals import *
 from .expr import *
 
 emp_output_string = ""
-bitwidth = 2048
+bitwidth = 32
 
 def eval(e):
     if isinstance(e, SecretArray):
@@ -33,21 +33,12 @@ def print_exp(e):
     elif isinstance(e, int):
         r = gensym('public_intval')
 
-        if bitsof(e) < 64:
+        if bitsof(e) < 32:
             emit(f'  Integer {r} = Integer({bitwidth}, {e}, PUBLIC);')
             emit()
             return r
         else:
-            bin_str = "{0:b}".format(e)
-            bin_arry = '{' + ','.join(bin_str) + '}'
-
-            emit(f'  bool {r}_init[] = {bin_arry};')
-            emit(f'  vector<Bit> {r}_vec;')
-            emit(f'  for (int i = 0; i < {len(bin_str)}; ++i)')
-            emit(f'    {r}_vec.push_back(Bit({r}_init[i], PUBLIC));')
-            emit(f'  Integer {r} = Integer({r}_vec);')
-            emit(f'  {r}.resize({bitwidth});')
-            emit()
+            emit_bigint(r, e)
             return r
 
     elif isinstance(e, Prim):
@@ -108,6 +99,16 @@ def print_exp(e):
             emit(f'  Integer {r} = {x1} % {x2};')
             emit()
             return r
+        elif e.op == 'exp_mod':
+            e1, e2, e3 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            x3 = print_exp(e3)
+            r = gensym('result_intval')
+
+            emit(f'  Integer {r} = {x1}.modExp({x2}, {x3});')
+            emit()
+            return r
         else:
             raise Exception(e)
     else:
@@ -117,7 +118,22 @@ def bitsof(n):
     bits = 1
     while 2**bits < n:
         bits += 1
+        if bits > 10000:
+            raise Exception(f'Too many bits! {n}')
     return bits
+
+def emit_bigint(r, e):
+    bin_str = "{0:b}".format(e)
+    bin_arry = '{' + ','.join(bin_str) + '}'
+
+    emit(f'  bool {r}_init[] = {bin_arry};')
+    emit(f'  vector<Bit> {r}_vec;')
+    emit(f'  for (int i = 0; i < {len(bin_str)}; ++i)')
+    emit(f'    {r}_vec.push_back(Bit({r}_init[i], PUBLIC));')
+    emit(f'  Integer {r} = Integer({r}_vec);')
+    emit(f'  {r}.resize({bitwidth});')
+    emit()
+
 
 def print_defs(defs):
     global bitwidth
@@ -127,10 +143,11 @@ def print_defs(defs):
         x = d.val()
 
         if isinstance(d, SecretInt):
-            if bitsof(x) > bitwidth:
-                bitwidth = bitsof(x)
-            emit(f'  Integer {name} = Integer({bitwidth}, {x}, ALICE);')
-            emit()
+            if bitsof(x) < 32:
+                emit(f'  Integer {name} = Integer({bitwidth}, {x}, ALICE);')
+                emit()
+            else:
+                emit_bigint(name, x)
         elif isinstance(d, (SecretTensor, SecretArray)):
             e2s = x.shape
             if len(e2s) == 1:
@@ -174,6 +191,10 @@ def print_mat(x):
                             for row in x]) + '}'
     else:
         raise Exception(f'unsupported array shape: {x.shape}')
+
+def set_bitwidth(b):
+    global bitwidth
+    bitwidth = b
 
 def print_emp(outp, filename):
     global all_defs

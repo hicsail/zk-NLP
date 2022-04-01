@@ -18,10 +18,23 @@ class AST:
         return Prim('mul', [other, self])
 
     def __mod__(self, other):
-        return Prim('mod', [other, self])
+        return Prim('mod', [self, other])
 
     def __rmod__(self, other):
-        return Prim('mod', [self, other])
+        return Prim('mod', [other, self])
+
+    def __le__(self, other):
+        return Prim('le', [self, other])
+
+    def __lt__(self, other):
+        return Prim('lt', [self, other])
+
+    def __ge__(self, other):
+        return Prim('ge', [self, other])
+
+    def __gt__(self, other):
+        return Prim('gt', [self, other])
+
 
 @dataclass
 class Prim(AST):
@@ -44,6 +57,8 @@ class Prim(AST):
         else:
             raise Exception(self)
 
+def exp_mod(a, b, c):
+    return Prim('exp_mod', [a, b, c])
 
 def relu(x):
     return Prim('relu', [x])
