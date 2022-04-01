@@ -6,7 +6,6 @@ sys.setrecursionlimit(10000)
 # https://stackoverflow.com/questions/41363791/calculating-modulus-for-larger-numbers-in-python
 def geom(a, k, n):
     """calculates (1 + a + a^2 + ... + a^(k-1)) mod n)"""
-    tot += 1
     if k <= 2:
         return sum(a**i for i in range(k)) % n
     else:
