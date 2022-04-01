@@ -11,6 +11,18 @@ class AST:
     def __rmatmul__(self, other):
         return Prim('matmul', [other, self])
 
+    def __mul__(self, other):
+        return Prim('mul', [self, other])
+
+    def __rmul__(self, other):
+        return Prim('mul', [other, self])
+
+    def __mod__(self, other):
+        return Prim('mod', [other, self])
+
+    def __rmod__(self, other):
+        return Prim('mod', [self, other])
+
 @dataclass
 class Prim(AST):
     op: str
@@ -35,6 +47,20 @@ class Prim(AST):
 
 def relu(x):
     return Prim('relu', [x])
+
+class SecretInt(AST):
+    def __init__(self, intval):
+        global all_defs
+        all_defs.append(self)
+        self.intval = intval
+        self.name = gensym('intval')
+
+    def __str__(self):
+        return f'SecretInt({self.intval})'
+    __repr__ = __str__
+
+    def val(self):
+        return self.intval
 
 class SecretArray(AST):
     def __init__(self, arr):

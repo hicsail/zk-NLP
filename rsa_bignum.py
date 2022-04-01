@@ -1,6 +1,8 @@
 import sys
 import random
 
+from miniwizpl import SecretInt, print_emp
+
 sys.setrecursionlimit(10000)
 # taken from:
 # https://stackoverflow.com/questions/41363791/calculating-modulus-for-larger-numbers-in-python
@@ -23,8 +25,6 @@ def mod_exp(a, m, n):
     r = pow(10,k,n)
     return (a*geom(r,m,n))%n
 
-print('modexp test:', mod_exp(366, 457429086499,164868357))
-
 def parse(x):
     return int(x.replace(':', ''), 16)
 
@@ -44,6 +44,9 @@ exponent2 = parse("07:00:45:a6:ee:8c:b3:03:c9:82:45:e4:b1:e9:05:d0:5a:ba:14:11:0
 
 coefficient = parse("6f:63:ae:03:5f:53:78:ec:b7:3d:ea:97:6e:2c:b4:e7:45:53:07:80:74:92:fb:15:fd:29:83:20:51:a1:c9:12:03:52:2f:5c:70:a9:9e:f2:9a:45:28:6b:ab:1b:92:f6:37:cb:b4:da:c7:ff:51:77:df:60:75:a7:c2:e4:7a:5a:b7:93:6f:de:a1:fd:20:0c:15:b8:dc:8c:33:17:0b:54:0a:01:12:09:9e:b9:d0:60:d0:a3:e3:4b:c2:a8:7a:c4:18:4d:05:3a:68:6f:9c:6f:d6:ee:c9:e6:21:7b:42:32:c1:ef:c3:58:e3:7f:54:66:b5:6a:d6:f0:d3:80:e7:59")
 
+# publicExponent = 20000000000000000000001
+# modulus = 100000000000000000000000001
+# privateExponent = 18800000000000000000001
 
 def enc(m):
     return mod_exp(m, publicExponent, modulus)
@@ -51,9 +54,13 @@ def enc(m):
 def dec(c):
     return mod_exp(c, privateExponent, modulus)
 
-encrypted_one = enc(1)
-print('encrypted:', encrypted_one)
+m = SecretInt(1)
 
+encrypted_one = enc(m)
 decrypted_one = dec(encrypted_one)
-print('decrypted:', decrypted_one)
+print('result:', decrypted_one)
 
+print_emp(decrypted_one, 'miniwizpl_test.cpp')
+
+#decrypted_one = dec(encrypted_one)
+#print('decrypted:', decrypted_one)

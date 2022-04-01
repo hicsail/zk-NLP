@@ -5,9 +5,8 @@ import os
 from .globals import *
 from .expr import *
 
-all_defs = []
 emp_output_string = ""
-
+bitwidth = 2048
 
 def eval(e):
     if isinstance(e, SecretArray):
@@ -29,10 +28,28 @@ def emit(s=''):
     emp_output_string += s + '\n'
 
 def print_exp(e):
-    if isinstance(e, SecretArray):
+    if isinstance(e, (SecretArray, SecretTensor, SecretInt)):
         return e.name
-    elif isinstance(e, SecretTensor):
-        return e.name
+    elif isinstance(e, int):
+        r = gensym('public_intval')
+
+        if bitsof(e) < 64:
+            emit(f'  Integer {r} = Integer({bitwidth}, {e}, PUBLIC);')
+            emit()
+            return r
+        else:
+            bin_str = "{0:b}".format(e)
+            bin_arry = '{' + ','.join(bin_str) + '}'
+
+            emit(f'  bool {r}_init[] = {bin_arry};')
+            emit(f'  vector<Bit> {r}_vec;')
+            emit(f'  for (int i = 0; i < {len(bin_str)}; ++i)')
+            emit(f'    {r}_vec.push_back(Bit({r}_init[i], PUBLIC));')
+            emit(f'  Integer {r} = Integer({r}_vec);')
+            emit(f'  {r}.resize({bitwidth});')
+            emit()
+            return r
+
     elif isinstance(e, Prim):
         if e.op == 'relu':
             x = print_exp(e.args[0])
@@ -63,35 +80,79 @@ def print_exp(e):
             emit(f'  QSMatrix<Float> {r} = {x1} + {x2};')
             emit()
             return r
+        elif e.op == 'mul':
+            e1, e2 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            r = gensym('result_intval')
+
+            emit(f'  Integer {r} = {x1} * {x2};')
+            emit()
+            return r
+        elif e.op == 'add':
+            e1, e2 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            r = gensym('result_intval')
+
+            emit(f'  Integer {r} = {x1} * {x2};')
+            emit()
+            return r
+
+        elif e.op == 'mod':
+            e1, e2 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            r = gensym('result_intval')
+
+            emit(f'  Integer {r} = {x1} % {x2};')
+            emit()
+            return r
         else:
             raise Exception(e)
     else:
         raise Exception(e)
 
+def bitsof(n):
+    bits = 1
+    while 2**bits < n:
+        bits += 1
+    return bits
+
 def print_defs(defs):
+    global bitwidth
+
     for d in defs:
         name = d.name
         x = d.val()
 
-        e2s = x.shape
-        if len(e2s) == 1:
-            n1 = 1
-            n2 = e2s[0]
-        elif len(e2s) == 2:
-            n1 = e2s[0]
-            n2 = e2s[1]
-        else:
-            raise Exception(f'unsupported array shape: {e2s}')
+        if isinstance(d, SecretInt):
+            if bitsof(x) > bitwidth:
+                bitwidth = bitsof(x)
+            emit(f'  Integer {name} = Integer({bitwidth}, {x}, ALICE);')
+            emit()
+        elif isinstance(d, (SecretTensor, SecretArray)):
+            e2s = x.shape
+            if len(e2s) == 1:
+                n1 = 1
+                n2 = e2s[0]
+            elif len(e2s) == 2:
+                n1 = e2s[0]
+                n2 = e2s[1]
+            else:
+                raise Exception(f'unsupported array shape: {e2s}')
 
-        p = f"""
-  float {name}_init[{n1}][{n2}] = {print_mat(x)};
-  QSMatrix<Float> {name}({n1}, {n2}, pub_zero);
-  for (int i = 0; i < {n1}; ++i)
-    for (int j = 0; j < {n2}; ++j) {{
-      {name}(i, j) = Float({name}_init[i][j], ALICE);
-    }}
+            p = f"""
+float {name}_init[{n1}][{n2}] = {print_mat(x)};
+QSMatrix<Float> {name}({n1}, {n2}, pub_zero);
+for (int i = 0; i < {n1}; ++i)
+  for (int j = 0; j < {n2}; ++j) {{
+    {name}(i, j) = Float({name}_init[i][j], ALICE);
+}}
 """
-        emit(p)
+            emit(p)
+        else:
+            raise Exception(f'unsupported secret type: {type(d)}')
 
 
 def print_mat(x):
