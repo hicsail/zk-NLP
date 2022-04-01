@@ -1,5 +1,5 @@
 import numpy as np
-from mini_wizpl import SecretArray, relu, print_emp
+from miniwizpl import SecretArray, relu, print_emp
 
 # simple neural network
 

@@ -171,19 +171,24 @@ def print_defs(defs):
 
 
 def print_mat(x):
+    # convert x into a numpy array
     typ = type(x).__name__
     if typ == 'ndarray':
         pass
+    elif typ in ['Tensor', 'Parameter']:
+        x = x.detach().numpy()
     else:
-        raise Exception(f'unsupported matrix type: {typ}')
-    #x = x.detach().numpy()
+        raise Exception(f'unsupported array type: {typ}')
 
+    # print out the numpy array
     if len(x.shape) == 1:
         return '{{' + ', '.join([str(i) for i in x]) + '}}'
 
     elif len(x.shape) == 2:
         return '{' + ', '.join(['{' + ', '.join([str(x) for x in row]) + '}'
                             for row in x]) + '}'
+    else:
+        raise Exception(f'unsupported array shape: {x.shape}')
 
 def print_emp(outp, filename):
     global all_defs
