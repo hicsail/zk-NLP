@@ -157,6 +157,51 @@ QSMatrix<T> QSMatrix<T>::transpose() {
   return result;
 }
 
+// Concatenate two matrices together along axis and output the concatenated matrix.
+template<typename T>
+QSMatrix<T>& QSMatrix<T>::concatenate(const QSMatrix<T>& rhs, bool const & axis) {
+  if (axis == 0) {
+    assert(this->cols == rhs.get_cols());
+    unsigned new_rows = this->rows + rhs.get_rows();
+    unsigned new_cols = this->cols;
+    QSMatrix<T> result(new_rows, new_cols, 0.0);
+
+    std::size_t src_row_index = 0;
+    QSMatrix<T> * src_mat = this;
+    for (std::size_t i = 0; i < new_rows; i++) {
+      if (src_row_index == src_mat->get_rows()) {
+        src_mat = &rhs;
+        src_row_index = 0;
+      }
+      for (std::size_t j = 0; j < new_cols; j++) {
+        result(i, j) = (*src_mat)[src_row_index][j];
+      }
+      src_row_index++;
+    }
+    return result;
+  } else if (axis == 1) {
+    assert(this->rows == rhs.get_rows());
+    unsigned new_rows = this->rows;
+    unsigned new_cols = this->cols + rhs.get_cols();
+    QSMatrix<T> result(new_rows, new_cols, 0.0);
+
+    std::size_t src_col_index = 0;
+    QSMatrix<T> * src_mat = this;
+    for (std::size_t i = 0; i < new_rows; i++) {
+      src_mat = this;
+      for (std::size_t j = 0; j < new_cols; j++) {
+        if (src_col_index == src_mat->get_cols()) {
+          src_mat = &rhs;
+          src_col_index = 0;
+        }
+        result(i, j) = (*src_mat)[i][src_col_index];
+        src_col_index++;
+      }
+    }
+    return result;
+  }
+}
+
 // Matrix/scalar addition                                                                                                                                                     
 template<typename T>
 QSMatrix<T> QSMatrix<T>::operator+(const T& rhs) {
