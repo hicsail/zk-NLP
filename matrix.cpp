@@ -159,7 +159,7 @@ QSMatrix<T> QSMatrix<T>::transpose() {
 
 // Concatenate two matrices together along axis and output the concatenated matrix.
 template<typename T>
-QSMatrix<T>& QSMatrix<T>::concatenate(const QSMatrix<T>& rhs, bool const & axis) {
+QSMatrix<T> QSMatrix<T>::concatenate(const QSMatrix<T>& rhs, bool const & axis) {
   if (axis == 0) {
     assert(this->cols == rhs.get_cols());
     unsigned new_rows = this->rows + rhs.get_rows();
