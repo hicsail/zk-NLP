@@ -223,12 +223,13 @@ out, h = evaluate(input_tensor)
 
 # Initialize secret input
 secret_input = SecretTensor(lineToTensor('g')[0])
+secret_hidden = SecretTensor(h)
 print("secret input:")
 print(secret_input)
 
 # Make prediction on secret input
 print("output on a test input:")
-out, h = rnn(secret_input, h)
+out, h = rnn(secret_input, secret_hidden)
 print(out)
 
 # Print EMP
