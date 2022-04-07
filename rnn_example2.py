@@ -193,12 +193,12 @@ def evaluate(line_tensor):
     for i in range(line_tensor.size()[0]):
         output, hidden = rnn(line_tensor[i], hidden)
 
-    return output
+    return output, hidden
 
 def predict(input_line, n_predictions=3):
     print('\n> %s' % input_line)
     with torch.no_grad():
-        output = evaluate(lineToTensor(input_line))
+        output, hidden = evaluate(lineToTensor(input_line))
 
         # Get top N categories
         topv, topi = output.topk(n_predictions, 1, True)
@@ -210,12 +210,26 @@ def predict(input_line, n_predictions=3):
             print('(%.2f) %s' % (value, all_categories[category_index]))
             predictions.append([value, all_categories[category_index]])
 
+rnn.eval()
 predict('Dovesky')
 predict('Jackson')
 predict('Satoshi')
 
 from mini_wizpl import SecretTensor, Prim, print_emp
+
+# Initialize model
 input_tensor = lineToTensor('Yan')
-out = evaluate(input_tensor)
-SecretTensor(lineToTensor('g')[0])
+out, h = evaluate(input_tensor)
+
+# Initialize secret input
+secret_input = SecretTensor(lineToTensor('g')[0])
+print("secret input:")
+print(secret_input)
+
+# Make prediction on secret input
+print("output on a test input:")
+out, h = rnn(secret_input, h)
+print(out)
+
+# Print EMP
 print_emp(out, 'rnn_test.cpp')
