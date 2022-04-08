@@ -46,7 +46,7 @@ class Prim(AST):
         elif self.op == "cat":
             # TODO:
             e1, e2, e3 = self.args
-            return e1.val()
+            return torch.cat((e1.val(), e2.val()), e3)
         else:
             raise Exception(self)
 
