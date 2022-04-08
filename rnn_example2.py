@@ -69,7 +69,7 @@ print(letterToTensor('J'))
 print(lineToTensor('Jones').size())
 
 import torch.nn as nn
-
+import torch.nn.functional as F
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(RNN, self).__init__()
@@ -78,13 +78,14 @@ class RNN(nn.Module):
 
         self.i2h = nn.Linear(input_size + hidden_size, hidden_size)
         self.i2o = nn.Linear(input_size + hidden_size, output_size)
-        self.softmax = nn.LogSoftmax(dim=1)
+        # self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, input, hidden):
         combined = torch.cat((input, hidden), 1)
         hidden = self.i2h(combined)
         output = self.i2o(combined)
-        output = self.softmax(output)
+        # output = self.softmax(output)
+        output = F.log_softmax(output, dim=1)
         return output, hidden
 
     def initHidden(self):
@@ -218,10 +219,13 @@ predict('Satoshi')
 from mini_wizpl import SecretTensor, Prim, print_emp
 
 # Initialize model
+print("model architecture: ")
+print(rnn)
 input_tensor = lineToTensor('Yan')
 out, h = evaluate(input_tensor)
 
 # Initialize secret input
+import mini_wizpl_torch
 secret_input = SecretTensor(lineToTensor('g')[0])
 secret_hidden = SecretTensor(h)
 print("secret input:")

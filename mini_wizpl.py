@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 from dataclasses import dataclass
+import torch
+import functools
 
 all_defs = []
 
@@ -41,6 +43,10 @@ class Prim(AST):
         elif self.op == 'matplus':
             e1, e2 = self.args
             return e1.val() + e2.val()
+        elif self.op == "cat":
+            # TODO:
+            e1, e2, e3 = self.args
+            return e1.val()
         else:
             raise Exception(self)
 
@@ -133,8 +139,20 @@ def print_exp(e):
             print(f'  QSMatrix<Float> {r} = {x1} + {x2};')
             print()
             return r
+        elif e.op == 'cat':
+            e1, e2, e3 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            dim = print_exp(e3)
+            r = gensym('result_mat')
+
+            print(f'  QSMatrix<Float> {r} = {x1}.concatenate({x2}, {dim});')
+            print()
+            return r
         else:
             raise Exception(e)
+    elif isinstance(e, int):
+        return str(e)
     else:
         raise Exception(e)
 
