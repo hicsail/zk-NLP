@@ -159,7 +159,7 @@ QSMatrix<T> QSMatrix<T>::transpose() {
 
 // Concatenate two matrices together along axis and output the concatenated matrix.
 template<typename T>
-QSMatrix<T> QSMatrix<T>::concatenate(const QSMatrix<T>& rhs, bool const & axis) {
+QSMatrix<T> QSMatrix<T>::concatenate(QSMatrix<T>& rhs, bool const & axis) {
   if (axis == 0) {
     assert(this->cols == rhs.get_cols());
     unsigned new_rows = this->rows + rhs.get_rows();
@@ -174,7 +174,7 @@ QSMatrix<T> QSMatrix<T>::concatenate(const QSMatrix<T>& rhs, bool const & axis) 
         src_row_index = 0;
       }
       for (std::size_t j = 0; j < new_cols; j++) {
-        result(i, j) = (*src_mat)[src_row_index][j];
+        result(i, j) = (*src_mat)(src_row_index, j);
       }
       src_row_index++;
     }
@@ -194,7 +194,7 @@ QSMatrix<T> QSMatrix<T>::concatenate(const QSMatrix<T>& rhs, bool const & axis) 
           src_mat = &rhs;
           src_col_index = 0;
         }
-        result(i, j) = (*src_mat)[i][src_col_index];
+        result(i, j) = (*src_mat)(i, src_col_index);
         src_col_index++;
       }
     }
