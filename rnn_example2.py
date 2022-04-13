@@ -212,28 +212,33 @@ def predict(input_line, n_predictions=3):
             predictions.append([value, all_categories[category_index]])
 
 rnn.eval()
-predict('Dovesky')
-predict('Jackson')
-predict('Satoshi')
+# predict('Dovesky')
+# predict('Jackson')
+# predict('Satoshi')
 
 from mini_wizpl import SecretTensor, Prim, print_emp
 
 # Initialize model
 print("model architecture: ")
 print(rnn)
-input_tensor = lineToTensor('Yan')
-out, h = evaluate(input_tensor)
 
 # Initialize secret input
 import mini_wizpl_torch
-secret_input = SecretTensor(lineToTensor('g')[0])
-secret_hidden = SecretTensor(h)
-print("secret input:")
-print(secret_input)
+input_str = "Yang"
+secret_hidden = SecretTensor(rnn.initHidden())
+for c in input_str:
+    # Turn each character into a one-hot encoded matrix
+    # and turn each matrix into a SecretTensor.
+    secret_input = SecretTensor(lineToTensor(c)[0])
+    # print("secret input:")
+    # print(secret_input)
+    # Make prediction on secret input.
+    out, h = rnn(secret_input, secret_hidden)
+    # Update the secret hidden state.
+    # secret_hidden = SecretTensor(h)
+    # print(h)
 
-# Make prediction on secret input
 print("output on a test input:")
-out, h = rnn(secret_input, secret_hidden)
 print(out)
 
 # Print EMP
