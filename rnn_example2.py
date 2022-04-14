@@ -200,6 +200,7 @@ def predict(input_line, n_predictions=3):
     print('\n> %s' % input_line)
     with torch.no_grad():
         output, hidden = evaluate(lineToTensor(input_line))
+        print(output)
 
         # Get top N categories
         topv, topi = output.topk(n_predictions, 1, True)
@@ -212,7 +213,7 @@ def predict(input_line, n_predictions=3):
             predictions.append([value, all_categories[category_index]])
 
 rnn.eval()
-# predict('Dovesky')
+predict('Yang')
 # predict('Jackson')
 # predict('Satoshi')
 
@@ -230,13 +231,7 @@ for c in input_str:
     # Turn each character into a one-hot encoded matrix
     # and turn each matrix into a SecretTensor.
     secret_input = SecretTensor(lineToTensor(c)[0])
-    # print("secret input:")
-    # print(secret_input)
-    # Make prediction on secret input.
     out, secret_hidden = rnn(secret_input, secret_hidden)
-    # Update the secret hidden state.
-    # secret_hidden = SecretTensor(h)
-    # print(h)
 
 print("output on a test input:")
 print(out)
