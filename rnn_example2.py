@@ -233,7 +233,7 @@ for c in input_str:
     # print("secret input:")
     # print(secret_input)
     # Make prediction on secret input.
-    out, h = rnn(secret_input, secret_hidden)
+    out, secret_hidden = rnn(secret_input, secret_hidden)
     # Update the secret hidden state.
     # secret_hidden = SecretTensor(h)
     # print(h)
