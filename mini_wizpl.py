@@ -119,7 +119,7 @@ def print_exp(e):
         elif e.op == 'softmax':
             x = print_exp(e.args[0])
             r = gensym('result_mat_softmax')
-            print(f'  QSMatrix<Float> {r} = {x};')
+            print(f'  QSMatrix<Float> {r} = softmax({x});')
             print()
             return r
         elif e.op == 'matmul':
