@@ -113,7 +113,8 @@ def print_exp(e):
             e1, e2, e3 = e.args
             x1 = print_exp(e1)
             x2 = print_exp(e2)
-            dim = print_exp(e3)
+            assert isinstance(e3, int)
+            dim = e3
             r = gensym('result_mat')
 
             emit(f'  QSMatrix<Float> {r} = {x1}.concatenate({x2}, {dim});')
