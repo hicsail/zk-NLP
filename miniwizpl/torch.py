@@ -26,4 +26,8 @@ def my_softmax(x, dim=1):
 #return old_addmm(inp, mat1, mat2)
 F.log_softmax = my_softmax
 
-
+old_cat = torch.cat
+def my_cat(to_cat, dim):
+    #print('Concatenate Override successful')
+    return Prim('cat', [to_cat[0], to_cat[1], dim])
+torch.cat = my_cat

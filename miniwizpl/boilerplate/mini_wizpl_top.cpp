@@ -28,6 +28,28 @@ QSMatrix<Float> relu(const QSMatrix<Float>& mat) {
   return result;
 }
 
+QSMatrix<Float> softmax(const QSMatrix<Float>& mat) {
+  unsigned rows = mat.get_rows();
+  unsigned cols = mat.get_cols();
+
+  QSMatrix<Float> result(rows, cols, 0.0);
+
+  Float sum = Float(0.0, PUBLIC);
+  for (unsigned i=0; i<rows; i++) {
+    for (unsigned j=0; j<cols; j++) {
+      sum = sum + mat(i, j).exp();
+    }
+  }
+
+  for (unsigned i=0; i<rows; i++) {
+    for (unsigned j=0; j<cols; j++) {
+      result(i, j) = mat(i, j).exp() / sum;
+    }
+  }
+
+  return result;
+}
+
 // *************************************************************************
 
 void test(BoolIO<NetIO> *ios[threads], int party) {

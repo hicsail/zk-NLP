@@ -109,6 +109,16 @@ def print_exp(e):
             emit(f'  Integer {r} = {x1}.modExp({x2}, {x3});')
             emit()
             return r
+        elif e.op == 'cat':
+            e1, e2, e3 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            dim = print_exp(e3)
+            r = gensym('result_mat')
+
+            emit(f'  QSMatrix<Float> {r} = {x1}.concatenate({x2}, {dim});')
+            emit()
+            return r
         else:
             raise Exception(e)
     else:
@@ -218,5 +228,4 @@ def print_emp(outp, filename):
 
     with open(filename, 'w') as f:
         f.write(emp_output_string)
-
 
