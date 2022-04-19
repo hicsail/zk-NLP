@@ -218,7 +218,7 @@ def print_emp(outp, filename):
 
     print_defs(all_defs)
     emit()
-    emit('  cout << "defs complete\\n";')
+    emit('cout << "defs complete\\n";')
     emit()
     print_exp(outp)
 

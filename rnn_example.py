@@ -9,7 +9,7 @@ import torch
 
 def findFiles(path): return glob.glob(path)
 
-print(findFiles('data/names/*.txt'))
+# print(findFiles('data/names/*.txt'))
 
 import unicodedata
 import string
@@ -25,7 +25,7 @@ def unicodeToAscii(s):
         and c in all_letters
     )
 
-print(unicodeToAscii('Ślusàrski'))
+# print(unicodeToAscii('Ślusàrski'))
 
 # Build the category_lines dictionary, a list of names per language
 category_lines = {}
@@ -60,13 +60,13 @@ def lineToTensor(line):
     return tensor
 
 n_categories = len(all_categories)
-print(category_lines['Italian'][:5])
+# print(category_lines['Italian'][:5])
 
 
 
-print(letterToTensor('J'))
+# print(letterToTensor('J'))
 
-print(lineToTensor('Jones').size())
+# print(lineToTensor('Jones').size())
 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -96,21 +96,21 @@ rnn = RNN(n_letters, n_hidden, n_categories)
 
 input = letterToTensor('A')
 hidden = torch.zeros(1, n_hidden)
-print(input)
+# print(input)
 output, next_hidden = rnn(input, hidden)
 
 input = lineToTensor('Albert')
 hidden = torch.zeros(1, n_hidden)
 
 output, next_hidden = rnn(input[0], hidden)
-print(output)
+# print(output)
 
 def categoryFromOutput(output):
     top_n, top_i = output.topk(1)
     category_i = top_i[0].item()
     return all_categories[category_i], category_i
 
-print(categoryFromOutput(output))
+# print(categoryFromOutput(output))
 
 import random
 
@@ -124,9 +124,9 @@ def randomTrainingExample():
     line_tensor = lineToTensor(line)
     return category, line, category_tensor, line_tensor
 
-for i in range(10):
-    category, line, category_tensor, line_tensor = randomTrainingExample()
-    print('category =', category, '/ line =', line)
+# for i in range(10):
+#     category, line, category_tensor, line_tensor = randomTrainingExample()
+#     print('category =', category, '/ line =', line)
 
 criterion = nn.NLLLoss()
 
@@ -180,7 +180,8 @@ for iter in range(1, n_iters + 1):
     if iter % print_every == 0:
         guess, guess_i = categoryFromOutput(output)
         correct = '✓' if guess == category else '✗ (%s)' % category
-        print('%d %d%% (%s) %.4f %s / %s %s' % (iter, iter / n_iters * 100, timeSince(start), loss, line, guess, correct))
+        # print('%d %d%% (%s) %.4f %s / %s %s' % (iter, iter / n_iters * 100, timeSince(start), loss, line, guess, correct))
+        print('%d of %d (%d%%) training records processed' % (iter, n_iters, iter / n_iters * 100))
 
     # Add current loss avg to list of losses
     if iter % plot_every == 0:
@@ -200,8 +201,9 @@ def predict(input_line, n_predictions=3):
     print('\n> %s' % input_line)
     with torch.no_grad():
         output, hidden = evaluate(lineToTensor(input_line))
-        print(output)
-
+        for i, score in enumerate(output[0]):
+            print('%s: %.4f' % (all_categories[i], score.item()))
+        print()
         # Get top N categories
         topv, topi = output.topk(n_predictions, 1, True)
         predictions = []
@@ -209,10 +211,15 @@ def predict(input_line, n_predictions=3):
         for i in range(n_predictions):
             value = topv[0][i].item()
             category_index = topi[0][i].item()
-            print('(%.2f) %s' % (value, all_categories[category_index]))
+            print('%.4f (%.2f%%) %s' % (value, math.exp(value) * 100, all_categories[category_index]))
             predictions.append([value, all_categories[category_index]])
+        print()
 
 rnn.eval()
+# TODO: get user input from the terminal to make the demo interactive. Remove
+# print statements for example data points.
+# print("Enter name: ")
+# input_str = input()
 predict('Yang')
 # predict('Jackson')
 # predict('Satoshi')
@@ -221,8 +228,6 @@ from miniwizpl import SecretTensor, Prim, print_emp
 import miniwizpl.torch
 
 # Initialize model
-print("model architecture: ")
-print(rnn)
 
 # Initialize secret input
 input_str = "Yang"
@@ -233,8 +238,8 @@ for c in input_str:
     secret_input = SecretTensor(lineToTensor(c)[0])
     out, secret_hidden = rnn(secret_input, secret_hidden)
 
-print("output on a test input:")
-print(out)
+# print("output on a test input:")
+# print(out)
 
 # Print EMP
 print_emp(out, 'rnn_test.cpp')
