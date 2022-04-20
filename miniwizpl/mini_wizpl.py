@@ -48,10 +48,10 @@ def print_exp(e):
             emit(f'  QSMatrix<Float> {r} = relu({x});')
             emit()
             return r
-        elif e.op == 'softmax':
+        elif e.op == 'log_softmax':
             x = print_exp(e.args[0])
             r = gensym('result_mat_softmax')
-            emit(f'  QSMatrix<Float> {r} = softmax({x});')
+            emit(f'  QSMatrix<Float> {r} = log_softmax({x});')
             emit()
             return r
         elif e.op == 'matmul':
@@ -120,6 +120,11 @@ def print_exp(e):
             emit(f'  QSMatrix<Float> {r} = {x1}.concatenate({x2}, {dim});')
             emit()
             return r
+        elif e.op == 'compare_secret_tensors':
+            e1, e2 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            emit(f'  assert(compare_qs_matrices({x1}, {x2}));')
         else:
             raise Exception(e)
     else:

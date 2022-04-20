@@ -45,7 +45,7 @@ class Prim(AST):
         if self.op == 'relu':
             x = self.args[0].val()
             return x * (x > 0)
-        elif self.op == 'softmax':
+        elif self.op == 'log_softmax':
             x = self.args[0].val()
             return x
         elif self.op == 'matmul':
@@ -54,6 +54,9 @@ class Prim(AST):
         elif self.op == 'matplus':
             e1, e2 = self.args
             return e1.val() + e2.val()
+        elif self.op == 'compare_secret_tensors':
+            e1, e2 = self.args
+            return e1.val() == e2.val()
         else:
             raise Exception(self)
 
@@ -62,6 +65,9 @@ def exp_mod(a, b, c):
 
 def relu(x):
     return Prim('relu', [x])
+
+def compare_secret_tensors(a, b):
+    return Prim('compare_secret_tensors', [a, b])
 
 class SecretInt(AST):
     def __init__(self, intval):

@@ -215,25 +215,29 @@ def predict(input_line, n_predictions=3):
             print('%.4f (Probability: %.2f%%) %s' % (value, math.exp(value) * 100, all_categories[category_index]))
             predictions.append([value, all_categories[category_index]])
         print()
+        return output[0]
 
 rnn.eval()
 
 print("Enter name to be classified: ")
 input_str = input()
-predict(input_str)
+expected_output = predict(input_str)
 # predict('Jackson')
 # predict('Satoshi')
 
-from miniwizpl import SecretTensor, Prim, print_emp
+from miniwizpl import SecretTensor, Prim, print_emp, compare_secret_tensors
 import miniwizpl.torch
 
 # Initialize secret input
+expected_output = SecretTensor(expected_output)
 secret_hidden = SecretTensor(rnn.initHidden())
 for c in input_str:
     # Turn each character into a one-hot encoded matrix
     # and turn each matrix into a SecretTensor.
     secret_input = SecretTensor(lineToTensor(c)[0])
     out, secret_hidden = rnn(secret_input, secret_hidden)
+
+out = compare_secret_tensors(out, expected_output)
 
 # print("output on a test input:")
 # print(out)

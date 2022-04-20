@@ -28,7 +28,7 @@ QSMatrix<Float> relu(const QSMatrix<Float>& mat) {
   return result;
 }
 
-QSMatrix<Float> softmax(const QSMatrix<Float>& mat) {
+QSMatrix<Float> log_softmax(const QSMatrix<Float>& mat) {
   unsigned rows = mat.get_rows();
   unsigned cols = mat.get_cols();
 
@@ -43,11 +43,23 @@ QSMatrix<Float> softmax(const QSMatrix<Float>& mat) {
 
   for (unsigned i=0; i<rows; i++) {
     for (unsigned j=0; j<cols; j++) {
-      result(i, j) = mat(i, j).exp() / sum;
+      result(i, j) = (mat(i, j).exp() / sum).ln();
     }
   }
 
   return result;
+}
+
+bool compare_qs_matrices(const QSMatrix<Float>& a, const QSMatrix<Float>& b) {
+  if (a.get_rows() != b.get_rows()) return false;
+  if (a.get_cols() != b.get_cols()) return false;
+
+  for (unsigned i = 0; i < a.get_rows(); i++) {
+    for (unsigned j = 0; j < a.get_cols(); j++) {
+      if (a(i, j).reveal<double>(PUBLIC) - b(i, j).reveal<double>(PUBLIC) > .001) return false;
+    }
+  }
+  return true;
 }
 
 // *************************************************************************
