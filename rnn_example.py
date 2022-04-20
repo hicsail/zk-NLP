@@ -94,15 +94,15 @@ class RNN(nn.Module):
 n_hidden = 128
 rnn = RNN(n_letters, n_hidden, n_categories)
 
-input = letterToTensor('A')
+input_tensor = letterToTensor('A')
 hidden = torch.zeros(1, n_hidden)
-# print(input)
-output, next_hidden = rnn(input, hidden)
+# print(input_tensor)
+output, next_hidden = rnn(input_tensor, hidden)
 
-input = lineToTensor('Albert')
+input_tensor = lineToTensor('Albert')
 hidden = torch.zeros(1, n_hidden)
 
-output, next_hidden = rnn(input[0], hidden)
+output, next_hidden = rnn(input_tensor[0], hidden)
 # print(output)
 
 def categoryFromOutput(output):
@@ -201,6 +201,7 @@ def predict(input_line, n_predictions=3):
     print('\n> %s' % input_line)
     with torch.no_grad():
         output, hidden = evaluate(lineToTensor(input_line))
+        print("Log softmax scores:")
         for i, score in enumerate(output[0]):
             print('%s: %.4f' % (all_categories[i], score.item()))
         print()
@@ -211,26 +212,22 @@ def predict(input_line, n_predictions=3):
         for i in range(n_predictions):
             value = topv[0][i].item()
             category_index = topi[0][i].item()
-            print('%.4f (%.2f%%) %s' % (value, math.exp(value) * 100, all_categories[category_index]))
+            print('%.4f (Probability: %.2f%%) %s' % (value, math.exp(value) * 100, all_categories[category_index]))
             predictions.append([value, all_categories[category_index]])
         print()
 
 rnn.eval()
-# TODO: get user input from the terminal to make the demo interactive. Remove
-# print statements for example data points.
-# print("Enter name: ")
-# input_str = input()
-predict('Yang')
+
+print("Enter name to be classified: ")
+input_str = input()
+predict(input_str)
 # predict('Jackson')
 # predict('Satoshi')
 
 from miniwizpl import SecretTensor, Prim, print_emp
 import miniwizpl.torch
 
-# Initialize model
-
 # Initialize secret input
-input_str = "Yang"
 secret_hidden = SecretTensor(rnn.initHidden())
 for c in input_str:
     # Turn each character into a one-hot encoded matrix
