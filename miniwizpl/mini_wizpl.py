@@ -27,6 +27,15 @@ def emit(s=''):
     global emp_output_string
     emp_output_string += s + '\n'
 
+int_ops = {
+    'add': '+',
+    'sub': '-',
+    'mul': '*',
+    'div': '/',
+    'mod': '%'
+}
+
+
 def print_exp(e):
     if isinstance(e, (SecretArray, SecretTensor, SecretInt)):
         return e.name
@@ -71,32 +80,20 @@ def print_exp(e):
             emit(f'  QSMatrix<Float> {r} = {x1} + {x2};')
             emit()
             return r
-        elif e.op == 'mul':
-            e1, e2 = e.args
-            x1 = print_exp(e1)
-            x2 = print_exp(e2)
-            r = gensym('result_intval')
-
-            emit(f'  Integer {r} = {x1} * {x2};')
+        elif e.op == 'round':
+            x = print_exp(e.args[0])
+            r = gensym('result_int')
+            emit(f'  Integer {r} = {x}; // round as no-op')
             emit()
             return r
-        elif e.op == 'add':
+        elif e.op in int_ops:
             e1, e2 = e.args
             x1 = print_exp(e1)
             x2 = print_exp(e2)
+            op_sym = int_ops[e.op]
             r = gensym('result_intval')
 
-            emit(f'  Integer {r} = {x1} * {x2};')
-            emit()
-            return r
-
-        elif e.op == 'mod':
-            e1, e2 = e.args
-            x1 = print_exp(e1)
-            x2 = print_exp(e2)
-            r = gensym('result_intval')
-
-            emit(f'  Integer {r} = {x1} % {x2};')
+            emit(f'  Integer {r} = {x1} {op_sym} {x2};')
             emit()
             return r
         elif e.op == 'exp_mod':
@@ -220,7 +217,11 @@ def print_emp(outp, filename):
     emit()
     emit('  cout << "defs complete\\n";')
     emit()
-    print_exp(outp)
+    final_output_var = print_exp(outp)
+    emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
+    emit('  cout << "final result:" << final_result << "\\n";')
+    emit()
+    
 
     with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_bottom.cpp', 'r') as f2:
         bottom_boilerplate = f2.read()

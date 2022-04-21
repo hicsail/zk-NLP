@@ -11,11 +11,23 @@ class AST:
     def __rmatmul__(self, other):
         return Prim('matmul', [other, self])
 
+    def __add__(self, other):
+        return Prim('add', [self, other])
+
+    def __radd__(self, other):
+        return Prim('add', [other, self])
+
     def __mul__(self, other):
         return Prim('mul', [self, other])
 
     def __rmul__(self, other):
         return Prim('mul', [other, self])
+
+    def __floordiv__(self, other):
+        return Prim('div', [self, other])
+
+    def __rfloordiv__(self, other):
+        return Prim('div', [other, self])
 
     def __mod__(self, other):
         return Prim('mod', [self, other])
@@ -34,6 +46,9 @@ class AST:
 
     def __gt__(self, other):
         return Prim('gt', [self, other])
+
+    def __round__(self):
+        return Prim('round', [self])
 
 
 @dataclass
