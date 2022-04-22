@@ -8,6 +8,13 @@ from .expr import *
 emp_output_string = ""
 bitwidth = 32
 
+original_pow = pow
+def pow(a, b, c):
+    if isinstance(a, AST) or isinstance(b, AST) or isinstance(c, AST):
+        return Prim('exp_mod', [a, b, c])
+    else:
+        return original_pow(a, b, c)
+
 def eval(e):
     if isinstance(e, SecretArray):
         return e.arr
@@ -94,6 +101,15 @@ def print_exp(e):
             r = gensym('result_intval')
 
             emit(f'  Integer {r} = {x1} {op_sym} {x2};')
+            emit()
+            return r
+        elif e.op == 'equals':
+            e1, e2 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            r = gensym('result_intval')
+
+            emit(f'  Bit {r} = {x1} == {x2};')
             emit()
             return r
         elif e.op == 'exp_mod':
@@ -218,8 +234,8 @@ def print_emp(outp, filename):
     emit('  cout << "defs complete\\n";')
     emit()
     final_output_var = print_exp(outp)
-    emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
-    emit('  cout << "final result:" << final_result << "\\n";')
+    # emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
+    # emit('  cout << "final result:" << final_result << "\\n";')
     emit()
     
 

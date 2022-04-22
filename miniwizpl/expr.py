@@ -50,6 +50,11 @@ class AST:
     def __round__(self):
         return Prim('round', [self])
 
+    def __eq__(self, other):
+        return Prim('equals', [self, other])
+    def __req__(self, other):
+        return Prim('equals', [other, self])
+
 
 @dataclass
 class Prim(AST):
@@ -71,6 +76,11 @@ class Prim(AST):
             return e1.val() + e2.val()
         else:
             raise Exception(self)
+
+    def __eq__(self, other):
+        return Prim('equals', [self, other])
+    def __req__(self, other):
+        return Prim('equals', [other, self])
 
 def exp_mod(a, b, c):
     return Prim('exp_mod', [a, b, c])
