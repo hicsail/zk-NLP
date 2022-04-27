@@ -50,6 +50,10 @@ QSMatrix<Float> softmax(const QSMatrix<Float>& mat) {
   return result;
 }
 
+Integer mux(Bit s, Integer a, Integer b) {
+  return b.select(s, a);
+}
+
 // *************************************************************************
 
 void test(BoolIO<NetIO> *ios[threads], int party) {

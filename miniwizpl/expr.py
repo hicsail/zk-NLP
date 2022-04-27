@@ -55,6 +55,20 @@ class AST:
     def __req__(self, other):
         return Prim('equals', [other, self])
 
+    def __and__(self, other):
+        return Prim('and', [self, other])
+    def __rand__(self, other):
+        return Prim('and', [self, other])
+
+@dataclass
+class SymVar(AST):
+    name: str
+    type: type
+
+    def __eq__(self, other):
+        return Prim('equals', [self, other])
+    def __req__(self, other):
+        return Prim('equals', [other, self])
 
 @dataclass
 class Prim(AST):
@@ -111,6 +125,20 @@ class SecretArray(AST):
         
     def __str__(self):
         return f'SecretArray({self.arr.shape})'
+    __repr__ = __str__
+
+    def val(self):
+        return self.arr
+
+class SecretList(AST):
+    def __init__(self, arr):
+        global all_defs
+        all_defs.append(self)
+        self.arr = arr
+        self.name = gensym('list')
+
+    def __str__(self):
+        return f'SecretList({len(self.arr)})'
     __repr__ = __str__
 
     def val(self):

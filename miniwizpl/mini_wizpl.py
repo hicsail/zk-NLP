@@ -15,6 +15,19 @@ def pow(a, b, c):
     else:
         return original_pow(a, b, c)
 
+def public_foreach(xs, f, init):
+    assert isinstance(xs, SecretList)
+    t_a = type(init)
+
+    x = SymVar(gensym('x'), SecretInt)
+    a = SymVar(gensym('a'), t_a)
+    r = f(x, a)
+    loop = Prim('fold', [x, r, a, xs, init])
+    return loop
+
+def mux(a, b, c):
+    return Prim('mux', [a, b, c])
+
 def eval(e):
     if isinstance(e, SecretArray):
         return e.arr
@@ -42,9 +55,14 @@ int_ops = {
     'mod': '%'
 }
 
+bool_ops = {
+    'and': '&',
+    'or': '|'
+    }
+
 
 def print_exp(e):
-    if isinstance(e, (SecretArray, SecretTensor, SecretInt)):
+    if isinstance(e, (SecretArray, SecretTensor, SecretInt, SymVar)):
         return e.name
     elif isinstance(e, int):
         r = gensym('public_intval')
@@ -62,6 +80,13 @@ def print_exp(e):
             x = print_exp(e.args[0])
             r = gensym('result_mat')
             emit(f'  QSMatrix<Float> {r} = relu({x});')
+            emit()
+            return r
+        elif e.op == 'mux':
+            arg_names = [print_exp(a) for a in e.args]
+            args = ', '.join(arg_names)
+            r = gensym('result_int')
+            emit(f'  Integer {r} = mux({args});')
             emit()
             return r
         elif e.op == 'softmax':
@@ -103,6 +128,16 @@ def print_exp(e):
             emit(f'  Integer {r} = {x1} {op_sym} {x2};')
             emit()
             return r
+        elif e.op in bool_ops:
+            e1, e2 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            op_sym = bool_ops[e.op]
+            r = gensym('result_bitval')
+
+            emit(f'  Bit {r} = {x1} {op_sym} {x2};')
+            emit()
+            return r
         elif e.op == 'equals':
             e1, e2 = e.args
             x1 = print_exp(e1)
@@ -133,6 +168,21 @@ def print_exp(e):
             emit(f'  QSMatrix<Float> {r} = {x1}.concatenate({x2}, {dim});')
             emit()
             return r
+        elif e.op == 'fold':
+            x, body, accum, xs, init = e.args
+
+            assert isinstance(x, SymVar)
+            assert isinstance(accum, SymVar)
+            assert isinstance(xs, SecretList)
+
+            a = print_exp(init)
+            emit(f'Integer {accum.name} = {a};')
+
+            emit(f'for (Integer {x.name} : {xs.name}) {{')
+            output = print_exp(body)
+            emit(f'  {accum.name} = {output};')
+            emit('}')
+            return accum.name
         else:
             raise Exception(e)
     else:
@@ -172,6 +222,15 @@ def print_defs(defs):
                 emit()
             else:
                 emit_bigint(name, x)
+        elif isinstance(d, (SecretList)):
+            n1 = len(d.arr)
+            p = f"""
+int {name}_init[] = {print_list(x)};
+vector<Integer> {name};
+for (int i = 0; i < {n1}; ++i)
+  {name}.push_back(Integer(32, {name}_init[i], ALICE));
+"""
+            emit(p)
         elif isinstance(d, (SecretTensor, SecretArray)):
             e2s = x.shape
             if len(e2s) == 1:
@@ -195,6 +254,8 @@ for (int i = 0; i < {n1}; ++i)
         else:
             raise Exception(f'unsupported secret type: {type(d)}')
 
+def print_list(x):
+    return '{' + ', '.join([str(i) for i in x]) + '}'
 
 def print_mat(x):
     # convert x into a numpy array
@@ -234,8 +295,8 @@ def print_emp(outp, filename):
     emit('  cout << "defs complete\\n";')
     emit()
     final_output_var = print_exp(outp)
-    # emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
-    # emit('  cout << "final result:" << final_result << "\\n";')
+    emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
+    emit('  cout << "final result:" << final_result << "\\n";')
     emit()
     
 
