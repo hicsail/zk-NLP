@@ -2,25 +2,33 @@ import pprint
 import random
 from miniwizpl import SecretInt, SecretList, mux, public_foreach, print_emp
 
-def next_state(char, state):
-    return mux((state == 0) & (char == 87), 1,
-    mux((state == 1) & (char == 65), 2,
-    mux((state == 1) & (char == 87), 1,
-    mux((state == 2) & (char == 78), 3,
-    mux((state == 2) & (char == 87), 1,
-    mux((state == 3) & (char == 65), 4,
-    mux((state == 3) & (char == 87), 1,
-    mux((state == 4) & (char == 67), 5,
-    mux((state == 4) & (char == 87), 1,
-    mux((state == 5) & (char == 82), 6,
-    mux((state == 5) & (char == 87), 1,
-    mux((state == 6) & (char == 87), 1,
-    mux((state == 6) & (char == 89), 7,
-    mux((state == 7) & (char == 33), 1000000,
-    mux((state == 7) & (char == 87), 1,
-        0)))))))))))))))
+dfa = {
+    (0, 87): 1,
+    (1, 65): 2,
+    (1, 87): 1,
+    (2, 78): 3,
+    (2, 87): 1,
+    (3, 65): 4,
+    (3, 87): 1,
+    (4, 67): 5,
+    (4, 87): 1,
+    (5, 82): 6,
+    (5, 87): 1,
+    (6, 87): 1,
+    (6, 89): 7,
+    (7, 33): 1000000,
+    (7, 87): 1,
+    }
 
-kb_size = 1000
+def next_state(char, state):
+    output = 0
+    for (dfa_state, dfa_char), next_state in dfa.items():
+        output = mux((state == dfa_state) & (char == dfa_char),
+                     next_state,
+                     output)
+    return output
+
+kb_size = 10
 randlist = [random.randint(1, 100) for _ in range(1000*kb_size)]
 
 #string = SecretList([87, 65])
@@ -30,8 +38,7 @@ def dfa_loop(string):
     return public_foreach(string,
                           next_state,
                           0)
-
 output = dfa_loop(string)
-#pprint.pprint(output)
+pprint.pprint(output)
 
 print_emp(output, 'miniwizpl_test.cpp')
