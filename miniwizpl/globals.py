@@ -1,4 +1,4 @@
-
+all_pubvals = {}
 all_defs = []
 
 gensym_num = 0

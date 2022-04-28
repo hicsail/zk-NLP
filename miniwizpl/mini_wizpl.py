@@ -62,18 +62,23 @@ bool_ops = {
 
 
 def print_exp(e):
+    global all_pubvals
     if isinstance(e, (SecretArray, SecretTensor, SecretInt, SymVar)):
         return e.name
     elif isinstance(e, int):
-        r = gensym('public_intval')
-
-        if bitsof(e) < 32:
-            emit(f'  Integer {r} = Integer({bitwidth}, {e}, PUBLIC);')
-            emit()
-            return r
+        if e in all_pubvals:
+            return all_pubvals[e]
         else:
-            emit_bigint(r, e)
-            return r
+            r = gensym('public_intval')
+            all_pubvals[e] = r
+
+            if bitsof(e) < 32:
+                emit(f'  Integer {r} = Integer({bitwidth}, {e}, PUBLIC);')
+                emit()
+                return r
+            else:
+                emit_bigint(r, e)
+                return r
 
     elif isinstance(e, Prim):
         if e.op == 'relu':
@@ -225,7 +230,7 @@ def print_defs(defs):
         elif isinstance(d, (SecretList)):
             n1 = len(d.arr)
             p = f"""
-int {name}_init[] = {print_list(x)};
+static int {name}_init[] = {print_list(x)};
 vector<Integer> {name};
 for (int i = 0; i < {n1}; ++i)
   {name}.push_back(Integer(32, {name}_init[i], ALICE));
@@ -290,6 +295,7 @@ def print_emp(outp, filename):
             
     emit(top_boilerplate)
 
+    emit('  cout << "starting defs\\n";')
     print_defs(all_defs)
     emit()
     emit('  cout << "defs complete\\n";')

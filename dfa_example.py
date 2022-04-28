@@ -28,17 +28,19 @@ def next_state(char, state):
                      output)
     return output
 
-kb_size = 10
-randlist = [random.randint(1, 100) for _ in range(1000*kb_size)]
+mb_size = .1
+kb_size = 1000*mb_size
+randlist = [random.randint(1, 100) for _ in range(int(1000*kb_size))]
 
 #string = SecretList([87, 65])
-string = SecretList(randlist)
+string = SecretList(randlist + [87, 65, 78, 65, 67, 82, 89, 33])
+#string = SecretList(randlist)
 
 def dfa_loop(string):
     return public_foreach(string,
                           next_state,
                           0)
 output = dfa_loop(string)
-pprint.pprint(output)
+#pprint.pprint(output)
 
 print_emp(output, 'miniwizpl_test.cpp')
