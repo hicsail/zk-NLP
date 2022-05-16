@@ -17,6 +17,12 @@ class AST:
     def __radd__(self, other):
         return Prim('add', [other, self])
 
+    def __sub__(self, other):
+        return Prim('sub', [self, other])
+
+    def __rsub__(self, other):
+        return Prim('sub', [other, self])
+
     def __mul__(self, other):
         return Prim('mul', [self, other])
 

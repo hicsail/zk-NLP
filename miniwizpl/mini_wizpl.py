@@ -259,7 +259,7 @@ def print_defs_ir1(defs):
 
         if isinstance(d, SecretInt):
             # TODO: deal with big ints
-            emit(f'< {x} >')
+            emit(f'< {x} >;')
             witness_map.append(name)
 
 
