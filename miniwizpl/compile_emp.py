@@ -30,7 +30,7 @@ def emit(s=''):
 
 def print_exp(e):
     global all_pubvals
-    if isinstance(e, (SecretArray, SecretTensor, SecretInt, SymVar)):
+    if isinstance(e, (SecretList, SecretIndexList, SecretArray, SecretTensor, SecretInt, SymVar)):
         return e.name
     elif isinstance(e, int):
         if e in all_pubvals:
@@ -90,6 +90,22 @@ def print_exp(e):
             emit(f'  Integer {r} = {x}; // round as no-op')
             emit()
             return r
+        elif e.op == 'listref':
+            e1, e2 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            r = gensym('listref_result')
+
+            emit(f'  Integer {r} = {x1}->read({x2});')
+            return r
+        elif e.op == 'listset':
+            e1, e2, e3 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            x3 = print_exp(e3)
+
+            emit(f'  {x1}->write({x2}, {x3});')
+            return None
         elif e.op in int_ops:
             e1, e2 = e.args
             x1 = print_exp(e1)
@@ -190,10 +206,19 @@ def print_defs(defs):
         elif isinstance(d, (SecretList)):
             n1 = len(d.arr)
             p = f"""
-static int {name}_init[] = {print_list(x)};
-vector<Integer> {name};
-for (int i = 0; i < {n1}; ++i)
-  {name}.push_back(Integer(32, {name}_init[i], ALICE));
+  static int {name}_init[] = {print_list(x)};
+  vector<Integer> {name};
+  for (int i = 0; i < {n1}; ++i)
+    {name}.push_back(Integer(32, {name}_init[i], ALICE));
+"""
+            emit(p)
+        elif isinstance(d, (SecretIndexList)):
+            n1 = len(d.arr)
+            p = f"""
+  static int {name}_init[] = {print_list(x)};
+  ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
+  for (int i = 0; i < {n1}; ++i)
+    {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, {name}_init[i], ALICE));
 """
             emit(p)
         elif isinstance(d, (SecretTensor, SecretArray)):
@@ -242,9 +267,18 @@ def print_mat(x):
     else:
         raise Exception(f'unsupported array shape: {x.shape}')
 
+def print_ram_checks(defs):
+    for d in defs:
+        name = d.name
+        x = d.val()
+
+        if isinstance(d, (SecretIndexList)):
+            emit(f'  {name}->check();')
+
 def print_emp(outp, filename):
     global all_defs
     global emp_output_string
+    global all_statements
 
     with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_top.cpp', 'r') as f1:
         top_boilerplate = f1.read()
@@ -256,10 +290,14 @@ def print_emp(outp, filename):
     emit()
     emit('  cout << "defs complete\\n";')
     emit()
+    for s in all_statements:
+        print_exp(s)
     final_output_var = print_exp(outp)
     emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
     emit('  cout << "final result:" << final_result << "\\n";')
     emit()
+
+    print_ram_checks(all_defs)
     
 
     with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_bottom.cpp', 'r') as f2:

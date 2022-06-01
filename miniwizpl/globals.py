@@ -2,6 +2,7 @@ bitwidth = 32
 all_pubvals = {}
 all_defs = []
 assertions = []
+all_statements = []
 
 gensym_num = 0
 def gensym(x):

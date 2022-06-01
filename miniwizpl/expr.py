@@ -143,11 +143,29 @@ class SecretList(AST):
         self.arr = arr
         self.name = gensym('list')
 
+    def __str__(self):
+        return f'SecretList({len(self.arr)})'
+    __repr__ = __str__
+
+    def val(self):
+        return self.arr
+
+class SecretIndexList(AST):
+    def __init__(self, arr):
+        global all_defs
+        all_defs.append(self)
+        self.arr = arr
+        self.name = gensym('list')
+
     def __getitem__(self, key):
         return Prim('listref', [self, key])
 
+    def __setitem__(self, key, val):
+        global all_statements
+        all_statements.append(Prim('listset', [self, key, val]))
+
     def __str__(self):
-        return f'SecretList({len(self.arr)})'
+        return f'SecretIndexList({len(self.arr)})'
     __repr__ = __str__
 
     def val(self):
