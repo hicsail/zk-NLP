@@ -11,11 +11,29 @@ class AST:
     def __rmatmul__(self, other):
         return Prim('matmul', [other, self])
 
+    def __add__(self, other):
+        return Prim('add', [self, other])
+
+    def __radd__(self, other):
+        return Prim('add', [other, self])
+
+    def __sub__(self, other):
+        return Prim('sub', [self, other])
+
+    def __rsub__(self, other):
+        return Prim('sub', [other, self])
+
     def __mul__(self, other):
         return Prim('mul', [self, other])
 
     def __rmul__(self, other):
         return Prim('mul', [other, self])
+
+    def __floordiv__(self, other):
+        return Prim('div', [self, other])
+
+    def __rfloordiv__(self, other):
+        return Prim('div', [other, self])
 
     def __mod__(self, other):
         return Prim('mod', [self, other])
@@ -35,6 +53,28 @@ class AST:
     def __gt__(self, other):
         return Prim('gt', [self, other])
 
+    def __round__(self):
+        return Prim('round', [self])
+
+    def __eq__(self, other):
+        return Prim('equals', [self, other])
+    def __req__(self, other):
+        return Prim('equals', [other, self])
+
+    def __and__(self, other):
+        return Prim('and', [self, other])
+    def __rand__(self, other):
+        return Prim('and', [self, other])
+
+@dataclass
+class SymVar(AST):
+    name: str
+    type: type
+
+    def __eq__(self, other):
+        return Prim('equals', [self, other])
+    def __req__(self, other):
+        return Prim('equals', [other, self])
 
 @dataclass
 class Prim(AST):
@@ -59,6 +99,11 @@ class Prim(AST):
             return e1.val() == e2.val()
         else:
             raise Exception(self)
+
+    def __eq__(self, other):
+        return Prim('equals', [self, other])
+    def __req__(self, other):
+        return Prim('equals', [other, self])
 
 def exp_mod(a, b, c):
     return Prim('exp_mod', [a, b, c])
@@ -91,7 +136,42 @@ class SecretArray(AST):
         self.name = gensym('mat')
         
     def __str__(self):
-        return f'SecretArray({self.arr.shape})'
+        return f'SecretArray({self.shape})'
+    __repr__ = __str__
+
+    def val(self):
+        return self.arr
+
+class SecretList(AST):
+    def __init__(self, arr):
+        global all_defs
+        all_defs.append(self)
+        self.arr = arr
+        self.name = gensym('list')
+
+    def __str__(self):
+        return f'SecretList({len(self.arr)})'
+    __repr__ = __str__
+
+    def val(self):
+        return self.arr
+
+class SecretIndexList(AST):
+    def __init__(self, arr):
+        global all_defs
+        all_defs.append(self)
+        self.arr = arr
+        self.name = gensym('list')
+
+    def __getitem__(self, key):
+        return Prim('listref', [self, key])
+
+    def __setitem__(self, key, val):
+        global all_statements
+        all_statements.append(Prim('listset', [self, key, val]))
+
+    def __str__(self):
+        return f'SecretIndexList({len(self.arr)})'
     __repr__ = __str__
 
     def val(self):
