@@ -2,7 +2,6 @@ import sys
 import numpy as np
 from dataclasses import dataclass
 import os
-from .utils import *
 from .globals import *
 from .expr import *
 
@@ -61,10 +60,10 @@ def print_exp(e):
             emit(f'  Integer {r} = mux({args});')
             emit()
             return r
-        elif e.op == 'softmax':
+        elif e.op == 'log_softmax':
             x = print_exp(e.args[0])
             r = gensym('result_mat_softmax')
-            emit(f'  QSMatrix<Float> {r} = softmax({x});')
+            emit(f'  QSMatrix<Float> {r} = log_softmax({x});')
             emit()
             return r
         elif e.op == 'matmul':
@@ -171,6 +170,11 @@ def print_exp(e):
             emit(f'  {accum.name} = {output};')
             emit('}')
             return accum.name
+        elif e.op == 'compare_secret_tensors':
+            e1, e2 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            emit(f'  assert(compare_qs_matrices({x1}, {x2}));')
         else:
             raise Exception(e)
     else:

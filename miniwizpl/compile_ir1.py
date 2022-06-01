@@ -2,7 +2,6 @@ import sys
 import numpy as np
 from dataclasses import dataclass
 import os
-from .utils import *
 from .globals import *
 from .expr import *
 

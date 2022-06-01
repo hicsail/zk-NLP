@@ -20,11 +20,11 @@ def my_linear(inp, weight, bias):
 F.linear = my_linear
 
 old_softmax = F.log_softmax
-def my_softmax(x, dim=1):
+def my_log_softmax(x, dim=1):
     #print('Softmax Override successful')
-    return Prim('softmax', [x, dim])
+    return Prim('log_softmax', [x, dim])
 #return old_addmm(inp, mat1, mat2)
-F.log_softmax = my_softmax
+F.log_softmax = my_log_softmax
 
 old_cat = torch.cat
 def my_cat(to_cat, dim):

@@ -179,7 +179,7 @@ QSMatrix<T> QSMatrix<T>::concatenate(QSMatrix<T>& rhs, bool const & axis) {
       src_row_index++;
     }
     return result;
-  } else if (axis == 1) {
+  } else {
     assert(this->rows == rhs.get_rows());
     unsigned new_rows = this->rows;
     unsigned new_cols = this->cols + rhs.get_cols();
