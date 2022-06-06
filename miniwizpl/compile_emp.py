@@ -30,7 +30,8 @@ def emit(s=''):
 
 def print_exp(e):
     global all_pubvals
-    if isinstance(e, (SecretList, SecretIndexList, SecretArray, SecretTensor, SecretInt, SymVar)):
+    if isinstance(e, (SecretList, SecretIndexList, SecretArray, SecretStack,
+                      SecretTensor, SecretInt, SymVar)):
         return e.name
     elif isinstance(e, int):
         if e in all_pubvals:
@@ -176,6 +177,23 @@ def print_exp(e):
             x1 = print_exp(e1)
             x2 = print_exp(e2)
             emit(f'  assert(compare_qs_matrices({x1}, {x2}));')
+        elif e.op == 'stack_pop':
+            assert len(e.args) == 1
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+
+            r = gensym('stack_val')
+            emit(f'  Integer {r} = {x1}->read({x1}_top);')
+            emit(f'  {x1}_top = {x1}_top - Integer(32, 1, ALICE);')
+            return r
+        elif e.op == 'stack_push':
+            e1, e2 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+
+            emit(f'  {x1}_top = {x1}_top + Integer(32, 1, ALICE);')
+            emit(f'  {x1}->write({x1}_top, {x2});')
+            return None
         else:
             raise Exception(e)
     else:
@@ -224,6 +242,16 @@ def print_defs(defs):
   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
   for (int i = 0; i < {n1}; ++i)
     {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, {name}_init[i], ALICE));
+"""
+            emit(p)
+        elif isinstance(d, (SecretStack)):
+            n1 = len(d.arr)
+            p = f"""
+  static int {name}_init[] = {print_list(x)};
+  ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
+  for (int i = 0; i < {n1}; ++i)
+    {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, {name}_init[i], ALICE));
+  Integer {name}_top = Integer(32, {n1-1}, ALICE);
 """
             emit(p)
         elif isinstance(d, (SecretTensor, SecretArray)):

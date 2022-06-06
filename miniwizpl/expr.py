@@ -177,6 +177,31 @@ class SecretIndexList(AST):
     def val(self):
         return self.arr
 
+class SecretStack(AST):
+    def __init__(self, arr):
+        global all_defs
+        all_defs.append(self)
+        self.arr = arr
+        self.name = gensym('stack')
+        self.max_size = len(arr)
+
+    def push(self, item):
+        global all_statements
+        #self.arr.append(item)
+        self.max_size += 1
+        
+        all_statements.append(Prim('stack_push', [self, item]))
+
+    def pop(self):
+        return Prim('stack_pop', [self])
+
+    def __str__(self):
+        return f'SecretStack({len(self.arr)})'
+    __repr__ = __str__
+
+    def val(self):
+        return self.arr
+
 class SecretTensor(AST):
     def __init__(self, arr):
         global all_defs
