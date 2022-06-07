@@ -5,6 +5,10 @@ import os
 from .globals import *
 from .expr import *
 
+def comment(msg):
+    global all_statements
+    all_statements.append(Prim('comment', [msg]))
+
 original_pow = pow
 def pow(a, b, c):
     if isinstance(a, AST) or isinstance(b, AST) or isinstance(c, AST):

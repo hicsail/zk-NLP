@@ -164,7 +164,11 @@ class SecretIndexList(AST):
         self.name = gensym('list')
 
     def __getitem__(self, key):
-        return Prim('listref', [self, key])
+        global all_statements
+        xn = gensym('list_val')
+        x = SymVar(xn, int)
+        all_statements.append(Prim('assign', [x, Prim('listref', [self, key])]))
+        return x
 
     def __setitem__(self, key, val):
         global all_statements
@@ -193,6 +197,7 @@ class SecretStack(AST):
         all_statements.append(Prim('stack_push', [self, item]))
 
     def pop(self):
+        global all_statements
         xn = gensym('stack_val')
         x = SymVar(xn, int)
         all_statements.append(Prim('assign', [x, Prim('stack_pop', [self])]))

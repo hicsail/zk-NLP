@@ -201,6 +201,9 @@ def print_exp(e):
             x2 = print_exp(e2)
             emit(f'  Integer {x1} = {x2};')
             return None
+        elif e.op == 'comment':
+            emit()
+            emit(f'  // {e.args[0]}')
         else:
             raise Exception(e)
     else:
