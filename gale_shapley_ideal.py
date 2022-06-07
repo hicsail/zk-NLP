@@ -18,7 +18,7 @@ def prefers(w, m, m_p):
     return p
 
 def gale_shapley():
-    unmarried_men = set(men)
+    unmarried_men = men
     marriages = {}
     next_proposal = [0 for _ in men]
 
@@ -30,12 +30,15 @@ def gale_shapley():
         print(f'{m} proposes to {w}')
 
         if w not in marriages:
+            print('branch 1')
             marriages[w] = m
         elif prefers(w, m, marriages[w]):
-            unmarried_men.add(marriages[w])
+            print('branch 2')
+            unmarried_men.append(marriages[w])
             marriages[w] = m
         else:
-            unmarried_men.add(m)
+            print('branch 3')
+            unmarried_men.append(m)
     return marriages
 
 print(gale_shapley())

@@ -19,6 +19,14 @@ int_ops = {
     'mod': '%'
 }
 
+cmp_ops = {
+    'lt': '<',
+    'gt': '>',
+    'lte': '<=',
+    'gte': '>=',
+    'equals': '==',
+}
+
 bool_ops = {
     'and': '&',
     'or': '|'
@@ -37,7 +45,8 @@ def print_exp(e):
         if e in all_pubvals:
             return all_pubvals[e]
         else:
-            r = gensym('public_intval')
+            ss = str(e).replace('-', 'minus')
+            r = f'public_int_{ss}'
             all_pubvals[e] = r
 
             if bitsof(e) < 32:
@@ -117,6 +126,14 @@ def print_exp(e):
             emit(f'  Integer {r} = {x1} {op_sym} {x2};')
             emit()
             return r
+        elif e.op == 'neg':
+            assert len(e.args) == 1
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            r = gensym('result_bitval')
+            emit(f'  Bit {r} = !{x1};')
+            emit()
+            return r
         elif e.op in bool_ops:
             e1, e2 = e.args
             x1 = print_exp(e1)
@@ -127,13 +144,14 @@ def print_exp(e):
             emit(f'  Bit {r} = {x1} {op_sym} {x2};')
             emit()
             return r
-        elif e.op == 'equals':
+        elif e.op in cmp_ops:
             e1, e2 = e.args
             x1 = print_exp(e1)
             x2 = print_exp(e2)
-            r = gensym('result_intval')
+            op_sym = cmp_ops[e.op]
+            r = gensym('result_bitval')
 
-            emit(f'  Bit {r} = {x1} == {x2};')
+            emit(f'  Bit {r} = {x1} {op_sym} {x2};')
             emit()
             return r
         elif e.op == 'exp_mod':
@@ -194,6 +212,16 @@ def print_exp(e):
             emit(f'  {x1}_top = {x1}_top + Integer(32, 1, ALICE);')
             emit(f'  {x1}->write({x1}_top, {x2});')
             return None
+        elif e.op == 'stack_cond_push':
+            # stack, cond, val
+            e1, e2, e3 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            x3 = print_exp(e3)
+
+            emit(f'  {x1}_top = mux({x2}, {x1}_top + Integer(32, 1, ALICE), {x1}_top);')
+            emit(f'  {x1}->write({x1}_top, mux({x2}, {x3}, {x1}->read({x1}_top)));')
+            return None
         elif e.op == 'assign':
             e1, e2 = e.args
             assert isinstance(e1, SymVar)
@@ -201,9 +229,39 @@ def print_exp(e):
             x2 = print_exp(e2)
             emit(f'  Integer {x1} = {x2};')
             return None
+        elif e.op == 'listindex':
+            # array, val, start, length
+            e1, e2, e3, e4 = e.args
+            assert isinstance(e4, int)
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            x3 = print_exp(e3)
+            r = gensym('listidx_result')
+
+            emit(f'  Integer {r} = Integer(32, -1, PUBLIC);')
+            emit(f'  for (int i = 0; i < {e4}; i++) {{')
+            emit(f'    Integer idx = Integer(32, i, PUBLIC);')
+            emit(f'    Integer val = {x1}->read({x3} + idx);')
+            emit(f'    {r} = mux(val == {x2}, idx, {r});')
+            emit(f'  }}')
+
+            return r
         elif e.op == 'comment':
             emit()
-            emit(f'  // {e.args[0]}')
+            emit(f'  // COMMENT: {e.args[0]}')
+        elif e.op == 'log_val':
+            t, msg, val = e.args
+            xv = print_exp(val)
+            x = gensym('log_val')
+
+            if t == int:
+                emit(f'  int {x} = {xv}.reveal<int>(PUBLIC);')
+                emit(f'  cout << "P" << party << " {msg}: " << {x} << "\\n";')
+            elif t == bool:
+                emit(f'  bool {x} = {xv}.reveal<bool>(PUBLIC);')
+                emit(f'  cout << "P" << party << " {msg}:" << {x} << "\\n";')
+            else:
+                raise Exception(e)
         else:
             raise Exception(e)
     else:

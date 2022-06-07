@@ -5,9 +5,25 @@ import os
 from .globals import *
 from .expr import *
 
+def index(arr, val, start, length):
+    #return arr[start:end].index(val)
+    global all_statements
+    xn = gensym('list_idx')
+    x = SymVar(xn, int)
+    all_statements.append(Prim('assign', [x, Prim('listindex', [arr, val, start, length])]))
+    return x
+
 def comment(msg):
     global all_statements
     all_statements.append(Prim('comment', [msg]))
+
+def log_int(msg, val):
+    global all_statements
+    all_statements.append(Prim('log_val', [int, msg, val]))
+
+def log_bool(msg, val):
+    global all_statements
+    all_statements.append(Prim('log_val', [bool, msg, val]))
 
 original_pow = pow
 def pow(a, b, c):

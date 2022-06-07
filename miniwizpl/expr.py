@@ -11,6 +11,9 @@ class AST:
     def __rmatmul__(self, other):
         return Prim('matmul', [other, self])
 
+    def __neg__(self):
+        return Prim('neg', [self])
+
     def __add__(self, other):
         return Prim('add', [self, other])
 
@@ -191,10 +194,14 @@ class SecretStack(AST):
 
     def push(self, item):
         global all_statements
-        #self.arr.append(item)
         self.max_size += 1
         
         all_statements.append(Prim('stack_push', [self, item]))
+
+    def cond_push(self, condition, item):
+        global all_statements
+        self.max_size += 1
+        all_statements.append(Prim('stack_cond_push', [self, condition, item]))
 
     def pop(self):
         global all_statements
