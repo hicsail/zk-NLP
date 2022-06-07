@@ -193,7 +193,10 @@ class SecretStack(AST):
         all_statements.append(Prim('stack_push', [self, item]))
 
     def pop(self):
-        return Prim('stack_pop', [self])
+        xn = gensym('stack_val')
+        x = SymVar(xn, int)
+        all_statements.append(Prim('assign', [x, Prim('stack_pop', [self])]))
+        return x
 
     def __str__(self):
         return f'SecretStack({len(self.arr)})'

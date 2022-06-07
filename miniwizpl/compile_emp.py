@@ -194,6 +194,13 @@ def print_exp(e):
             emit(f'  {x1}_top = {x1}_top + Integer(32, 1, ALICE);')
             emit(f'  {x1}->write({x1}_top, {x2});')
             return None
+        elif e.op == 'assign':
+            e1, e2 = e.args
+            assert isinstance(e1, SymVar)
+            x1 = e1.name
+            x2 = print_exp(e2)
+            emit(f'  Integer {x1} = {x2};')
+            return None
         else:
             raise Exception(e)
     else:
