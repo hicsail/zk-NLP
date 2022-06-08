@@ -20,7 +20,7 @@ QSMatrix<Float> relu(const QSMatrix<Float>& mat) {
   for (unsigned i=0; i<rows; i++) {
     for (unsigned j=0; j<cols; j++) {
       Float val = mat(i, j);
-      Bit t = zero.less_equal(val);
+      Bit t = val.less_equal(zero);
       result(i,j) = val.If(t, zero);
     }
   }
