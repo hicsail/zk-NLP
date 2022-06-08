@@ -200,9 +200,12 @@ def print_exp(e):
             e1 = e.args[0]
             x1 = print_exp(e1)
 
+            # unconditional; address should always be ok
             r = gensym('stack_val')
+            #emit(f'  cout << "P" << party << " stack POP, old top: " << {x1}_top.reveal<int>(PUBLIC) << "\\n";')
             emit(f'  Integer {r} = {x1}->read({x1}_top);')
             emit(f'  {x1}_top = {x1}_top - Integer(32, 1, ALICE);')
+            #emit(f'  cout << "P" << party << " stack POP, new top: " << {x1}_top.reveal<int>(PUBLIC) << "\\n";')
             return r
         elif e.op == 'stack_push':
             e1, e2 = e.args
@@ -218,9 +221,16 @@ def print_exp(e):
             x1 = print_exp(e1)
             x2 = print_exp(e2)
             x3 = print_exp(e3)
+            a = gensym('cond_addr')
+
+            # conditional, address might be out of range!
+            #emit(f'  cout << "P" << party << " stack PUSH, old top: " << {x1}_top.reveal<int>(PUBLIC) << " condition: " << {x2}.reveal<bool>(PUBLIC) << "\\n";')
 
             emit(f'  {x1}_top = mux({x2}, {x1}_top + Integer(32, 1, ALICE), {x1}_top);')
-            emit(f'  {x1}->write({x1}_top, mux({x2}, {x3}, {x1}->read({x1}_top)));')
+            emit(f'  Integer {a} = mux({x2}, {x1}_top, Integer(32, 0, ALICE));')
+            emit(f'  {x1}->write({a}, mux({x2}, {x3}, {x1}->read({a})));')
+
+            #emit(f'  cout << "P" << party << " stack PUSH, new top: " << {x1}_top.reveal<int>(PUBLIC) << " condition: " << {x2}.reveal<bool>(PUBLIC) << "\\n";')
             return None
         elif e.op == 'assign':
             e1, e2 = e.args
