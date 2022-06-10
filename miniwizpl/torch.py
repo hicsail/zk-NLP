@@ -22,7 +22,8 @@ F.linear = my_linear
 old_softmax = F.log_softmax
 def my_log_softmax(x, dim=1):
     #print('Softmax Override successful')
-    return Prim('log_softmax', [x, dim])
+    # TODO: support additional dimensions
+    return Prim('log_softmax', [x])
 #return old_addmm(inp, mat1, mat2)
 F.log_softmax = my_log_softmax
 

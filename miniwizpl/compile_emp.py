@@ -11,25 +11,49 @@ witness_map = []
 current_wire = 0
 assertions = []
 
-int_ops = {
+prim_ops = {
+    'relu': 'relu',
+    'mux': 'mux',
+    'log_softmax': 'log_softmax',
+    'round': 'round',
+}
+
+bin_ops = {
     'add': '+',
     'sub': '-',
     'mul': '*',
     'div': '/',
-    'mod': '%'
-}
-
-cmp_ops = {
+    'mod': '%',
+    'matmul': '*',
+    'matplus': '+',
     'lt': '<',
     'gt': '>',
     'lte': '<=',
     'gte': '>=',
     'equals': '==',
-}
-
-bool_ops = {
     'and': '&',
     'or': '|'
+    }
+
+output_types = {
+    'round': 'Integer',
+    'add': 'Integer',
+    'sub': 'Integer',
+    'mul': 'Integer',
+    'div': 'Integer',
+    'mod': 'Integer',
+    'lt': 'Bit',
+    'gt': 'Bit',
+    'lte': 'Bit',
+    'gte': 'Bit',
+    'equals': 'Bit',
+    'relu': 'QSMatrix<Float>',
+    'mux': 'Integer',
+    'log_softmax': 'QSMatrix<Float>',
+    'matmul': 'QSMatrix<Float>',
+    'matplus': 'QSMatrix<Float>',
+    'and': 'Bit',
+    'or': 'Bit',
     }
 
 def emit(s=''):
@@ -58,47 +82,24 @@ def print_exp(e):
                 return r
 
     elif isinstance(e, Prim):
-        if e.op == 'relu':
-            x = print_exp(e.args[0])
-            r = gensym('result_mat')
-            emit(f'  QSMatrix<Float> {r} = relu({x});')
-            emit()
+        if e.op in prim_ops:
+            xs = [print_exp(a) for a in e.args]
+            ns = ', '.join(xs)
+            r = gensym('result')
+            t = output_types[e.op]
+            op = prim_ops[e.op]
+
+            emit(f'  {t} {r} = {op}({ns});')
             return r
-        elif e.op == 'mux':
-            arg_names = [print_exp(a) for a in e.args]
-            args = ', '.join(arg_names)
-            r = gensym('result_int')
-            emit(f'  Integer {r} = mux({args});')
-            emit()
-            return r
-        elif e.op == 'log_softmax':
-            x = print_exp(e.args[0])
-            r = gensym('result_mat_softmax')
-            emit(f'  QSMatrix<Float> {r} = log_softmax({x});')
-            emit()
-            return r
-        elif e.op == 'matmul':
+        elif e.op in bin_ops:
             e1, e2 = e.args
             x1 = print_exp(e1)
             x2 = print_exp(e2)
-            r = gensym('result_mat')
+            r = gensym('result')
+            t = output_types[e.op]
+            op = bin_ops[e.op]
 
-            emit(f'  QSMatrix<Float> {r} = {x1} * {x2};')
-            return r
-        elif e.op == 'matplus':
-            e1, e2 = e.args
-            x1 = print_exp(e1)
-            x2 = print_exp(e2)
-            r = gensym('result_mat')
-
-            emit(f'  QSMatrix<Float> {r} = {x1} + {x2};')
-            emit()
-            return r
-        elif e.op == 'round':
-            x = print_exp(e.args[0])
-            r = gensym('result_int')
-            emit(f'  Integer {r} = {x}; // round as no-op')
-            emit()
+            emit(f'  {t} {r} = {x1} {op} {x2};')
             return r
         elif e.op == 'listref':
             e1, e2 = e.args
@@ -116,42 +117,12 @@ def print_exp(e):
 
             emit(f'  {x1}->write({x2}, {x3});')
             return None
-        elif e.op in int_ops:
-            e1, e2 = e.args
-            x1 = print_exp(e1)
-            x2 = print_exp(e2)
-            op_sym = int_ops[e.op]
-            r = gensym('result_intval')
-
-            emit(f'  Integer {r} = {x1} {op_sym} {x2};')
-            emit()
-            return r
         elif e.op == 'neg':
             assert len(e.args) == 1
             e1 = e.args[0]
             x1 = print_exp(e1)
             r = gensym('result_bitval')
             emit(f'  Bit {r} = !{x1};')
-            emit()
-            return r
-        elif e.op in bool_ops:
-            e1, e2 = e.args
-            x1 = print_exp(e1)
-            x2 = print_exp(e2)
-            op_sym = bool_ops[e.op]
-            r = gensym('result_bitval')
-
-            emit(f'  Bit {r} = {x1} {op_sym} {x2};')
-            emit()
-            return r
-        elif e.op in cmp_ops:
-            e1, e2 = e.args
-            x1 = print_exp(e1)
-            x2 = print_exp(e2)
-            op_sym = cmp_ops[e.op]
-            r = gensym('result_bitval')
-
-            emit(f'  Bit {r} = {x1} {op_sym} {x2};')
             emit()
             return r
         elif e.op == 'exp_mod':
