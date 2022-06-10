@@ -9,26 +9,28 @@ def index(arr, val, start, length):
     #return arr[start:end].index(val)
     global all_statements
     xn = gensym('list_idx')
-    x = SymVar(xn, int)
-    all_statements.append(Prim('assign', [x, Prim('listindex', [arr, val, start, length])]))
+    x = SymVar(xn, int, None)
+    all_statements.append(Prim('assign',
+                               [x, Prim('listindex', [arr, val, start, length], None)],
+                               None))
     return x
 
 def comment(msg):
     global all_statements
-    all_statements.append(Prim('comment', [msg]))
+    all_statements.append(Prim('comment', [msg], None))
 
 def log_int(msg, val):
     global all_statements
-    all_statements.append(Prim('log_val', [int, msg, val]))
+    all_statements.append(Prim('log_val', [int, msg, val], None))
 
 def log_bool(msg, val):
     global all_statements
-    all_statements.append(Prim('log_val', [bool, msg, val]))
+    all_statements.append(Prim('log_val', [bool, msg, val], None))
 
 original_pow = pow
 def pow(a, b, c):
     if isinstance(a, AST) or isinstance(b, AST) or isinstance(c, AST):
-        return Prim('exp_mod', [a, b, c])
+        return Prim('exp_mod', [a, b, c], original_pow(val_of(a), val_of(b), val_of(c)))
     else:
         return original_pow(a, b, c)
 
@@ -36,29 +38,21 @@ def public_foreach(xs, f, init):
     assert isinstance(xs, SecretList)
     t_a = type(init)
 
-    x = SymVar(gensym('x'), SecretInt)
-    a = SymVar(gensym('a'), t_a)
+    # TODO: how can we handle the values here?
+    x = SymVar(gensym('x'), SecretInt, None)
+    a = SymVar(gensym('a'), t_a, None)
     r = f(x, a)
-    loop = Prim('fold', [x, r, a, xs, init])
+
+    # compute the actual result
+    a_val = val_of(init)
+    for x_val in val_of(xs):
+        a_val = val_of(f(x_val, a_val))
+
+    loop = Prim('fold', [x, r, a, xs, init], a_val)
     return loop
 
 def mux(a, b, c):
-    return Prim('mux', [a, b, c])
-
-def eval(e):
-    if isinstance(e, SecretArray):
-        return e.arr
-    elif isinstance(e, Prim):
-        if e.op == 'relu':
-            x = eval(e.args[0])
-            return x * (x > 0)
-        elif e.op == 'matmul':
-            e1, e2 = e.args
-            return eval(e1) @ eval(e2)
-        else:
-            raise Exception(e)
-    else:
-        raise Exception(e)
+    return Prim('mux', [a, b, c], val_of(b) if val_of(a) else val_of(c))
 
 def set_bitwidth(b):
     global bitwidth
@@ -66,4 +60,4 @@ def set_bitwidth(b):
 
 def assert0(v):
     global assertions
-    assertions.append(Prim('assert0', [v]))
+    assertions.append(Prim('assert0', [v], val_of(v) == 0))

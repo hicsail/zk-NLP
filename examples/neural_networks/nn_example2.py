@@ -29,7 +29,7 @@ outp_layer = SecretArray(np.random.randint(-10, high=10, size=(10, 2)))
 net = net @ outp_layer
 
 # print the result
-print(net.val())
+print(net.val)
 print(net)
 
 print_emp(net, 'miniwizpl_test.cpp')

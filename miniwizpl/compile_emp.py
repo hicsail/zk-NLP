@@ -267,7 +267,7 @@ def print_defs(defs):
 
     for d in defs:
         name = d.name
-        x = d.val()
+        x = d.val
 
         if isinstance(d, SecretInt):
             if bitsof(x) < 32:
@@ -352,9 +352,9 @@ def print_mat(x):
 def print_ram_checks(defs):
     for d in defs:
         name = d.name
-        x = d.val()
+        x = d.val
 
-        if isinstance(d, (SecretIndexList)):
+        if isinstance(d, (SecretIndexList, SecretStack)):
             emit(f'  {name}->check();')
 
 def print_emp(outp, filename):
@@ -375,9 +375,11 @@ def print_emp(outp, filename):
     for s in all_statements:
         print_exp(s)
     final_output_var = print_exp(outp)
-    emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
-    emit('  cout << "final result:" << final_result << "\\n";')
-    emit()
+
+    if isinstance(outp.val, int):
+        emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
+        emit('  cout << "final result:" << final_result << "\\n";')
+        emit()
 
     print_ram_checks(all_defs)
     

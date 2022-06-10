@@ -18,9 +18,14 @@ print(model)
 
 # Run the model on a secret input
 print('output on a test input:')
-test_input = SecretTensor(torch.randn(1, 784))
+test_input = torch.randn(1, 784)
 output = model(test_input)
 print(output)
 
+print('output on a secret input:')
+secret_input = SecretTensor(test_input)
+secret_output = model(secret_input)
+print(secret_output)
+
 # Compile the output to EMP
-print_emp(output, 'miniwizpl_test.cpp')
+print_emp(secret_output, 'miniwizpl_test.cpp')
