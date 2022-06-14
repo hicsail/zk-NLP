@@ -9,4 +9,6 @@ setup(name='miniwizpl',
       license='GPLv3',
       packages=['miniwizpl'],
       install_requires=[], # TODO: add deps
+      package_data={'': ['boilerplate/*']},
+      include_package_data=True,
       zip_safe=False)
