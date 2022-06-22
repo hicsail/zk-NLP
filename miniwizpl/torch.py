@@ -39,9 +39,14 @@ F.log_softmax = my_log_softmax
 
 old_cat = torch.cat
 def my_cat(to_cat, dim):
-    #print('Concatenate Override successful')
-    if isinstance(to_cat, AST) or isinstance(dim, AST):
-        return Prim('cat', [to_cat[0], to_cat[1], dim], old_cat(val_of(to_cat), val_of(dim)))
+    # print('Concatenate Override successful')
+    assert isinstance(to_cat, tuple)
+    assert len(to_cat) == 2
+
+    if isinstance(to_cat[0], AST) or isinstance(to_cat[1], AST) or isinstance(dim, AST):
+        return Prim('cat', [to_cat[0], to_cat[1], dim],
+                    old_cat((val_of(to_cat[0]), val_of(to_cat[1])),
+                            val_of(dim)))
     else:
         return old_cat(to_cat, dim)
 torch.cat = my_cat
