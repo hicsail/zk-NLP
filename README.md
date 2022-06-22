@@ -33,3 +33,12 @@ python examples/simple_demos/simple.py
 This will produce a new file in the current directory called
 `miniwizpl_test.cpp` containing EMP code encoding the statement that
 the prover knows two numbers `x` and `y` such that `x + y = 5`.
+
+## Generating Documentation
+
+Documentation can be generated with `pdoc3`:
+
+```
+pip install pdoc3
+pdoc --http localhost:8080 miniwizpl
+```

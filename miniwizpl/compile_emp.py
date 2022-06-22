@@ -5,6 +5,7 @@ import os
 from .globals import *
 from .expr import *
 from .utils import *
+from .data_types import *
 
 emp_output_string = ""
 witness_map = []
