@@ -67,8 +67,18 @@ def mux(a, b, c):
     return Prim('mux', [a, b, c], val_of(b) if val_of(a) else val_of(c))
 
 def set_bitwidth(b):
+    """
+    Set the bitwidth for boolean-representation output.
+    """
     global bitwidth
     bitwidth = b
+
+def set_field(b):
+    """
+    Set the field size for arithmetic-representation output.
+    """
+    global params
+    params['arithmetic_field'] = b
 
 def assert0(v):
     global assertions

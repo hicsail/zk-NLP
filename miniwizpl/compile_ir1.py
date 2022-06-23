@@ -10,13 +10,18 @@ emp_output_string = ""
 witness_map = []
 current_wire = 0
 
+def next_wire():
+    global current_wire
+    r = current_wire
+    current_wire += 1
+    return '$' + str(r)
+
 def emit(s=''):
     global emp_output_string
     emp_output_string += s + '\n'
 
 int_ops_ir1 = {
     'add': 'add',
-    'sub': 'sub',
     'mul': 'mul',
     'div': 'div',
     'mod': 'mod'
@@ -25,21 +30,39 @@ int_ops_ir1 = {
 
 def print_exp_ir1(e):
     global all_pubvals
-    global current_wire
+    global params
+
     if isinstance(e, (SecretArray, SecretTensor, SecretInt, SymVar)):
-        return '$' + str(witness_map.index(e.name))
+        if e.name in witness_map:
+            return '$' + str(witness_map.index(e.name))
+        else:
+            raise Exception(f'Secret value is not part of witness: {e}')
     elif isinstance(e, int):
-        raise Exception(e)
+        r = next_wire()
+        emit(f'  {r} <- < {e} >;')
+        return r
     elif isinstance(e, Prim):
         if e.op in int_ops_ir1:
             e1, e2 = e.args
             x1 = print_exp_ir1(e1)
             x2 = print_exp_ir1(e2)
             op_sym = int_ops_ir1[e.op]
-            r = '$' + str(current_wire)
-            current_wire += 1
+            r = next_wire()
 
             emit(f'  {r} <- @{op_sym}({x1}, {x2});')
+            return r
+        elif e.op == 'sub':
+            # implementation: multiply x2 by -1
+            e1, e2 = e.args
+            x1 = print_exp_ir1(e1)
+            x2 = print_exp_ir1(e2)
+            negated_x2 = next_wire()
+            c = params['arithmetic_field'] - 1
+            emit(f'  {negated_x2} <- @mulc({x2}, < {c} >);')
+
+            r = next_wire()
+
+            emit(f'  {r} <- @add({x1}, {negated_x2});')
             return r
         elif e.op == 'assert0':
             assert len(e.args) == 1
@@ -47,9 +70,9 @@ def print_exp_ir1(e):
             emit(f'  @assert_zero({x1});')
             return None
         else:
-            raise Exception(e)
+            raise Exception(f'unknown operator: {e.op}')
     else:
-        raise Exception(e)
+        raise Exception(f'unknown expression type: {e}')
 
 
 
@@ -58,7 +81,7 @@ def print_exp_ir1(e):
 def print_defs_ir1(defs):
     for i, d in enumerate(defs):
         name = d.name
-        x = d.val()
+        x = d.val
 
         if isinstance(d, SecretInt):
             # TODO: deal with big ints
@@ -69,12 +92,15 @@ def print_defs_ir1(defs):
 def print_ir1(filename):
     global all_defs
     global emp_output_string
-    global current_wire
 
+    field = params['arithmetic_field']
+    print('field size:', field)
+
+    # WITNESS OUTPUT
     emp_output_string = ""
 
-    emit("""version 1.0.0;
-field characteristic 97 degree 1;
+    emit(f"""version 1.0.0;
+field characteristic {field} degree 1;
 short_witness
 @begin""")
 
@@ -85,19 +111,32 @@ short_witness
     with open(filename + '.wit', 'w') as f:
         f.write(emp_output_string)
 
-
+    # INSTANCE OUTPUT
     emp_output_string = ""
 
-    emit("""version 1.0.0;
-field characteristic 97 degree 1;
+    emit(f"""version 1.0.0;
+field characteristic {field} degree 1;
+instance
+@begin
+@end
+""")
+
+    with open(filename + '.ins', 'w') as f:
+        f.write(emp_output_string)
+
+
+    # RELATION OUTPUT
+    emp_output_string = ""
+
+    emit(f"""version 1.0.0;
+field characteristic {field} degree 1;
 relation
 gate_set: arithmetic;
 features: @function, @switch;
 @begin""")
 
-    for i in range(len(witness_map)):
-        emit(f'  ${i} <- @short_witness;')
-    current_wire = i+1
+    for _ in range(len(witness_map)):
+        emit(f'  {next_wire()} <- @short_witness;')
 
     for a in assertions:
         print_exp_ir1(a)

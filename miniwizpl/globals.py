@@ -1,4 +1,10 @@
+params = {
+    'bitwidth': 32,
+    'arithmetic_field': 97
+}
+
 bitwidth = 32
+arithmetic_field = 97
 all_pubvals = {}
 all_defs = []
 assertions = []
@@ -15,3 +21,9 @@ def gensym(x):
     global gensym_num
     gensym_num = gensym_num + 1
     return f'{x}_{gensym_num}'
+
+def global_set_field(b):
+    global arithmetic_field
+    print('setting field! old val:', arithmetic_field)
+    arithmetic_field = b
+    print('setting field! new val:', arithmetic_field)
