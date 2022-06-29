@@ -219,8 +219,7 @@ def predict(input_line, n_predictions=3):
 
 rnn.eval()
 
-print("Enter name to be classified: ")
-input_str = input()
+input_str = "Jackson"
 expected_output = predict(input_str)
 # predict('Jackson')
 # predict('Satoshi')
@@ -243,4 +242,4 @@ out = compare_secret_tensors(out, expected_output)
 # print(out)
 
 # Print EMP
-print_emp(out, 'rnn_test.cpp')
+print_emp(out, 'miniwizpl_test.cpp')
