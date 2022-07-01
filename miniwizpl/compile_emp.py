@@ -32,6 +32,7 @@ bin_ops = {
     'lte': '<=',
     'gte': '>=',
     'equals': '==',
+    'not_equals': '!=',
     'and': '&',
     'or': '|'
     }
@@ -48,6 +49,7 @@ output_types = {
     'lte': 'Bit',
     'gte': 'Bit',
     'equals': 'Bit',
+    'not_equals': 'Bit',
     'relu': 'QSMatrix<Float>',
     'mux': 'Integer',
     'log_softmax': 'QSMatrix<Float>',
@@ -66,6 +68,8 @@ def print_exp(e):
     if isinstance(e, (SecretList, SecretIndexList, SecretArray, SecretStack,
                       SecretTensor, SecretInt, SymVar)):
         return e.name
+    elif isinstance(e, bool):
+        raise Exception(e)
     elif isinstance(e, int):
         if e in all_pubvals:
             return all_pubvals[e]
@@ -157,10 +161,13 @@ def print_exp(e):
             a = print_exp(init)
             emit(f'Integer {accum.name} = {a};')
 
+            old_pubvals = all_pubvals.copy()
             emit(f'for (Integer {x.name} : {xs.name}) {{')
             output = print_exp(body)
             emit(f'  {accum.name} = {output};')
             emit('}')
+            all_pubvals = old_pubvals
+
             return accum.name
         elif e.op == 'compare_secret_tensors':
             e1, e2 = e.args
@@ -377,7 +384,11 @@ def print_emp(outp, filename):
         print_exp(s)
     final_output_var = print_exp(outp)
 
-    if isinstance(outp.val, int):
+    if isinstance(outp.val, bool):
+        emit(f'  bool final_result = {final_output_var}.reveal<bool>(PUBLIC);')
+        emit('  cout << "final result:" << final_result << "\\n";')
+        emit()
+    elif isinstance(outp.val, int):
         emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
         emit('  cout << "final result:" << final_result << "\\n";')
         emit()
