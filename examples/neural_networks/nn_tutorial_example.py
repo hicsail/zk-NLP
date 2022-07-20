@@ -22,9 +22,6 @@ class Net(nn.Module):
 
 model = Net()
 
-print('model architecture:')
-print(model)
-
 test_input = torch.randn(1, 784)
 test_input = SecretTensor(test_input)
 
