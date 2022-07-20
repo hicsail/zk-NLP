@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
-from miniwizpl import utils, SecretTensor, print_emp, compare_secret_tensors
+from miniwizpl import SecretTensor, print_emp, compare_secret_tensors
 import miniwizpl.torch
 
 class Net(nn.Module):
