@@ -150,3 +150,5 @@ stores it inside the file `miniwizpl_nn.cpp`.
 ```python
 print_emp(output, "miniwizpl_nn.cpp")
 ```
+(TODO: include proper way of compiling and running result with EMP
+toolkit)
