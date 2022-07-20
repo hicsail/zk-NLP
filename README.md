@@ -72,7 +72,7 @@ from torch.optim.lr_scheduler import StepLR
 Additionally, we must import the relevant MiniWizPL libraries:
 
 ```python
-from miniwizpl import SecretTensor, print_emp, compare_tensors
+from miniwizpl import SecretTensor, PublicTensor, print_emp, compare_tensors
 import miniwizpl.torch
 ```
 

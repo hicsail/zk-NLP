@@ -224,7 +224,7 @@ expected_output = predict(input_str)
 # predict('Jackson')
 # predict('Satoshi')
 
-from miniwizpl import SecretTensor, Prim, print_emp, compare_tensors
+from miniwizpl import SecretTensor, PublicTensor, Prim, print_emp, compare_tensors
 import miniwizpl.torch
 
 # Initialize secret input
