@@ -344,7 +344,7 @@ for (int i = 0; i < {n1}; ++i)
 
             p = f"""
 float {name}_init[{n1}][{n2}] = {print_mat(x)};
-QSMatrix<float> {name}({n1}, {n2}, pub_zero);
+QSMatrix<float> {name}({n1}, {n2}, 0);
 for (int i = 0; i < {n1}; ++i)
   for (int j = 0; j < {n2}; ++j) {{
     {name}(i, j) = {name}_init[i][j];
