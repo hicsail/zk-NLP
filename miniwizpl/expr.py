@@ -114,5 +114,5 @@ def relu(x):
     output_val = np.maximum(val_of(x), 0)
     return Prim('relu', [x], output_val)
 
-def compare_secret_tensors(a, b):
-    return Prim('compare_secret_tensors', [a, b], None) # TODO: fill in value
+def compare_tensors(a, b):
+    return Prim('compare_tensors', [a, b], None) # TODO: fill in value

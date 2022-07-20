@@ -62,6 +62,42 @@ bool compare_qs_matrices(const QSMatrix<Float>& a, const QSMatrix<Float>& b) {
   return true;
 }
 
+bool compare_qs_matrices(const QSMatrix<float>& a, const QSMatrix<Float>& b) {
+  if (a.get_rows() != b.get_rows()) return false;
+  if (a.get_cols() != b.get_cols()) return false;
+
+  for (unsigned i = 0; i < a.get_rows(); i++) {
+    for (unsigned j = 0; j < a.get_cols(); j++) {
+      if (a(i, j) - b(i, j).reveal<double>(PUBLIC) > .001) return false;
+    }
+  }
+  return true;
+}
+
+bool compare_qs_matrices(const QSMatrix<Float>& a, const QSMatrix<float>& b) {
+  if (a.get_rows() != b.get_rows()) return false;
+  if (a.get_cols() != b.get_cols()) return false;
+
+  for (unsigned i = 0; i < a.get_rows(); i++) {
+    for (unsigned j = 0; j < a.get_cols(); j++) {
+      if (a(i, j).reveal<double>(PUBLIC) - b(i, j) > .001) return false;
+    }
+  }
+  return true;
+}
+
+bool compare_qs_matrices(const QSMatrix<float>& a, const QSMatrix<float>& b) {
+  if (a.get_rows() != b.get_rows()) return false;
+  if (a.get_cols() != b.get_cols()) return false;
+
+  for (unsigned i = 0; i < a.get_rows(); i++) {
+    for (unsigned j = 0; j < a.get_cols(); j++) {
+      if (a(i, j) - b(i, j) > .001) return false;
+    }
+  }
+  return true;
+}
+
 Integer mux(Bit s, Integer a, Integer b) {
   return b.select(s, a);
 }

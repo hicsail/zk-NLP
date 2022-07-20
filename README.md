@@ -80,11 +80,11 @@ import miniwizpl.torch
 by wrapping PyTorch tensors. `print_emp` is a function that produces
 the final ZK statement for the ZK backend. `compare_tensors`
 is a function that appends a special comparison function to the ZK
-statement given two `SecretTensors`, or one `SecretTensor` and PyTorch
-tensor. And finally, `miniwizpl.torch` contains overloads for various
-PyTorch functions that allows the program to simultaneously perform
-the neural network operations and progressively build up the final ZK
-statement.
+statement given two `SecretTensors`, or one `SecretTensor` and
+`PublicTensor`. And finally, `miniwizpl.torch` contains overloads for
+various PyTorch functions that allows the program to simultaneously
+perform the neural network operations and progressively build up the
+final ZK statement.
 
 
 The next step is to define our neural network model. Below is a
@@ -136,10 +136,10 @@ We wish to prove that our secret input fed into our secret model
 produces a specific output, so we additionally must call the
 `compare_tensors` function. This function appends to the syntax tree
 in `output` a specific directive that performs comparisons between
-either two `SecretTensor`s or a `SecretTensor` and PyTorch tensor.
+either two `SecretTensor`s or a `SecretTensor` and `PublicTensor`.
 
 ```python
-expected_output = output.val
+expected_output = PublicTensor(output.val)
 output = compare_tensors(output, expected_output)
 ```
 

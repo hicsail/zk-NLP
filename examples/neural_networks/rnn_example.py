@@ -224,11 +224,11 @@ expected_output = predict(input_str)
 # predict('Jackson')
 # predict('Satoshi')
 
-from miniwizpl import SecretTensor, Prim, print_emp, compare_secret_tensors
+from miniwizpl import SecretTensor, Prim, print_emp, compare_tensors
 import miniwizpl.torch
 
 # Initialize secret input
-expected_output = SecretTensor(expected_output)
+expected_output = PublicTensor(expected_output)
 secret_hidden = SecretTensor(rnn.initHidden())
 for c in input_str:
     # Turn each character into a one-hot encoded matrix
@@ -236,7 +236,7 @@ for c in input_str:
     secret_input = SecretTensor(lineToTensor(c)[0])
     out, secret_hidden = rnn(secret_input, secret_hidden)
 
-out = compare_secret_tensors(out, expected_output)
+out = compare_tensors(out, expected_output)
 
 # print("output on a test input:")
 # print(out)

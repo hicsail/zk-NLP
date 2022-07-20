@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
-from miniwizpl import SecretTensor, print_emp, compare_secret_tensors
+from miniwizpl import SecretTensor, print_emp, compare_tensors
 import miniwizpl.torch
 
 class Net(nn.Module):
@@ -26,8 +26,8 @@ test_input = torch.randn(1, 784)
 test_input = SecretTensor(test_input)
 
 output = model(test_input)
-expected_output = SecretTensor(output.val)
-output = compare_secret_tensors(output, expected_output)
+expected_output = PublicTensor(output.val)
+output = compare_tensors(output, expected_output)
 
 # Compile the output to EMP
 print_emp(output, "miniwizpl_nn.cpp")
