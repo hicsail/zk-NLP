@@ -2,7 +2,7 @@ import numpy as np
 from miniwizpl import *
 
 # n from Doerner, Evans, shelat
-NUM_INDIVIDUALS = 100
+NUM_INDIVIDUALS = 35000
 
 # q from Doerner, Evans, shelat
 NUM_PREFS = 15
@@ -20,7 +20,7 @@ women_prefs = np.asarray([np.random.choice(men, size=NUM_PREFS, replace=False) f
 prefs = np.vstack([men_prefs, women_prefs])
 
 print("PREFERENCE LIST:")
-print(prefs)
+#print(prefs)
 
 preference_matrix = SecretIndexList(list(prefs.flatten()))
 
@@ -78,8 +78,8 @@ def gale_shapley():
     return marriages
 
 r = gale_shapley()
-for i in range(len(women)):
-    log_int(f'marriage of woman {i+len(men)}', r[i])
+# for i in range(len(women)):
+#     log_int(f'marriage of woman {i+len(men)}', r[i])
 print('output:', r)
 print_emp(r[0], 'miniwizpl_test.cpp')
 
