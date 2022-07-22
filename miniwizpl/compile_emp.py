@@ -71,7 +71,7 @@ def emit_witness(s=''):
 def print_exp(e):
     global all_pubvals
     if isinstance(e, (SecretList, SecretIndexList, SecretArray, SecretStack,
-                      SecretTensor, SecretInt, SymVar)):
+                      SecretTensor, SecretInt, SymVar, PublicTensor)):
         return e.name
     elif isinstance(e, bool):
         raise Exception(e)
@@ -174,7 +174,7 @@ def print_exp(e):
             all_pubvals = old_pubvals
 
             return accum.name
-        elif e.op == 'compare_secret_tensors':
+        elif e.op == 'compare_tensors':
             e1, e2 = e.args
             x1 = print_exp(e1)
             x2 = print_exp(e2)
@@ -350,6 +350,26 @@ QSMatrix<Float> {name}({n1}, {n2}, pub_zero);
 for (int i = 0; i < {n1}; ++i)
   for (int j = 0; j < {n2}; ++j) {{
     {name}(i, j) = Float({name}_init[i][j], ALICE);
+}}
+"""
+            emit(p)
+        elif isinstance(d, PublicTensor):
+            e2s = x.shape
+            if len(e2s) == 1:
+                n1 = 1
+                n2 = e2s[0]
+            elif len(e2s) == 2:
+                n1 = e2s[0]
+                n2 = e2s[1]
+            else:
+                raise Exception(f'unsupported array shape: {e2s}')
+
+            p = f"""
+float {name}_init[{n1}][{n2}] = {print_mat(x)};
+QSMatrix<float> {name}({n1}, {n2}, 0);
+for (int i = 0; i < {n1}; ++i)
+  for (int j = 0; j < {n2}; ++j) {{
+    {name}(i, j) = {name}_init[i][j];
 }}
 """
             emit(p)

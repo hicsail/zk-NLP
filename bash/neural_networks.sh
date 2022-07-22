@@ -3,7 +3,7 @@ set -euo pipefail
 
 cp miniwizpl/boilerplate/* .
 #declare -a examples=("mnist_wizpl.py" "nn_example.py" "nn_example2.py" "rnn_example.py")
-declare -a examples=("mnist_wizpl.py" "rnn_example.py")
+declare -a examples=("mnist_wizpl.py" "rnn_example.py" "nn_tutorial_example.py")
 for i in "${examples[@]}"
 do
     cd examples/neural_networks
