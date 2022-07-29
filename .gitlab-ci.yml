@@ -18,7 +18,8 @@ build:
     - wget https://raw.githubusercontent.com/emp-toolkit/emp-readme/master/scripts/install.py
     - python3 install.py --deps --tool --ot --zk
     - export LD_LIBRARY_PATH=/usr/local/lib
-    - ./bash/neural_networks.sh
+    - cp miniwizpl/boilerplate/* .
     - ./bash/crypto.sh
-    - ./bash/simple.sh
     - ./bash/misc.sh
+    - ./bash/neural_networks.sh
+    - ./bash/simple.sh
