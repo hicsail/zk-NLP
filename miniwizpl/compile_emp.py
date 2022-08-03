@@ -179,6 +179,11 @@ def print_exp(e):
             x1 = print_exp(e1)
             x2 = print_exp(e2)
             emit(f'  assert(compare_qs_matrices({x1}, {x2}));')
+        elif e.op == 'assert0EMP':
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            emit(f'  assert(assert0EMP({x1}));')
+            return x1
         elif e.op == 'stack_pop':
             assert len(e.args) == 1
             e1 = e.args[0]
