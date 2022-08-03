@@ -8,6 +8,7 @@ from .utils import *
 from .data_types import *
 
 emp_output_string = ""
+witness_output_string = ""
 witness_map = []
 current_wire = 0
 assertions = []
@@ -62,6 +63,10 @@ output_types = {
 def emit(s=''):
     global emp_output_string
     emp_output_string += s + '\n'
+
+def emit_witness(s=''):
+    global witness_output_string
+    witness_output_string += s + '\n'
 
 def print_exp(e):
     global all_pubvals
@@ -294,20 +299,37 @@ def print_defs(defs):
             emit(p)
         elif isinstance(d, (SecretIndexList)):
             n1 = len(d.arr)
+            print_witness(x)
+#             p = f"""
+#   static int {name}_init[] = {print_list(x)};
+#   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
+#   for (int i = 0; i < {n1}; ++i)
+#     {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, {name}_init[i], ALICE));
+# """
             p = f"""
-  static int {name}_init[] = {print_list(x)};
   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
-  for (int i = 0; i < {n1}; ++i)
-    {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, {name}_init[i], ALICE));
+  for (int i = 0; i < {n1}; ++i) {{
+    is >> tmp;
+    {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, tmp, ALICE));
+  }}
 """
             emit(p)
         elif isinstance(d, (SecretStack)):
             n1 = len(d.arr)
+            print_witness(x)
+#             p = f"""
+#   static int {name}_init[] = {print_list(x)};
+#   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
+#   for (int i = 0; i < {n1}; ++i)
+#     {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, {name}_init[i], ALICE));
+#   Integer {name}_top = Integer(32, {n1-1}, ALICE);
+# """
             p = f"""
-  static int {name}_init[] = {print_list(x)};
   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
-  for (int i = 0; i < {n1}; ++i)
-    {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, {name}_init[i], ALICE));
+  for (int i = 0; i < {n1}; ++i) {{
+    is >> tmp;
+    {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, tmp, ALICE));
+  }}
   Integer {name}_top = Integer(32, {n1-1}, ALICE);
 """
             emit(p)
@@ -354,6 +376,10 @@ for (int i = 0; i < {n1}; ++i)
         else:
             raise Exception(f'unsupported secret type: {type(d)}')
 
+def print_witness(x):
+    for e in x:
+        emit_witness(str(e))
+
 def print_list(x):
     return '{' + ', '.join([str(i) for i in x]) + '}'
 
@@ -388,6 +414,7 @@ def print_ram_checks(defs):
 def print_emp(outp, filename):
     global all_defs
     global emp_output_string
+    global witness_output_string
     global all_statements
 
     with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_top.cpp', 'r') as f1:
@@ -423,3 +450,6 @@ def print_emp(outp, filename):
 
     with open(filename, 'w') as f:
         f.write(emp_output_string)
+
+    with open(filename + '.emp_wit', 'w') as f:
+        f.write(witness_output_string)

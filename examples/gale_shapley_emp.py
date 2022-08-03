@@ -1,17 +1,28 @@
+import numpy as np
 from miniwizpl import *
 
-men = [0, 1, 2]
-women = [3, 4, 5]
-NUM_PREFS = 3
+# n from Doerner, Evans, shelat
+NUM_INDIVIDUALS = 35000
 
-preference_matrix = SecretIndexList([
-    3,4,5,
-    3,4,5,
-    3,4,5,
-    1,2,0,
-    2,1,0,
-    0,1,2,
-    ])
+# q from Doerner, Evans, shelat
+NUM_PREFS = 15
+
+# iterations <= n^2
+ITERS = NUM_INDIVIDUALS**2
+ITERS = 1
+
+# men are 0..n, women are n..2n
+men = list(range(NUM_INDIVIDUALS))
+women = list(range(NUM_INDIVIDUALS, 2*NUM_INDIVIDUALS))
+
+men_prefs = np.asarray([np.random.choice(women, size=NUM_PREFS, replace=False) for _ in men])
+women_prefs = np.asarray([np.random.choice(men, size=NUM_PREFS, replace=False) for _ in women])
+prefs = np.vstack([men_prefs, women_prefs])
+
+print("PREFERENCE LIST:")
+#print(prefs)
+
+preference_matrix = SecretIndexList(list(prefs.flatten()))
 
 def prefers(w, m, m_p):
     comment('first index')
@@ -29,7 +40,7 @@ def gale_shapley():
     next_proposal = SecretIndexList([0 for _ in men])
 
     # while unmarried_men:
-    for _ in range(6):
+    for _ in range(ITERS):
         m = unmarried_men.pop()
 
         comment('set w')
@@ -67,9 +78,9 @@ def gale_shapley():
     return marriages
 
 r = gale_shapley()
-for i in range(len(women)):
-    log_int(f'marriage of woman {i+len(men)}', r[i])
-print(r)
+# for i in range(len(women)):
+#     log_int(f'marriage of woman {i+len(men)}', r[i])
+print('output:', r)
 print_emp(r[0], 'miniwizpl_test.cpp')
 
 #assert r == [1, 2, 0]

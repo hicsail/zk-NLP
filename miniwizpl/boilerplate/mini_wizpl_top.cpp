@@ -110,3 +110,11 @@ void test(BoolIO<NetIO> *ios[threads], int party) {
   cout << "!!\n";
 
   Float pub_zero = Float(0.0, PUBLIC);
+
+  std::ifstream is("miniwizpl_test.cpp.emp_wit");
+  if (! is.good()) {
+    cout << "Error reading the memory dump file\n";
+    exit(1);
+  }
+  int tmp;
+
