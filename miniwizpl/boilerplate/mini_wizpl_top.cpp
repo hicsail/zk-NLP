@@ -102,11 +102,8 @@ Integer mux(Bit s, Integer a, Integer b) {
   return b.select(s, a);
 }
 
-// TODO: Can we check that something is zero without revealing the
-// value? Ditto for the matrices.
 bool assert0EMP(Integer a) {
-  return a.reveal<int>(PUBLIC) == 0;
-
+  return a.equal(Integer(32, 0, PUBLIC)).reveal<bool>(PUBLIC);
 }
 
 // *************************************************************************
@@ -124,4 +121,3 @@ void test(BoolIO<NetIO> *ios[threads], int party) {
     exit(1);
   }
   int tmp;
-
