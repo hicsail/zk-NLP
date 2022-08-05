@@ -17,8 +17,8 @@ build:
     - pip install .
     - wget https://raw.githubusercontent.com/emp-toolkit/emp-readme/master/scripts/install.py
     - python3 install.py --deps --tool --ot --zk
-    - export LD_LIBRARY_PATH=/usr/local/lib
-    - cp miniwizpl/boilerplate/* .
+    - sudo ldconfig
+    - cp miniwizpl/boilerplate/matrix.{h,cpp} miniwizpl/boilerplate/tensor.h .
     - ./bash/crypto.sh
     - ./bash/misc.sh
     - ./bash/neural_networks.sh
