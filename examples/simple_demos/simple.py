@@ -1,8 +1,7 @@
-from miniwizpl import SecretInt, Prim, print_emp
+from miniwizpl import SecretInt, Prim, assert0EMP, print_emp
 
 x = SecretInt(3)
 y = SecretInt(2)
-output = x + y
-print(output)
+output = assert0EMP(x + y - 5)
 
 print_emp(output, "miniwizpl_test.cpp")

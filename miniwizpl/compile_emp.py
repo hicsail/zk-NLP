@@ -179,6 +179,11 @@ def print_exp(e):
             x1 = print_exp(e1)
             x2 = print_exp(e2)
             emit(f'  assert(compare_qs_matrices({x1}, {x2}));')
+        elif e.op == 'assert0EMP':
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            emit(f'  assert(assert0EMP({x1}));')
+            return x1
         elif e.op == 'stack_pop':
             assert len(e.args) == 1
             e1 = e.args[0]
@@ -419,7 +424,7 @@ def print_emp(outp, filename):
 
     with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_top.cpp', 'r') as f1:
         top_boilerplate = f1.read()
-            
+
     emit(top_boilerplate)
 
     emit('  cout << "starting defs\\n";')
@@ -431,21 +436,21 @@ def print_emp(outp, filename):
         print_exp(s)
     final_output_var = print_exp(outp)
 
-    if isinstance(outp.val, bool):
-        emit(f'  bool final_result = {final_output_var}.reveal<bool>(PUBLIC);')
-        emit('  cout << "final result:" << final_result << "\\n";')
-        emit()
-    elif isinstance(outp.val, int):
-        emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
-        emit('  cout << "final result:" << final_result << "\\n";')
-        emit()
+    # if isinstance(outp.val, bool):
+    #     emit(f'  bool final_result = {final_output_var}.reveal<bool>(PUBLIC);')
+    #     emit('  cout << "final result:" << final_result << "\\n";')
+    #     emit()
+    # elif isinstance(outp.val, int):
+    #     emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
+    #     emit('  cout << "final result:" << final_result << "\\n";')
+    #     emit()
 
     print_ram_checks(all_defs)
-    
+
 
     with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_bottom.cpp', 'r') as f2:
         bottom_boilerplate = f2.read()
-            
+
     emit(bottom_boilerplate)
 
     with open(filename, 'w') as f:

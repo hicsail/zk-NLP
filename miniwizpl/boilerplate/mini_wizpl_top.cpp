@@ -102,6 +102,10 @@ Integer mux(Bit s, Integer a, Integer b) {
   return b.select(s, a);
 }
 
+bool assert0EMP(Integer a) {
+  return a.equal(Integer(32, 0, PUBLIC)).reveal<bool>(PUBLIC);
+}
+
 // *************************************************************************
 
 void test(BoolIO<NetIO> *ios[threads], int party) {
@@ -117,4 +121,3 @@ void test(BoolIO<NetIO> *ios[threads], int party) {
     exit(1);
   }
   int tmp;
-
