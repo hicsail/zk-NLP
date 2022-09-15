@@ -7,8 +7,8 @@ from .expr import *
 from .data_types import *
 
 emp_output_string = ""
-witness_map = []
 current_wire = 0
+witness_list = []
 
 def next_wire():
     global current_wire
@@ -19,6 +19,13 @@ def next_wire():
 def emit(s=''):
     global emp_output_string
     emp_output_string += s + '\n'
+
+def add_to_witness(obj):
+    wire_name = '$' + str(next_wire())
+    witness_list.append(obj)
+    emit(f'  {wire_name} <- @short_witness;')
+
+    return wire_name
 
 int_ops_ir1 = {
     'add': 'add',
@@ -33,10 +40,8 @@ def print_exp_ir1(e):
     global params
 
     if isinstance(e, (SecretArray, SecretTensor, SecretInt, SymVar)):
-        if e.name in witness_map:
-            return '$' + str(witness_map.index(e.name))
-        else:
-            raise Exception(f'Secret value is not part of witness: {e}')
+        return add_to_witness(e)
+
     elif isinstance(e, int):
         r = next_wire()
         emit(f'  {r} <- < {e} >;')
@@ -51,6 +56,14 @@ def print_exp_ir1(e):
 
             emit(f'  {r} <- @{op_sym}({x1}, {x2});')
             return r
+        elif e.op == 'mux':
+            # todo
+            pass
+        elif e.op == 'equals':
+            # todo
+            # diff_inv = ???
+            # wire_name_for_diff_inv = add_to_witness(diff_inv)
+            pass
         elif e.op == 'sub':
             # implementation: multiply x2 by -1
             e1, e2 = e.args
@@ -75,41 +88,12 @@ def print_exp_ir1(e):
         raise Exception(f'unknown expression type: {e}')
 
 
-
-
-
-def print_defs_ir1(defs):
-    for i, d in enumerate(defs):
-        name = d.name
-        x = d.val
-
-        if isinstance(d, SecretInt):
-            # TODO: deal with big ints
-            emit(f'< {x} >;')
-            witness_map.append(name)
-
-
 def print_ir1(filename):
     global all_defs
     global emp_output_string
 
     field = params['arithmetic_field']
     print('field size:', field)
-
-    # WITNESS OUTPUT
-    emp_output_string = ""
-
-    emit(f"""version 1.0.0;
-field characteristic {field} degree 1;
-short_witness
-@begin""")
-
-    print_defs_ir1(all_defs)
-
-    emit("@end")
-
-    with open(filename + '.wit', 'w') as f:
-        f.write(emp_output_string)
 
     # INSTANCE OUTPUT
     emp_output_string = ""
@@ -135,9 +119,6 @@ gate_set: arithmetic;
 features: @function, @switch;
 @begin""")
 
-    for _ in range(len(witness_map)):
-        emit(f'  {next_wire()} <- @short_witness;')
-
     for a in assertions:
         print_exp_ir1(a)
 
@@ -146,4 +127,21 @@ features: @function, @switch;
     with open(filename + '.rel', 'w') as f:
         f.write(emp_output_string)
 
+    # WITNESS OUTPUT
     emp_output_string = ""
+
+    emit(f"""version 1.0.0;
+field characteristic {field} degree 1;
+short_witness
+@begin""")
+
+    for x in witness_list:
+        emit(f'< {x.val} >;')
+
+    emit("@end")
+
+    with open(filename + '.wit', 'w') as f:
+        f.write(emp_output_string)
+
+    emp_output_string = ""
+
