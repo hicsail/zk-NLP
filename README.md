@@ -49,7 +49,7 @@ programs that demonstrate the compiler's features. For example, after
 installing miniWizPL, you can run:
 
 ```
-python examples/simple_demos/simple.py
+python[3] examples/simple_demos/simple.py
 ```
 
 This will produce a new file in the current directory called
