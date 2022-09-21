@@ -48,6 +48,7 @@ Currently supported backends are:
 ## Examples
 
 <strong> miniWizPL </strong><br>
+
 The `examples` directory contains several examples of miniWizPL
 programs that demonstrate the compiler's features. For example, after
 installing miniWizPL, you can run:
