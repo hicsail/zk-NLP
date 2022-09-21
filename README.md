@@ -45,7 +45,7 @@ programs that demonstrate the compiler's features. For example, after
 installing miniWizPL, you can run:
 
 ```
-python[3] examples/simple_demos/simple.py
+python examples/simple_demos/simple.py
 ```
 
 You may also explore other systems to prove in the examples directory by just changing the path below.
