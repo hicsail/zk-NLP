@@ -39,15 +39,6 @@ wget https://raw.githubusercontent.com/emp-toolkit/emp-readme/master/scripts/ins
     <li> By default it will build for Release. `-DCMAKE_BUILD_TYPE=[Release|Debug]` option is also available.</li>
     <li> No sudo? Change [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/v2.8.8/cmake.html#variable%3aCMAKE_INSTALL_PREFIX).</li>
 
-## Running the Compiler
-
-miniWizPL programs are Python programs; when you run the program, its
-output is a ZK statement in the format of a supported backend.
-Currently supported backends are:
-
-- EMP toolkit
-- SIEVE IR0/1 (wip)
-
 ## Examples
 
 <strong> miniWizPL </strong><br>
@@ -105,7 +96,7 @@ The second command line argument represents the communication port.
 For a successful proof, the above command should run and return 
 a non-zero exit code. For a failed proof, the above should report a failed assertion.
 
-## Generating Documentation
+## Generating Documentation Re: miniwizpl
 
 Documentation can be generated with `pdoc3`:
 
