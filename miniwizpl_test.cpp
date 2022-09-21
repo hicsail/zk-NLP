@@ -93,6 +93,8 @@ void test(BoolIO<NetIO> *ios[threads], int party) {
   cout <<"done\n";
 }
 
+
+
 int main(int argc, char** argv) {
   parse_party_and_port(argv, &party, &port);
   BoolIO<NetIO>* ios[threads];

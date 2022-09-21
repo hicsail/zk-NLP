@@ -114,5 +114,3 @@ Documentation can be generated with `pdoc3`:
 pip install pdoc3
 pdoc --http localhost:8080 miniwizpl
 ```
-# SIEVE
-# SIEVE
