@@ -6,6 +6,10 @@
 
 ## Setting up
 
+SIEVE system consists of two conponents, miniWizPL and emp-zk tool kit.
+
+miniWizPL generates cpp file to generate an intermediate representation file for emp-zk tool kit to prove and verify. 
+
 <strong> miniWizPL </strong><br>
 
 You can install miniWizPL with `pip`. 
