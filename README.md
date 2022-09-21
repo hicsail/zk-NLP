@@ -106,7 +106,7 @@ pdoc --http localhost:8080 miniwizpl
 
 ## Changes from original code stacks
 
-<li> Changed #include statement in mini_wizpl_top.cpp in miniwizpl/boilerplate, "from ram-zk/zk-mem.h" to "emp-zk/emp-zk/extensions/ram-zk/zk-mem.h" 
+<li> Changed #include statement in mini_wizpl_top.cpp in miniwizpl/boilerplate, from "ram-zk/zk-mem.h" to "emp-zk/emp-zk/extensions/ram-zk/zk-mem.h" 
 , so that test file can find the path properly</li>
 <li> Added "-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" into g++ command instruction </li>
 
