@@ -11,7 +11,6 @@ miniWizPL is a Python library and compiler for writing zero-knowledge statements
 
 <strong> miniWizPL </strong><br>
 
-You can install miniWizPL with `pip`. 
 Clone this repo:
 
 ```
@@ -22,25 +21,22 @@ Then, inside the local repo root directory run:
 
 ```
 source venv/bin/activate
-pip[3] install .
+pip install .
 ```
 
 <strong> emp-zk tool kit </strong><br>
 
-1. In the local repo root directory run: 
-```
-wget https://raw.githubusercontent.com/emp-toolkit/emp-readme/master/scripts/install.py
-```
-
-2. Also in The local repo root directory run: 
+In the local repo root directory run: 
   ```
-  python[3] install.py --deps --tool --ot --zk
+  python install.py --deps --tool --ot --zk
   ```
   <br>
     <li> By default it will build for Release. `-DCMAKE_BUILD_TYPE=[Release|Debug]` option is also available.</li>
     <li> No sudo? Change [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/v2.8.8/cmake.html#variable%3aCMAKE_INSTALL_PREFIX).</li>
 
 ## Examples
+
+We will demonstrate end-to-end execution with simple.py in the examples/simple_demos directory.
 
 <strong> miniWizPL </strong><br>
 
@@ -51,6 +47,8 @@ installing miniWizPL, you can run:
 ```
 python[3] examples/simple_demos/simple.py
 ```
+
+You may also explore other systems to prove in the examples directory by just changing the path below.
 
 This will produce a new file in the current directory called
 `miniwizpl_test.cpp` containing EMP code encoding the statement that
