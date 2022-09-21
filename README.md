@@ -1,14 +1,13 @@
 # SIEVE
 
-## A Python library and compiler for writing zero-knowledge statements
+
+SIEVE system consists of two conponents, miniWizPL and emp-zk tool kit.
+
+miniWizPL is a Python library and compiler for writing zero-knowledge statements and generates cpp file to generate an intermediate representation file for emp-zk tool kit to prove and verify. 
 
 ----
 
 ## Setting up
-
-SIEVE system consists of two conponents, miniWizPL and emp-zk tool kit.
-
-miniWizPL generates cpp file to generate an intermediate representation file for emp-zk tool kit to prove and verify. 
 
 <strong> miniWizPL </strong><br>
 
