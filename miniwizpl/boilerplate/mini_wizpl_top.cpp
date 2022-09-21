@@ -1,7 +1,7 @@
 #include "emp-zk/emp-zk.h"
 #include <iostream>
 #include "emp-tool/emp-tool.h"
-#include "ram-zk/zk-mem.h"
+#include "emp-zk/emp-zk/extensions/ram-zk/zk-mem.h"
 #include "matrix.h"
 using namespace emp;
 using namespace std;

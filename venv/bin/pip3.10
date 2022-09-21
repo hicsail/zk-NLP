@@ -1,4 +1,4 @@
-#!/Users/hicadmin/Desktop/Project_SIEVE/miniwizpl-master/venv/bin/python3.10
+#!/Users/hicadmin/Desktop/SIEVE/venv/bin/python3.10
 # -*- coding: utf-8 -*-
 import re
 import sys
