@@ -21,7 +21,8 @@ git clone https://github.com/multiparty/SIEVE.git
 Then, inside the local repo root directory run:
 
 ```
-pip install .
+source venv/bin/activate
+pip[3] install .
 ```
 
 <strong> emp-zk tool kit </strong><br>
