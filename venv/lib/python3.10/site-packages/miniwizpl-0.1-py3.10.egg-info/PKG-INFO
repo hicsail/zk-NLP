@@ -1,0 +1,8 @@
+Metadata-Version: 2.1
+Name: miniwizpl
+Version: 0.1
+Summary: miniWizPL library & compiler for writing zero-knowledge statements
+Home-page: none
+Author: Joe Near
+Author-email: jnear@uvm.edu
+License: GPLv3
