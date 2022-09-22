@@ -2,11 +2,9 @@ import random
 import sys
 
 from cryptography.hazmat.primitives.asymmetric import dsa
-from miniwizpl import SecretInt, print_emp, exp_mod, set_bitwidth, pow
+from miniwizpl import assert0EMP, SecretInt, print_emp, exp_mod, set_bitwidth, pow
 
-private_key = dsa.generate_private_key(
-    key_size=2048,
-)
+private_key = dsa.generate_private_key(key_size=2048)
 p = private_key.parameters().parameter_numbers()._p
 q = private_key.parameters().parameter_numbers()._q
 
@@ -31,14 +29,14 @@ m = 5
 def sign(m):
     k = random.randint(1, q-1)
     r = pow(g, k, p) % q
-    s = (pow(k, -1, q) * (m + sk*r)) % q
+    s = (pow(k, q-2, q) * (m + sk*r)) % q
     return r, s
 
 def verify(r, s, m):
-    w = pow(s, -1, q)
+    w = pow(s, q-2, q)
     u1 = (m*w) % q
     u2 = (r*w) % q
-    v = (pow(g, u1, p) * pow(g, u2, p)) % q
+    v = (pow(g, u1, p) * pow(pk, u2, p)) % q
     return v == r
 
 r, s = sign(m)
@@ -46,7 +44,7 @@ print('r:', r)
 print('s:', s)
 
 output = verify(r, s, SecretInt(m))
-print(output)
+output = assert0EMP(not output)
 
 set_bitwidth(256)
 print_emp(output, 'miniwizpl_test.cpp')
