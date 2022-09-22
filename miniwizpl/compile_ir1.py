@@ -21,11 +21,34 @@ def emit(s=''):
     emp_output_string += s + '\n'
 
 def add_to_witness(obj):
-    wire_name = '$' + str(next_wire())
+    wire_name = str(next_wire())
     witness_list.append(obj)
     emit(f'  {wire_name} <- @short_witness;')
 
     return wire_name
+
+def _extended_gcd(a, b):
+   """
+   Division in integers modulus p means finding the inverse of the
+   denominator modulo p and then multiplying the numerator by this
+   inverse (Note: inverse of A is B such that A*B % p == 1) this can
+   be computed via extended Euclidean algorithm
+   """
+   x = 0
+   last_x = 1
+   y = 1
+   last_y = 0
+   while b != 0:
+       quot = a // b
+       a, b = b, a % b
+       x, last_x = last_x - quot * x, x
+       y, last_y = last_y - quot * y, y
+   return last_x, last_y
+
+def modular_inverse(x, p):
+   """Compute the inverse of x mod p, i.e. b s.t. x*b mod p = 1"""
+   b, _ = _extended_gcd(x, p)
+   return b % p
 
 int_ops_ir1 = {
     'add': 'add',
@@ -57,13 +80,70 @@ def print_exp_ir1(e):
             emit(f'  {r} <- @{op_sym}({x1}, {x2});')
             return r
         elif e.op == 'mux':
-            # todo
-            pass
+            e1, e2, e3 = e.args
+            x1 = print_exp_ir1(e1)
+            x2 = print_exp_ir1(e2)
+            x3 = print_exp_ir1(e3)
+            c = params['arithmetic_field'] - 1
+
+            r1 = next_wire()
+            emit(f'  {r1} <- @mul({x1}, < {x2} >);')
+            r2 = next_wire()
+            emit(f'  {r2} <- @mulc({x1}, < {c} >);')
+            r3 = next_wire()
+            emit(f'  {r3} <- @mul({r2}, {x3});')
+            r_val = next_wire()
+            emit(f'  {r_val} <- @add({r1}, {r3});')
+            return r_val
         elif e.op == 'equals':
-            # todo
-            # diff_inv = ???
-            # wire_name_for_diff_inv = add_to_witness(diff_inv)
-            pass
+            e1, e2 = e.args
+            x1 = print_exp_ir1(e1)
+            x2 = print_exp_ir1(e2)
+
+            diff = e1 - e2
+            temp_wire_1 = next_wire()
+            wire_name_for_diff = next_wire()
+            c = params['arithmetic_field'] - 1
+
+            emit(f'  {temp_wire_1} <- @mulc({x2}, < {c} >);')
+            emit(f'  {wire_name_for_diff} <- @add({x1}, {temp_wire_1});')
+
+            if val_of(diff) != 0:
+                res = 1
+            else:
+                res = val_of(diff)
+
+            wire_name_for_res = add_to_witness(SecretInt(res))
+            temp = next_wire()
+            emit(f'  {temp} <- @mulc({wire_name_for_res}, < {c} >);')
+            r_res = next_wire()
+            emit(f'  {r_res} <- @addc({temp}, < 1 >);')
+
+            diff_inv = SecretInt(modular_inverse(val_of(diff), c + 1))
+
+            wire_name_for_diff_inv = add_to_witness(diff_inv)
+
+            temp_wire_1 = next_wire()
+            emit(f'  {temp_wire_1} <- @addc({wire_name_for_diff_inv}, < 1 >);')
+
+            temp_wire_2 = next_wire()
+            emit(f'  {temp_wire_2} <- @mul({wire_name_for_diff_inv}, {temp_wire_1});')
+
+            temp_wire_1 = next_wire()
+            emit(f'  {temp_wire_1} <- @mul({temp_wire_2}, {wire_name_for_res});')
+
+            temp_wire_2 = next_wire()
+            emit(f'  {temp_wire_2} <- @mulc({wire_name_for_res}, < {c} >);')
+            temp_wire_3 = next_wire()
+            emit(f'  {temp_wire_3} <- @add({temp_wire_1}, {temp_wire_2});')
+
+            temp_wire_1 = next_wire()
+            emit(f'  {temp_wire_1} <- @mulc({wire_name_for_diff}, < {c} >);')
+            temp_wire_3 = next_wire()
+            emit(f'  {temp_wire_3} <- @add({temp_wire_2}, {temp_wire_1});')
+
+            emit(f'  @assert_zero({temp_wire_3});')
+            return r_res
         elif e.op == 'sub':
             # implementation: multiply x2 by -1
             e1, e2 = e.args
