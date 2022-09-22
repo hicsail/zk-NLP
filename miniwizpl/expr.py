@@ -95,6 +95,9 @@ class SymVar(AST):
         return Prim('equals', [self, other], val_of(self) == val_of(other))
     def __req__(self, other):
         return Prim('equals', [other, self], val_of(other) == val_of(self))
+    def __str__(self):
+        return f'SymVar({self.name})'
+    __repr__ = __str__
 
 @dataclass
 class Prim(AST):
