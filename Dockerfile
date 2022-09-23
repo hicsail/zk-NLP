@@ -1,6 +1,3 @@
-
-# FROM ubuntu:latest
-
 FROM alpine:latest
 WORKDIR /usr/src/app
 
@@ -22,29 +19,7 @@ COPY . .
 
 RUN . venv/bin/activate
 RUN pip3 install .
-# RUN pip3 install numpy==1.18
 RUN python3 install.py --deps --tool --ot --zk
-
-# RUN git clone https://github.com/emp-toolkit/emp-tool.git --branch master
-# WORKDIR /usr/src/app/emp-tool
-# RUN cmake .
-# RUN make -j4
-# RUN make install
-# WORKDIR /usr/src/app
-
-# RUN git clone https://github.com/emp-toolkit/emp-ot.git --branch master
-# WORKDIR /usr/src/app/emp-ot
-# RUN cmake .
-# RUN make -j4
-# RUN make install
-# WORKDIR /usr/src/app
-
-# RUN git clone https://github.com/emp-toolkit/emp-zk.git --branch master
-# WORKDIR /usr/src/app/emp-zk
-# RUN cmake .
-# RUN make -j4
-# RUN make install
-# WORKDIR /usr/src/app
 
 RUN python3 examples/simple_demos/simple.py
 
