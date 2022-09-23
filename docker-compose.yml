@@ -1,0 +1,10 @@
+version: '3'
+services:
+  sieve:
+    container_name: sieve
+    restart: always
+    build: ./
+    volumes:
+      - ./:/code/sieve
+    command: 1 12349
+
