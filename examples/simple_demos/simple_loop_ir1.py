@@ -1,9 +1,9 @@
-from miniwizpl import SecretInt, SecretList, assert0, print_ir1, public_foreach
+from miniwizpl import *
 
-ls = SecretList([1,2,3,4,5])
+ls = SecretList(list(range(1, 5)))
 
 def add(a, b):
-    return a + b
+    return b + a
 
 sum_result = public_foreach(ls, add, 0)
 output = assert0(sum_result - 15)

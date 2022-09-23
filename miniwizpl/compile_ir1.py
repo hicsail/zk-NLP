@@ -5,6 +5,7 @@ import os
 from .globals import *
 from .expr import *
 from .data_types import *
+import sys
 
 emp_output_string = ""
 current_wire = 0
@@ -57,6 +58,19 @@ int_ops_ir1 = {
     'mod': 'mod'
 }
 
+def subst(x, v, e):
+    sys.setrecursionlimit(10000)
+
+    assert isinstance(x, SymVar)
+    if e is x:
+        return v
+    elif isinstance(e, (int, float, SymVar, SecretInt)):
+        return e
+    elif isinstance(e, Prim):
+        return Prim(e.op, [subst(x, v, a) for a in e.args], e.val)
+    else:
+        raise RuntimeError('unknown expression type', e)
+
 
 def print_exp_ir1(e):
     global all_pubvals
@@ -79,6 +93,17 @@ def print_exp_ir1(e):
 
             emit(f'  {r} <- @{op_sym}({x1}, {x2});')
             return r
+        elif e.op == 'fold':
+            x, body, accum, xs, init = e.args
+
+            assert isinstance(xs, SecretList)
+
+            a = init
+            for x_val in val_of(xs):
+                b = subst(accum, a, body)
+                a = subst(x, SecretInt(x_val), b)
+
+            return print_exp_ir1(a)
         elif e.op == 'mux':
             e1, e2, e3 = e.args
             x1 = print_exp_ir1(e1)

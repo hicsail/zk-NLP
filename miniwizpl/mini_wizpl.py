@@ -47,6 +47,16 @@ def pow(a, b, c):
     else:
         return _original_pow(a, b, c)
 
+def public_foreach_unroll(xs, f, init):
+    a = init
+    if isinstance(xs, SecretList):
+        for x in val_of(xs):
+            a = f(SecretInt(x), a)
+    else:
+        for x in xs:
+            a = f(x, a)
+    return a
+
 def public_foreach(xs, f, init):
     assert isinstance(xs, SecretList)
     t_a = type(init)
