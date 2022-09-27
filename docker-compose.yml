@@ -5,6 +5,5 @@ services:
     # restart: always
     build: ./
     volumes:
-      - ./:/code
+      - ./examples:/code
     # command: 1 12349
-

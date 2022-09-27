@@ -1,38 +1,40 @@
-FROM alpine:latest
+
+FROM ubuntu:latest
 WORKDIR /usr/src/app
 
-RUN apk update && apk add\
-    build-base \
+RUN apt update && apt install -y\
+    build-essential\
     python3 \
-    py3-pip\
+    python3-pip\
     python3-dev\
-    # py3-numpy\
+    python3-numpy\
     git \
     cmake\
     make\
-    openssl-dev\
+    libssl-dev\
     bash\
     musl-dev\
-    && apk upgrade
+    && apt upgrade -y
 
 COPY . .
 
 RUN . venv/bin/activate
 RUN pip3 install .
-RUN pip3 install numpy
 RUN python3 install.py --deps --tool --ot --zk
 
 RUN python3 examples/simple_demos/simple.py
 
+RUN ldconfig
+
 RUN g++  miniwizpl_test.cpp -o miniwizpl_test\
     -pthread -Wall -funroll-loops -Wno-ignored-attributes -Wno-unused-result -march=native -maes -mrdseed -std=c++11 -O3 \
+    -I/usr/src/app/miniwizpl/boilerplate\
+    -I/usr/lib/openssl/include\
     -L/usr/lib/openssl/lib -lssl -lcrypto \
-    -L./emp-zk/emp-zk -lemp-zk\
-    -L./emp-tool/emp-tool -lemp-tool\
-    -I./miniwizpl/boilerplate -I/usr/lib/openssl/include
+    -L/usr/src/app/emp-zk/emp-zk -lemp-zk\
+    -L/usr/src/app/emp-tool/emp-tool -lemp-tool\
+    -L/usr/local/lib -Wl,-R/usr/local/lib    
 
-# ENTRYPOINT ["./miniwizpl_test", "1", "12349","&", "&&", "./miniwizpl_test", "2", "12349"]
 RUN chmod +x ./shell.sh
 
-ENTRYPOINT [ "/bin/bash", "/usr/src/app/shell.sh","&", "&&", "sleep", "infinity"]
-
+ENTRYPOINT [ "/bin/bash", "/usr/src/app/shell.sh"]
