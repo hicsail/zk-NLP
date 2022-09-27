@@ -6,7 +6,7 @@ RUN apk update && apk add\
     python3 \
     py3-pip\
     python3-dev\
-    py3-numpy\
+    # py3-numpy\
     git \
     cmake\
     make\
@@ -19,17 +19,20 @@ COPY . .
 
 RUN . venv/bin/activate
 RUN pip3 install .
+RUN pip3 install numpy
 RUN python3 install.py --deps --tool --ot --zk
 
 RUN python3 examples/simple_demos/simple.py
 
-RUN g++ -I./miniwizpl/boilerplate -I/usr/lib/openssl/include -I./emp-zk/emp-zk -I ./emp-tool/emp-tool -I./emp-ot/emp-ot -I./emp-zk -I./emp-tool -I./emp-ot\ 
-    -L./emp-zk/emp-zk-lemp-zk\
-    -L./emp-tool/emp-tool-lemp-tool\
-    -L/usr/lib/openssl/lib -lssl -lcrypto \
+RUN g++  miniwizpl_test.cpp -o miniwizpl_test\
     -pthread -Wall -funroll-loops -Wno-ignored-attributes -Wno-unused-result -march=native -maes -mrdseed -std=c++11 -O3 \
-    miniwizpl_test.cpp -o miniwizpl_test
+    -L/usr/lib/openssl/lib -lssl -lcrypto \
+    -L./emp-zk/emp-zk -lemp-zk\
+    -L./emp-tool/emp-tool -lemp-tool\
+    -I./miniwizpl/boilerplate -I/usr/lib/openssl/include
 
-ENTRYPOINT ["./miniwizpl_test" ]
+# ENTRYPOINT ["./miniwizpl_test", "1", "12349","&", "&&", "./miniwizpl_test", "2", "12349"]
+RUN chmod +x ./shell.sh
 
+ENTRYPOINT [ "/bin/bash", "/usr/src/app/shell.sh","&", "&&", "sleep", "infinity"]
 

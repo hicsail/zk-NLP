@@ -25,7 +25,7 @@ git clone https://github.com/emp-toolkit/X.git --branch Y
 cd X
 cmake .
 make -j4
-sudo make install
+make install
 cd ..
 '''
 
