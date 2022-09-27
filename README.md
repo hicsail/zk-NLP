@@ -20,60 +20,68 @@ git clone https://github.com/multiparty/SIEVE.git
 Then, inside the local repo root directory run:
 
 ```
-source venv/bin/activate
-pip install .
+docker-compose up -d --build
 ```
 
-<strong> emp-zk tool kit </strong><br>
+This will build an image and compose a container
 
-In the local repo root directory run: 
-  ```
-  python install.py --deps --tool --ot --zk
-  ```
-  <br>
-    <li> By default it will build for Release. `-DCMAKE_BUILD_TYPE=[Release|Debug]` option is also available.</li>
-    <li> No sudo? Change [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/v2.8.8/cmake.html#variable%3aCMAKE_INSTALL_PREFIX).</li>
+Once the container is made, it will automatically run simple.py and corresponding proof and verification as an example
 
-## Examples
+## If you want to chose a demo file and run it inside the docker:
 
-We will demonstrate end-to-end execution with simple.py in the examples/simple_demos directory.
-
-<strong> miniWizPL </strong><br>
-
-The `examples` directory contains several examples of miniWizPL
-programs that demonstrate the compiler's features. For example, after
-installing miniWizPL, you can run:
+Run the following command in your terminal:
 
 ```
-python examples/simple_demos/simple.py
+docker exec -it <containerID> bash
 ```
 
-You may also explore other systems to prove in the examples directory by just changing the path below.
+Now you are inside docker shell
 
-This will produce a new file in the current directory called
-`miniwizpl_test.cpp` containing EMP code encoding the statement that
-the prover knows two numbers `x` and `y` such that `x + y = 5`.
+<br>
+<strong> 1) Easy Way </strong>
+<br>
+<br>
 
-`miniwizpl_test.cpp` will be compiled in the following step to run a ZK proof experiment.
-
-<strong> emp-zk tool kit </strong><br>
-
-Run the following command in the directory of `miniwizpl_test.cpp` (If you followed the instruction here exacly, it should be the root directory of this project)
+Then run:
 
 ```
-g++ -I./miniwizpl/boilerplate -lssl -lcrypto -o\
+/bin/bash ./run.sh -f <sub_folder> -c <Python script name>
+```
+
+For example, you can run:
+
+```
+/bin/bash ./run.sh -f simple_demos -c simple.py 
+```
+
+If you want to run a script just beneath examples directory, then run without -f flag like:
+
+```
+/bin/bash ./run.sh -c dfa_example.py 
+```
+
+<br>
+<strong> 2) Manual Execution </strong>
+<br>
+<br>
+
+In case you want to experiment manually, run inside docker shell:
+
+```
+python[3] examples/simple_demos/simple.py
+```
+
+And run the following command:
+
+```
+g++  miniwizpl_test.cpp -o miniwizpl_test\
     -pthread -Wall -funroll-loops -Wno-ignored-attributes -Wno-unused-result -march=native -maes -mrdseed -std=c++11 -O3 \
-    miniwizpl_test.cpp -lemp-zk -lemp-tool -lcrypto \
-    -o miniwizpl_test
-```
-
-Should you encounter an error related to openssl or crypto package, try adding -I and -L as follows:
-
-```
-g++ -I./miniwizpl/boilerplate -I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib -lssl -lcrypto -o\
-    -pthread -Wall -funroll-loops -Wno-ignored-attributes -Wno-unused-result -march=native -maes -mrdseed -std=c++11 -O3 \
-    miniwizpl_test.cpp -lemp-zk -lemp-tool -lcrypto \
-    -o miniwizpl_test
+    -I/usr/src/app/miniwizpl/boilerplate\
+    -I/usr/lib/openssl/include\
+    -L/usr/lib/openssl/lib -lssl -lcrypto \
+    -L/usr/src/app/emp-zk/emp-zk -lemp-zk\
+    -L/usr/src/app/emp-tool/emp-tool -lemp-tool\
+    -L/usr/local/lib -Wl,-R/usr/local/lib    
 ```
 
 Once you have compiled our EMP code, we can run the `miniwizpl_test`
@@ -95,6 +103,8 @@ The second command line argument represents the communication port.
 For a successful proof, the above command should run and return 
 a non-zero exit code. For a failed proof, the above should report a failed assertion.
 
+----
+
 ## Generating Documentation Re: miniwizpl
 
 Documentation can be generated with `pdoc3`:
@@ -110,5 +120,6 @@ pdoc --http localhost:8080 miniwizpl
 , so that test file can find the path properly</li>
 <li> Added "-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" into g++ command instruction </li>
 
+<li> Sudo prefix is removed from install.py to fit Dockerfile's style </li>
 <li> Added "prefix to mnist.pt directory in examples/neural_networks/mnist_wizpl.py, so that the system can find the file inside container </li>
 
