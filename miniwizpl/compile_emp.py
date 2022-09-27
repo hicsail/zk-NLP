@@ -74,7 +74,15 @@ def print_exp(e):
                       SecretTensor, SecretInt, SymVar, PublicTensor)):
         return e.name
     elif isinstance(e, bool):
-        raise Exception(e)
+        if e in all_pubvals:
+            return all_pubvals[e]
+        else:
+            ss = str(e).replace('-', 'minus')
+            r = f'public_bit_{ss}'
+            all_pubvals[e] = r
+            emit(f'  Bit {r} = Bit({int(e)}, PUBLIC);')
+            emit()
+            return r
     elif isinstance(e, int):
         if e in all_pubvals:
             return all_pubvals[e]
@@ -135,6 +143,14 @@ def print_exp(e):
             emit(f'  Bit {r} = !{x1};')
             emit()
             return r
+        elif e.op == 'not':
+            assert len(e.args) == 1
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            r = gensym('result_bitval')
+            emit(f'  Bit {r} = !{x1};')
+            emit()
+            return r
         elif e.op == 'exp_mod':
             e1, e2, e3 = e.args
             x1 = print_exp(e1)
@@ -183,6 +199,16 @@ def print_exp(e):
             e1 = e.args[0]
             x1 = print_exp(e1)
             emit(f'  assert(assert0EMP({x1}));')
+            return x1
+        elif e.op == 'assertTrueEMP':
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            emit(f'  assert({x1}.reveal<bool>(PUBLIC));')
+            return x1
+        elif e.op == 'assertFalseEMP':
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            emit(f'  assert(!{x1}.reveal<bool>(PUBLIC));')
             return x1
         elif e.op == 'stack_pop':
             assert len(e.args) == 1
