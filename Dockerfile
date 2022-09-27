@@ -14,6 +14,7 @@ RUN apt update && apt install -y\
     libssl-dev\
     bash\
     musl-dev\
+    nano\
     && apt upgrade -y
 
 COPY . .
@@ -35,6 +36,6 @@ RUN g++  miniwizpl_test.cpp -o miniwizpl_test\
     -L/usr/src/app/emp-tool/emp-tool -lemp-tool\
     -L/usr/local/lib -Wl,-R/usr/local/lib    
 
-RUN chmod +x ./shell.sh
+RUN chmod +x ./start.sh
 
-ENTRYPOINT [ "/bin/bash", "/usr/src/app/shell.sh"]
+ENTRYPOINT [ "/bin/bash", "/usr/src/app/start.sh"]

@@ -110,4 +110,5 @@ pdoc --http localhost:8080 miniwizpl
 , so that test file can find the path properly</li>
 <li> Added "-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" into g++ command instruction </li>
 
+<li> Added "prefix to mnist.pt directory in examples/neural_networks/mnist_wizpl.py, so that the system can find the file inside container </li>
 

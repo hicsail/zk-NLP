@@ -10,7 +10,7 @@ from mnist_model import Net
 import miniwizpl.torch
 
 model = Net()
-model.load_state_dict(torch.load('mnist.pt'))
+model.load_state_dict(torch.load('./examples/neural_networks/mnist.pt'))
 model.eval()
 
 print('model architecture:')
