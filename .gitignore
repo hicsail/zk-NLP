@@ -1,5 +1,12 @@
 data/
 data/names/
+
+venv/
+venv/bin
+venv/lib
+venv/lib/python3.10
+venv/lib/python3.10/site-packages
+
 build/
 build/lib/miniwizpl/
 build/lib/miniwizpl/boilerplate
