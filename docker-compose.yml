@@ -1,0 +1,7 @@
+version: '3'
+services:
+  sieve:
+    container_name: sieve
+    build: ./
+    volumes:
+      - ./examples:/code
