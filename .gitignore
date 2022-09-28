@@ -4,3 +4,5 @@ venv/
 build/
 build/lib/miniwizpl/
 build/lib/miniwizpl/boilerplate
+
+.DS_Store
