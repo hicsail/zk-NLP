@@ -19,7 +19,7 @@ RUN apt update && apt install -y\
 
 COPY . .
 
-RUN . venv/bin/activate && pip3 install .
+RUN pip3 install -r requirements.txt
 RUN python3 install.py --deps --tool --ot --zk
 
 RUN python3 examples/simple_demos/simple.py
