@@ -21,14 +21,14 @@ Then, inside the local repo root directory run:
 
 ```
 source venv/bin/activate
-pip install .
+pip[3] install .
 ```
 
 <strong> emp-zk tool kit </strong><br>
 
 In the local repo root directory run: 
   ```
-  python install.py --deps --tool --ot --zk
+  python[3] install.py --deps --tool --ot --zk
   ```
   <br>
     <li> By default it will build for Release. `-DCMAKE_BUILD_TYPE=[Release|Debug]` option is also available.</li>
@@ -45,7 +45,7 @@ programs that demonstrate the compiler's features. For example, after
 installing miniWizPL, you can run:
 
 ```
-python examples/simple_demos/simple.py
+python[3] examples/simple_demos/simple.py
 ```
 
 You may also explore other systems to prove in the examples directory by just changing the path below.
