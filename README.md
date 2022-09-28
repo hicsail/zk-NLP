@@ -27,6 +27,7 @@ This will build an image and compose a container
 
 Once the container is made, it will automatically run simple.py and corresponding proof and verification as an example
 
+
 ## If you want to chose a demo file and run it inside the docker:
 
 Run the following command in your terminal:
