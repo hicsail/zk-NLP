@@ -95,15 +95,28 @@ def print_exp_ir1(e):
             return r
         elif e.op == 'fold':
             x, body, accum, xs, init = e.args
-
             assert isinstance(xs, SecretList)
 
-            a = init
             for x_val in val_of(xs):
-                b = subst(accum, a, body)
-                a = subst(x, SecretInt(x_val), b)
+                r1 = next_wire()
+                emit(f' {r1} <- < {x_val} >;')
+            # TODO Need function name
+            fun_name = '_'
+            rf = next_wire()
+            r1 = rf
+            # TODO I don't think this loop is right
+            for i in range(init, len(val_of(xs))):
+                rf = next_wire()
+            emit(f' {r1}...{rf} <- @for i @first {r1} @last {rf}')
+            emit(f'   $i <- @call({fun_name}, $(i - 1), $(i - 2));')
+            emit(f' @end')
 
-            return print_exp_ir1(a)
+            # a = init
+            # for x_val in val_of(xs):
+            #     b = subst(accum, a, body)
+            #     a = subst(x, SecretInt(x_val), b)
+            # TODO What do I return?
+            return rf
         elif e.op == 'mux':
             e1, e2, e3 = e.args
             x1 = print_exp_ir1(e1)
@@ -181,6 +194,22 @@ def print_exp_ir1(e):
             r = next_wire()
 
             emit(f'  {r} <- @add({x1}, {negated_x2});')
+            return r
+        elif e.op == 'and':
+            e1, e2 = e.args
+            x1 = print_exp_ir1(e1)
+            x2 = print_exp_ir1(e2)
+            r = next_wire()
+            emit(f'  {r} <- @mul({x1}, {x2});')
+            return r
+        elif e.op == 'not':
+            e1 = e.args
+            x1 = print_exp_ir1(e1)
+            negated_x2 = next_wire()
+            c = params['arithmetic_field'] - 1
+            emit(f'  {negated_x2} <- @mulc({x1}, < {c} >);')
+            r = next_wire()
+            emit(f'  {r} <- @add({negated_x2}, < {1} >);')
             return r
         elif e.op == 'assert0':
             assert len(e.args) == 1
