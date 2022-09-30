@@ -14,7 +14,7 @@ miniWizPL is a Python library and compiler for writing zero-knowledge statements
 Clone this repo:
 
 ```
-git clone https://github.com/multiparty/SIEVE.git
+git clone https://github.com/hicsail/SIEVE.git
 ```
 
 Then, inside the local repo root directory run:
