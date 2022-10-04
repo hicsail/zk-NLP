@@ -1,5 +1,8 @@
 # # #!/bin/sh
 
+[ -e miniwizpl_test ] && rm miniwizpl_test
+[ -e miniwizpl_test.cpp  ] && rm miniwizpl_test.cpp 
+
 while getopts f:c: flag
 do
     case "${flag}" in
@@ -26,23 +29,21 @@ cp /code/$path_to /usr/src/app/examples/$path_to
 
 echo "Running $path_to ....";
 
-if python3 /usr/src/app/examples/$path_to
+if ([ "$code" == "substring_search.py"] || ["$code" == "dfa_example.py" ] );
 then
+    echo "Fetchingh target_file ....";
+    if python3 /usr/src/app/examples/$path_to /usr/src/app/examples/dfa_test_input.txt
+    then
+        source ./compile.sh
+    else
+        echo "Error in the python script - abort"
+    fi
 
-    g++  miniwizpl_test.cpp -o miniwizpl_test\
-        -pthread -Wall -funroll-loops -Wno-ignored-attributes -Wno-unused-result -march=native -maes -mrdseed -std=c++11 -O3 \
-        -I/usr/src/app/miniwizpl/boilerplate\
-        -I/usr/lib/openssl/include\
-        -L/usr/lib/openssl/lib -lssl -lcrypto \
-        -L/usr/src/app/emp-zk/emp-zk -lemp-zk\
-        -L/usr/src/app/emp-tool/emp-tool -lemp-tool\
-        -L/usr/local/lib -Wl,-R/usr/local/lib    
-
-    chmod ugo+rwx /usr/src/app/miniwizpl_test
-
-    /usr/src/app/miniwizpl_test 1 12349 &
-    /usr/src/app/miniwizpl_test 2 12349 &
-
-else
-    echo "Error in the python script - abort"
+else 
+    if python3 /usr/src/app/examples/$path_to
+    then
+        source ./compile.sh
+    else
+        echo "Error in the python script - abort"
+    fi
 fi
