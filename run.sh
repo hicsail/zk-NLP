@@ -28,22 +28,11 @@ fi
 cp /code/$path_to /usr/src/app/examples/$path_to
 
 echo "Running $path_to ....";
+echo "$code";
 
-if ([ "$code" == "substring_search.py"] || ["$code" == "dfa_example.py" ] );
-then
-    echo "Fetchingh target_file ....";
-    if python3 /usr/src/app/examples/$path_to /usr/src/app/examples/dfa_test_input.txt
+if python3 /usr/src/app/examples/$path_to /usr/src/app/examples/dfa_test_input.txt
     then
         source ./compile.sh
     else
         echo "Error in the python script - abort"
-    fi
-
-else 
-    if python3 /usr/src/app/examples/$path_to
-    then
-        source ./compile.sh
-    else
-        echo "Error in the python script - abort"
-    fi
 fi
