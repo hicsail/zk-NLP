@@ -36,7 +36,7 @@ def verify(r, s, m):
     w = pow(s, q-2, q)
     u1 = (m*w) % q
     u2 = (r*w) % q
-    v = (pow(g, u1, p) * pow(pk, u2, p)) % q
+    v = ((pow(g, u1, p) * pow(pk, u2, p)) % p) % q
     return v == r
 
 r, s = sign(m)
