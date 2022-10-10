@@ -2,10 +2,10 @@ from miniwizpl import *
 
 ls = SecretList(list(range(1, 5)))
 
-def add(a, b):
-    return b + a
+def f(x, accum):
+    return mux(x == 3, accum + x, accum)
 
-sum_result = public_foreach(ls, add, 0)
+sum_result = public_foreach(ls, f, 0)
 output = assert0(sum_result - 15)
 
 print(sum_result)

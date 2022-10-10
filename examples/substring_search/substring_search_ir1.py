@@ -2,7 +2,7 @@ import pprint
 import random
 import sys
 import functools
-from miniwizpl import SecretInt, SecretList, mux, public_foreach, print_emp, print_ir1, assert0
+from miniwizpl import *
 
 if len(sys.argv) != 2:
     print("Usage: python dfa_example.py <target_filename>")
@@ -68,4 +68,4 @@ print(output)
 
 
 # compile the ZK statement to an EMP file
-print_ir1('miniwizpl_test.cpp')
+print_ir0('miniwizpl_test')

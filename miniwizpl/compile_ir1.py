@@ -10,6 +10,7 @@ import sys
 emp_output_string = ""
 current_wire = 0
 witness_list = []
+IR_MODE = 1
 
 def next_wire():
     global current_wire
@@ -21,10 +22,13 @@ def emit(s=''):
     global emp_output_string
     emp_output_string += s + '\n'
 
-def add_to_witness(obj):
+def add_to_witness(obj, comment=None):
     wire_name = str(next_wire())
     witness_list.append(obj)
-    emit(f'  {wire_name} <- @short_witness;')
+    if comment:
+        emit(f'  {wire_name} <- @short_witness; // {comment}')
+    else:
+        emit(f'  {wire_name} <- @short_witness;')
 
     return wire_name
 
@@ -64,7 +68,7 @@ def subst(x, v, e):
     assert isinstance(x, SymVar)
     if e is x:
         return v
-    elif isinstance(e, (int, float, SymVar, SecretInt)):
+    elif isinstance(e, (int, float, str, SymVar, SecretInt)):
         return e
     elif isinstance(e, Prim):
         return Prim(e.op, [subst(x, v, a) for a in e.args], e.val)
@@ -78,6 +82,10 @@ def print_exp_ir1(e):
 
     if isinstance(e, (SecretArray, SecretTensor, SecretInt, SymVar)):
         return add_to_witness(e)
+
+    elif isinstance(e, str):
+        # this is a wire name
+        return e
 
     elif isinstance(e, int):
         r = next_wire()
@@ -97,26 +105,38 @@ def print_exp_ir1(e):
             x, body, accum, xs, init = e.args
             assert isinstance(xs, SecretList)
 
-            for x_val in val_of(xs):
-                r1 = next_wire()
-                emit(f' {r1} <- < {x_val} >;')
-            # TODO Need function name
-            fun_name = '_'
-            rf = next_wire()
-            r1 = rf
-            # TODO I don't think this loop is right
-            for i in range(init, len(val_of(xs))):
-                rf = next_wire()
-            emit(f' {r1}...{rf} <- @for i @first {r1} @last {rf}')
-            emit(f'   $i <- @call({fun_name}, $(i - 1), $(i - 2));')
-            emit(f' @end')
+            if IR_MODE == 1:
+                for x_val in val_of(xs):
+                    r1 = next_wire()
+                    emit(f' {r1} <- < {x_val} >;')
+                    # TODO Need function name
+                    fun_name = '_'
+                    rf = next_wire()
+                    r1 = rf
+                    # TODO I don't think this loop is right
+                    for i in range(init, len(val_of(xs))):
+                        rf = next_wire()
+                        emit(f' {r1}...{rf} <- @for i @first {r1} @last {rf}')
+                        emit(f'   $i <- @call({fun_name}, $(i - 1), $(i - 2));')
+                        emit(f' @end')
 
-            # a = init
-            # for x_val in val_of(xs):
-            #     b = subst(accum, a, body)
-            #     a = subst(x, SecretInt(x_val), b)
-            # TODO What do I return?
-            return rf
+                        # a = init
+                        # for x_val in val_of(xs):
+                        #     b = subst(accum, a, body)
+                        #     a = subst(x, SecretInt(x_val), b)
+                        # TODO What do I return?
+                        return rf
+            elif IR_MODE == 0:
+                a_wire = print_exp_ir1(init)
+                for x_val in val_of(xs):
+                    b = subst(accum, a_wire, body)
+                    a = subst(x, SecretInt(x_val), b)
+                    a_wire = print_exp_ir1(a)
+
+                return a_wire
+
+            else:
+                raise RuntimeError('unknown IR mode:', IR_MODE)
         elif e.op == 'mux':
             e1, e2, e3 = e.args
             x1 = print_exp_ir1(e1)
@@ -139,19 +159,20 @@ def print_exp_ir1(e):
             x2 = print_exp_ir1(e2)
 
             diff = e1 - e2
+            print('diff is:', diff)
             temp_wire_1 = next_wire()
             wire_name_for_diff = next_wire()
             c = params['arithmetic_field'] - 1
 
             emit(f'  {temp_wire_1} <- @mulc({x2}, < {c} >);')
-            emit(f'  {wire_name_for_diff} <- @add({x1}, {temp_wire_1});')
+            emit(f'  {wire_name_for_diff} <- @add({x1}, {temp_wire_1}); // diff')
 
             if val_of(diff) != 0:
                 res = 1
             else:
                 res = val_of(diff)
 
-            wire_name_for_res = add_to_witness(SecretInt(res))
+            wire_name_for_res = add_to_witness(SecretInt(res), 'res')
             temp = next_wire()
             emit(f'  {temp} <- @mulc({wire_name_for_res}, < {c} >);')
             r_res = next_wire()
@@ -159,7 +180,7 @@ def print_exp_ir1(e):
 
             diff_inv = SecretInt(modular_inverse(val_of(diff), c + 1))
 
-            wire_name_for_diff_inv = add_to_witness(diff_inv)
+            wire_name_for_diff_inv = add_to_witness(diff_inv, 'diff_inv')
 
             temp_wire_1 = next_wire()
             emit(f'  {temp_wire_1} <- @addc({wire_name_for_diff_inv}, < 1 >);')
@@ -221,6 +242,11 @@ def print_exp_ir1(e):
     else:
         raise Exception(f'unknown expression type: {e}')
 
+def print_ir0(filename):
+    global IR_MODE
+    IR_MODE = 0
+    print_ir1(filename)
+    IR_MODE = 1
 
 def print_ir1(filename):
     global all_defs
