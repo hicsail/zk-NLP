@@ -7,10 +7,26 @@ from .expr import *
 from .data_types import *
 import sys
 
+output_file = None
 emp_output_string = ""
 current_wire = 0
 witness_list = []
 IR_MODE = 1
+
+@dataclass
+class WireVal(AST):
+    name: str
+    type: type
+    val: any
+
+    def __eq__(self, other):
+        return Prim('equals', [self, other], val_of(self) == val_of(other))
+    def __req__(self, other):
+        return Prim('equals', [other, self], val_of(other) == val_of(self))
+    def __str__(self):
+        return f'WireVal({self.name}, {self.val})'
+    __repr__ = __str__
+
 
 def next_wire():
     global current_wire
@@ -19,8 +35,12 @@ def next_wire():
     return '$' + str(r)
 
 def emit(s=''):
-    global emp_output_string
-    emp_output_string += s + '\n'
+    global output_file
+    output_file.write(s)
+    output_file.write('\n')
+    
+    # global emp_output_string
+    # emp_output_string += s + '\n'
 
 def add_to_witness(obj, comment=None):
     wire_name = str(next_wire())
@@ -83,9 +103,9 @@ def print_exp_ir1(e):
     if isinstance(e, (SecretArray, SecretTensor, SecretInt, SymVar)):
         return add_to_witness(e)
 
-    elif isinstance(e, str):
-        # this is a wire name
-        return e
+    elif isinstance(e, WireVal):
+        # just return the wire name
+        return e.name
 
     elif isinstance(e, int):
         r = next_wire()
@@ -102,7 +122,8 @@ def print_exp_ir1(e):
             emit(f'  {r} <- @{op_sym}({x1}, {x2});')
             return r
         elif e.op == 'fold':
-            x, body, accum, xs, init = e.args
+            xs, f, init = e.args
+            #x, body, accum, xs, init = e.args
             assert isinstance(xs, SecretList)
 
             if IR_MODE == 1:
@@ -127,13 +148,15 @@ def print_exp_ir1(e):
                         # TODO What do I return?
                         return rf
             elif IR_MODE == 0:
-                a_wire = print_exp_ir1(init)
-                for x_val in val_of(xs):
-                    b = subst(accum, a_wire, body)
-                    a = subst(x, SecretInt(x_val), b)
-                    a_wire = print_exp_ir1(a)
+                a_wire_name = print_exp_ir1(init)
+                a_wire_val = WireVal(a_wire_name, int, val_of(init))
 
-                return a_wire
+                for x_val in val_of(xs):
+                    new_a_val = f(SecretInt(x_val), a_wire_val)
+                    a_wire_name = print_exp_ir1(new_a_val)
+                    a_wire_val = WireVal(a_wire_name, int, val_of(new_a_val))
+
+                return a_wire_name
 
             else:
                 raise RuntimeError('unknown IR mode:', IR_MODE)
@@ -159,7 +182,7 @@ def print_exp_ir1(e):
             x2 = print_exp_ir1(e2)
 
             diff = e1 - e2
-            print('diff is:', diff)
+            #print('diff is:', diff)
             temp_wire_1 = next_wire()
             wire_name_for_diff = next_wire()
             c = params['arithmetic_field'] - 1
@@ -250,58 +273,52 @@ def print_ir0(filename):
 
 def print_ir1(filename):
     global all_defs
-    global emp_output_string
+    global output_file
 
     field = params['arithmetic_field']
     print('field size:', field)
 
     # INSTANCE OUTPUT
-    emp_output_string = ""
+    with open(filename + '.ins', 'w') as f:
+        output_file = f
 
-    emit(f"""version 1.0.0;
+        emit(f"""version 1.0.0;
 field characteristic {field} degree 1;
 instance
 @begin
 @end
 """)
 
-    with open(filename + '.ins', 'w') as f:
-        f.write(emp_output_string)
-
 
     # RELATION OUTPUT
-    emp_output_string = ""
+    with open(filename + '.rel', 'w') as f:
+        output_file = f
 
-    emit(f"""version 1.0.0;
+        emit(f"""version 1.0.0;
 field characteristic {field} degree 1;
 relation
 gate_set: arithmetic;
 features: @function, @switch;
 @begin""")
 
-    for a in assertions:
-        print_exp_ir1(a)
+        for a in assertions:
+            print_exp_ir1(a)
 
-    emit('@end')
-
-    with open(filename + '.rel', 'w') as f:
-        f.write(emp_output_string)
+        emit('@end')
 
     # WITNESS OUTPUT
-    emp_output_string = ""
+    with open(filename + '.wit', 'w') as f:
+        output_file = f
+        emp_output_string = ""
 
-    emit(f"""version 1.0.0;
+        emit(f"""version 1.0.0;
 field characteristic {field} degree 1;
 short_witness
 @begin""")
 
-    for x in witness_list:
-        emit(f'< {x.val} >;')
+        for x in witness_list:
+            emit(f'< {x.val} >;')
 
-    emit("@end")
+        emit("@end")
 
-    with open(filename + '.wit', 'w') as f:
-        f.write(emp_output_string)
-
-    emp_output_string = ""
 

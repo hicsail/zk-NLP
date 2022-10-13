@@ -68,4 +68,4 @@ print(output)
 
 
 # compile the ZK statement to an EMP file
-print_ir0('miniwizpl_test')
+print_ir0('miniwizpl_test_ir0')

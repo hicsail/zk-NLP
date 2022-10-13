@@ -1,6 +1,6 @@
 params = {
     'bitwidth': 32,
-    'arithmetic_field': 97
+    'arithmetic_field': 2**31-1
 }
 
 bitwidth = 32
