@@ -127,6 +127,23 @@ def print_exp_ir1(e):
             assert isinstance(xs, SecretList)
 
             if IR_MODE == 1:
+                xs_wires = [print_exp_ir1(SecretInt(x)) for x in val_of(xs)]
+
+                r1 = xs_wires[0]
+                rf = xs_wires[-1]
+
+                x_wire_val = WireVal('$1', int, None)
+                a_wire_val = WireVal('$2', int, None)
+                loop_body = f(x_wire_val, a_wire_val)
+                fun_name = '_'
+                emit(f' {r1}...{rf} <- @for i @first {r1} @last {rf}')
+                emit(f'   $i <- @call({fun_name}, $(i - 1), $(i - 2));')
+                output_wire = print_exp_ir1(loop_body)
+                emit(f'   $0 <- {output_wire};')
+                emit(f' @end')
+                return r1
+
+                # TODO: probably remove code below here
                 for x_val in val_of(xs):
                     r1 = next_wire()
                     emit(f' {r1} <- < {x_val} >;')
@@ -267,6 +284,8 @@ def print_exp_ir1(e):
 
 def print_ir0(filename):
     global IR_MODE
+    global current_wire
+    current_wire = 0
     IR_MODE = 0
     print_ir1(filename)
     IR_MODE = 1
@@ -274,6 +293,8 @@ def print_ir0(filename):
 def print_ir1(filename):
     global all_defs
     global output_file
+    global current_wire
+    current_wire = 0
 
     field = params['arithmetic_field']
     print('field size:', field)
