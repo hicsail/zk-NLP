@@ -120,12 +120,3 @@ def relu(x):
 
 def compare_tensors(a, b):
     return Prim('compare_tensors', [a, b], None) # TODO: fill in value
-
-def assert0EMP(a):
-    return Prim('assert0EMP', [a], val_of(a) == 0)
-
-def assertTrueEMP(a):
-    return Prim('assertTrueEMP', [a], val_of(a) == True)
-
-def assertFalseEMP(a):
-    return Prim('assertFalseEMP', [a], val_of(a) == False)

@@ -16,6 +16,19 @@ def index(arr, val, start, length):
                                None))
     return x
 
+
+def assert0EMP(a):
+    global all_statements
+    all_statements.append(Prim('assert0EMP', [a], val_of(a) == 0))
+
+def assertTrueEMP(a):
+    global all_statements
+    all_statements.append(Prim('assertTrueEMP', [a], val_of(a) == True))
+
+def assertFalseEMP(a):
+    global all_statements
+    all_statements.append(Prim('assertFalseEMP', [a], val_of(a) == False))
+
 def comment(msg):
     """
     Prints a comment in the compiler's output.
