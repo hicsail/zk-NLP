@@ -84,8 +84,7 @@ def set_bitwidth(b):
     """
     Set the bitwidth for boolean-representation output.
     """
-    global bitwidth
-    bitwidth = b
+    params['bitwidth'] = b
 
 def set_field(b):
     """

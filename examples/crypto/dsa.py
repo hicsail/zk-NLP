@@ -45,5 +45,5 @@ print('s:', s)
 
 output = verify(r, s, SecretInt(m))
 output = assertFalseEMP(~output)
-set_bitwidth(256)
+set_bitwidth(2048)
 print_emp(output, 'miniwizpl_test.cpp')

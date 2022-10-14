@@ -92,7 +92,8 @@ def print_exp(e):
             all_pubvals[e] = r
 
             if bitsof(e) < 32:
-                emit(f'  Integer {r} = Integer({bitwidth}, {e}, PUBLIC);')
+                bw = params['bitwidth']
+                emit(f'  Integer {r} = Integer({bw}, {e}, PUBLIC);')
                 emit()
                 return r
             else:
@@ -302,20 +303,21 @@ def emit_bigint(r, e):
     emit(f'  for (int i = 0; i < {len(bin_str)}; ++i)')
     emit(f'    {r}_vec.push_back(Bit({r}_init[i], PUBLIC));')
     emit(f'  Integer {r} = Integer({r}_vec);')
-    emit(f'  {r}.resize({bitwidth});')
+    bw = params['bitwidth']
+    emit(f'  {r}.resize({bw});')
     emit()
 
 
 def print_defs(defs):
-    global bitwidth
-
     for d in defs:
         name = d.name
         x = d.val
 
         if isinstance(d, SecretInt):
             if bitsof(x) < 32:
-                emit(f'  Integer {name} = Integer({bitwidth}, {x}, ALICE);')
+                bw = params['bitwidth']
+
+                emit(f'  Integer {name} = Integer({bw}, {x}, ALICE);')
                 emit()
             else:
                 emit_bigint(name, x)
