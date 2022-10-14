@@ -2,9 +2,11 @@ import random
 import sys
 
 from cryptography.hazmat.primitives.asymmetric import dsa
-from miniwizpl import assertFalseEMP, SecretInt, print_emp, exp_mod, set_bitwidth, pow
+from miniwizpl import *
+BITWIDTH = 1024
+set_bitwidth(BITWIDTH)
 
-private_key = dsa.generate_private_key(key_size=2048)
+private_key = dsa.generate_private_key(key_size=BITWIDTH)
 p = private_key.parameters().parameter_numbers()._p
 q = private_key.parameters().parameter_numbers()._q
 
@@ -44,6 +46,5 @@ print('r:', r)
 print('s:', s)
 
 output = verify(r, s, SecretInt(m))
-output = assertFalseEMP(~output)
-set_bitwidth(2048)
-print_emp(output, 'miniwizpl_test.cpp')
+assertTrueEMP(output)
+print_emp(True, 'miniwizpl_test.cpp')
