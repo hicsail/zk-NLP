@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from dataclasses import dataclass
+from collections import defaultdict
 import os
 from .globals import *
 from .expr import *
@@ -96,6 +97,8 @@ def subst(x, v, e):
         raise RuntimeError('unknown expression type', e)
 
 
+function_unrollings = defaultdict(int)
+
 def print_exp_ir1(e):
     global all_pubvals
     global params
@@ -121,6 +124,23 @@ def print_exp_ir1(e):
 
             emit(f'  {r} <- @{op_sym}({x1}, {x2});')
             return r
+        elif e.op == 'rec':
+            name, bound, args, func = e.args
+            if function_unrollings[name] > bound:
+                r = next_wire()
+                emit(f'  {r} <- < 0 >;')
+                return r
+            else:
+                function_unrollings[name] += 1
+                arg_wires = []
+                for a in args:
+                    w = print_exp_ir1(a)
+                    wv = WireVal(w, int, val_of(a))
+                    arg_wires.append(wv)
+
+                body = func(*arg_wires)
+                r = print_exp_ir1(body)
+                return r
         elif e.op == 'fold':
             xs, f, init = e.args
             #x, body, accum, xs, init = e.args

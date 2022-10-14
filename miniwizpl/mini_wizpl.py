@@ -1,10 +1,27 @@
 import sys
 import numpy as np
 from dataclasses import dataclass
+from functools import wraps
 import os
 from .globals import *
 from .expr import *
 from .data_types import *
+
+def miniwizpl_recursive(*args, **kwargs):
+    if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
+        raise RuntimeError('For recursive functions, you must provide an unrolling bound')
+
+    bound = kwargs['unrolling_bound']
+    def decorator(func):
+        top = True
+        name = gensym('func')
+        @wraps(func)
+        def wrapped(*args):
+            result = Prim('rec', [name, bound, list(args), func], None)
+            return result
+        return wrapped
+
+    return decorator
 
 def index(arr, val, start, length):
     #return arr[start:end].index(val)
