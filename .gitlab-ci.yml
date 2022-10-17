@@ -15,8 +15,24 @@ build:
   script:
     - apt-get -q -y install python3-pip sudo
     - pip install .
-    - wget https://raw.githubusercontent.com/emp-toolkit/emp-readme/master/scripts/install.py
-    - python3 install.py --deps --tool --ot --zk
+    - git clone https://github.com/emp-toolkit/emp-tool.git --branch 0.2.4
+    - cd emp-tool
+    - cmake -DCMAKE_BUILD_TYPE=Release .
+    - make -j4
+    - make install
+    - cd ..
+    - git clone https://github.com/emp-toolkit/emp-ot.git --branch 0.2.3
+    - cd emp-ot
+    - cmake -DCMAKE_BUILD_TYPE=Release .
+    - make -j4
+    - make install
+    - cd ..
+    - git clone https://github.com/emp-toolkit/emp-zk.git --branch 0.2.0
+    - cd emp-zk
+    - cmake -DCMAKE_BUILD_TYPE=Release .
+    - make -j4
+    - make install
+    - cd ..
     - sudo ldconfig
     - ./bash/crypto.sh
     - ./bash/misc.sh
