@@ -2,7 +2,7 @@ import random
 import sys
 
 from cryptography.hazmat.primitives.asymmetric import dsa
-from miniwizpl import *
+from miniwizpl import SecretInt, assertTrueEMP, pow, print_emp, set_bitwidth
 BITWIDTH = 1024
 set_bitwidth(BITWIDTH)
 
