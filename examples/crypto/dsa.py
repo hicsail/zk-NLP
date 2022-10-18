@@ -1,23 +1,34 @@
 import random
 import sys
+import galois
+from miniwizpl import *
 
-from cryptography.hazmat.primitives.asymmetric import dsa
-from miniwizpl import SecretInt, assertTrueEMP, pow, print_emp, set_bitwidth
-BITWIDTH = 1024
+BITWIDTH = 128
 set_bitwidth(BITWIDTH)
 
-private_key = dsa.generate_private_key(key_size=BITWIDTH)
-p = private_key.parameters().parameter_numbers()._p
-q = private_key.parameters().parameter_numbers()._q
+# Generate the parameters for DSA
+def gen_params():
+    N = 8
+    L = 12  # we get this many bits of security
+
+    q = galois.random_prime(N)
+    p = galois.random_prime(L)
+    while (p-1)%q != 0:
+        p = galois.next_prime(p)
+
+    h = 2
+    g = pow(h, (p-1)//q, p)
+    return p, q, g
+
+p, q, g = gen_params()
 
 print('bitwidth p:', p.bit_length())
 print('bitwidth q:', q.bit_length())
+print('g:', g)
 
 h = random.randint(2, p-2)
 
-g = private_key.parameters().parameter_numbers()._g
-print('g:', g)
-
+# Generate keys
 def gen_key():
     x = random.randint(1, q-1)
     y = pow(g, x, p)
