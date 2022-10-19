@@ -143,47 +143,25 @@ def print_exp_ir1(e):
                 return r
         elif e.op == 'fold':
             xs, f, init = e.args
-            #x, body, accum, xs, init = e.args
             assert isinstance(xs, SecretList)
 
             if IR_MODE == 1:
                 xs_wires = [print_exp_ir1(SecretInt(x)) for x in val_of(xs)]
+                init_wire = next_wire()
+                emit(f'  {init_wire} <- < {init} >;')
 
                 r1 = xs_wires[0]
                 rf = xs_wires[-1]
-
+                wires = [next_wire() for _ in range(0, len(val_of(xs))+1)]
                 x_wire_val = WireVal('$1', int, None)
                 a_wire_val = WireVal('$2', int, None)
-                loop_body = f(x_wire_val, a_wire_val)
-                fun_name = '_'
-                emit(f' {r1}...{rf} <- @for i @first {r1} @last {rf}')
-                emit(f'   $i <- @call({fun_name}, $(i - 1), $(i - 2));')
-                output_wire = print_exp_ir1(loop_body)
-                emit(f'   $0 <- {output_wire};')
+                loop_body = f(a_wire_val, x_wire_val)
+                emit(f' {wires[0]}...{wires[-1]} <- @for i @first {r1} @last {rf}')
+                emit(f'   $(i+{len(val_of(xs)) + 1}) <- @anon_call($i, $(i + {len(val_of(xs))})));')
+                emit(f'   {init_wire} <- @{loop_body.op}({loop_body.args[0].name}, {loop_body.args[1].name})')
+                emit(f'   $0 <- {init_wire};')
                 emit(f' @end')
                 return r1
-
-                # TODO: probably remove code below here
-                for x_val in val_of(xs):
-                    r1 = next_wire()
-                    emit(f' {r1} <- < {x_val} >;')
-                    # TODO Need function name
-                    fun_name = '_'
-                    rf = next_wire()
-                    r1 = rf
-                    # TODO I don't think this loop is right
-                    for i in range(init, len(val_of(xs))):
-                        rf = next_wire()
-                        emit(f' {r1}...{rf} <- @for i @first {r1} @last {rf}')
-                        emit(f'   $i <- @call({fun_name}, $(i - 1), $(i - 2));')
-                        emit(f' @end')
-
-                        # a = init
-                        # for x_val in val_of(xs):
-                        #     b = subst(accum, a, body)
-                        #     a = subst(x, SecretInt(x_val), b)
-                        # TODO What do I return?
-                        return rf
             elif IR_MODE == 0:
                 a_wire_name = print_exp_ir1(init)
                 a_wire_val = WireVal(a_wire_name, int, val_of(init))
