@@ -13,6 +13,7 @@ build:
   stage: stage_1
   image: registry.stealthsoftwareinc.com/stealth/builder-images/ubuntu:20.04
   script:
+    - apt-get update
     - apt-get -q -y install python3-pip sudo
     - pip install .
     - git clone https://github.com/emp-toolkit/emp-tool.git --branch 0.2.4
