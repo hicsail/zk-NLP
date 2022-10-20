@@ -102,6 +102,7 @@ function_unrollings = defaultdict(int)
 def print_exp_ir1(e):
     global all_pubvals
     global params
+    global current_wire
 
     if isinstance(e, (SecretArray, SecretTensor, SecretInt, SymVar)):
         return add_to_witness(e)
@@ -155,12 +156,41 @@ def print_exp_ir1(e):
                 wires = [next_wire() for _ in range(0, len(val_of(xs))+1)]
                 x_wire_val = WireVal('$1', int, None)
                 a_wire_val = WireVal('$2', int, None)
+
+                # possibly
+                # step 1: create the "abstracted" loop body with anonymous function's inputs
+                # we want this step to output code to the .rel file
+                # we want this step to NOT output anything to the .wit file
                 loop_body = f(a_wire_val, x_wire_val)
+
+                # TODO: disable adding stuff to witness
+                # add a global flag to make add_to_witness do nothing?
                 emit(f' {wires[0]}...{wires[-1]} <- @for i @first {r1} @last {rf}')
                 emit(f'   $(i+{len(val_of(xs)) + 1}) <- @anon_call($i, $(i + {len(val_of(xs))})));')
-                emit(f'   {init_wire} <- @{loop_body.op}({loop_body.args[0].name}, {loop_body.args[1].name})')
-                emit(f'   $0 <- {init_wire};')
+                ocw = current_wire
+                current_wire = 3
+                output_wire = print_exp_ir1(loop_body)
+                current_wire = ocw
+                emit(f'   $0 <- {output_wire};')
                 emit(f' @end')
+                emit('// end of loop -------------')
+
+
+                # step 2: run the loop "concretely" with actual values instead of abstracted
+                # function inputs
+                # we want this step to output witness values to the .wit file
+                # we want this step to NOT output anything to the .rel file
+
+                # TODO: disable adding stuff to rel
+                # add a global flag to make emit() do nothing
+                a_val = val_of(init)
+                x_wire_vals = [WireVal(n, int, v) for n, v in zip(xs_wires, val_of(xs))]
+                for x_val in x_wire_vals:
+                    a_val = f(x_val, val_of(a_val))
+                    print_exp_ir1(a_val)
+                emit('// end of extra garbage code -------------')
+
+
                 return r1
             elif IR_MODE == 0:
                 a_wire_name = print_exp_ir1(init)
