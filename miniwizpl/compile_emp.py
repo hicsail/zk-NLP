@@ -78,7 +78,7 @@ def print_exp(e):
             r = f'public_int_{ss}'
             all_pubvals[e] = r
 
-            if bitsof(e) < 32:
+            if bitsof(e) < 64:
                 emit(f'  Integer {r} = Integer({bitwidth}, {e}, PUBLIC);')
                 emit()
                 return r
@@ -183,7 +183,7 @@ def print_exp(e):
             r = gensym('stack_val')
             #emit(f'  cout << "P" << party << " stack POP, old top: " << {x1}_top.reveal<int>(PUBLIC) << "\\n";')
             emit(f'  Integer {r} = {x1}->read({x1}_top);')
-            emit(f'  {x1}_top = {x1}_top - Integer(32, 1, ALICE);')
+            emit(f'  {x1}_top = {x1}_top - Integer(64, 1, ALICE);')
             #emit(f'  cout << "P" << party << " stack POP, new top: " << {x1}_top.reveal<int>(PUBLIC) << "\\n";')
             return r
         elif e.op == 'stack_push':
@@ -191,7 +191,7 @@ def print_exp(e):
             x1 = print_exp(e1)
             x2 = print_exp(e2)
 
-            emit(f'  {x1}_top = {x1}_top + Integer(32, 1, ALICE);')
+            emit(f'  {x1}_top = {x1}_top + Integer(64, 1, ALICE);')
             emit(f'  {x1}->write({x1}_top, {x2});')
             return None
         elif e.op == 'stack_cond_push':
@@ -205,8 +205,8 @@ def print_exp(e):
             # conditional, address might be out of range!
             #emit(f'  cout << "P" << party << " stack PUSH, old top: " << {x1}_top.reveal<int>(PUBLIC) << " condition: " << {x2}.reveal<bool>(PUBLIC) << "\\n";')
 
-            emit(f'  {x1}_top = mux({x2}, {x1}_top + Integer(32, 1, ALICE), {x1}_top);')
-            emit(f'  Integer {a} = mux({x2}, {x1}_top, Integer(32, 0, ALICE));')
+            emit(f'  {x1}_top = mux({x2}, {x1}_top + Integer(64, 1, ALICE), {x1}_top);')
+            emit(f'  Integer {a} = mux({x2}, {x1}_top, Integer(64, 0, ALICE));')
             emit(f'  {x1}->write({a}, mux({x2}, {x3}, {x1}->read({a})));')
 
             #emit(f'  cout << "P" << party << " stack PUSH, new top: " << {x1}_top.reveal<int>(PUBLIC) << " condition: " << {x2}.reveal<bool>(PUBLIC) << "\\n";')
@@ -227,9 +227,9 @@ def print_exp(e):
             x3 = print_exp(e3)
             r = gensym('listidx_result')
 
-            emit(f'  Integer {r} = Integer(32, -1, PUBLIC);')
+            emit(f'  Integer {r} = Integer(64, -1, PUBLIC);')
             emit(f'  for (int i = 0; i < {e4}; i++) {{')
-            emit(f'    Integer idx = Integer(32, i, PUBLIC);')
+            emit(f'    Integer idx = Integer(64, i, PUBLIC);')
             emit(f'    Integer val = {x1}->read({x3} + idx);')
             emit(f'    {r} = mux(val == {x2}, idx, {r});')
             emit(f'  }}')
@@ -278,7 +278,7 @@ def print_defs(defs):
         x = d.val
 
         if isinstance(d, SecretInt):
-            if bitsof(x) < 32:
+            if bitsof(x) < 64:
                 emit(f'  Integer {name} = Integer({bitwidth}, {x}, ALICE);')
                 emit()
             else:
@@ -286,29 +286,29 @@ def print_defs(defs):
         elif isinstance(d, (SecretList)):
             n1 = len(d.arr)
             p = f"""
-  static int {name}_init[] = {print_list(x)};
+  static long int {name}_init[] = {print_list(x)};
   vector<Integer> {name};
   for (int i = 0; i < {n1}; ++i)
-    {name}.push_back(Integer(32, {name}_init[i], ALICE));
+    {name}.push_back(Integer(64, {name}_init[i], ALICE));
 """
             emit(p)
         elif isinstance(d, (SecretIndexList)):
             n1 = len(d.arr)
             p = f"""
-  static int {name}_init[] = {print_list(x)};
+  static long int {name}_init[] = {print_list(x)};
   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
   for (int i = 0; i < {n1}; ++i)
-    {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, {name}_init[i], ALICE));
+    {name}->write(Integer(index_sz, i, PUBLIC), Integer(64, {name}_init[i], ALICE));
 """
             emit(p)
         elif isinstance(d, (SecretStack)):
             n1 = len(d.arr)
             p = f"""
-  static int {name}_init[] = {print_list(x)};
+  static long int {name}_init[] = {print_list(x)};
   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
   for (int i = 0; i < {n1}; ++i)
-    {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, {name}_init[i], ALICE));
-  Integer {name}_top = Integer(32, {n1-1}, ALICE);
+    {name}->write(Integer(index_sz, i, PUBLIC), Integer(64, {name}_init[i], ALICE));
+  Integer {name}_top = Integer(64, {n1-1}, ALICE);
 """
             emit(p)
         elif isinstance(d, (SecretTensor, SecretArray)):

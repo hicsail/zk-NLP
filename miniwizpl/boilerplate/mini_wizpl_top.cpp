@@ -8,7 +8,7 @@ using namespace std;
 
 int port, party;
 const int threads = 1;
-const int index_sz = 20, step_sz = 25, val_sz = 32;
+const int index_sz = 20, step_sz = 25, val_sz = 64;
 
 QSMatrix<Float> relu(const QSMatrix<Float>& mat) {
   unsigned rows = mat.get_rows();
