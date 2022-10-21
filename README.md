@@ -1,7 +1,8 @@
 # miniWizPL
-## A Python library and compiler for writing zero-knowledge statements
 
-----
+A Python library and compiler for writing zero-knowledge statements
+
+[[_TOC_]]
 
 ## Installing
 
