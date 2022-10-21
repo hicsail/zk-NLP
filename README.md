@@ -241,10 +241,10 @@ print_emp(True, 'miniwizpl_test.cpp')
 
 ```
 
-## Executing your example in EMP-ZK
+## Compiling the generated C++ code
 
-In order to compile the output we next install
-[EMP-ZK](https://github.com/emp-toolkit/emp-zk) by running the
+In order to compile the outputted file `miniwizpl_test.cpp` we next
+install [EMP-ZK](https://github.com/emp-toolkit/emp-zk) by running the
 following commands:
 
 ```sh
@@ -267,6 +267,8 @@ make -j4
 make install
 cd ..
 ```
+
+## Executing your example in EMP-ZK
 
 Once we have installed EMP-ZK, we can now compile the generated C++
 file, making sure that we add the directory `miniwizpl/boilerplate` to
