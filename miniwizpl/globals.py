@@ -1,9 +1,9 @@
 params = {
-    'bitwidth': 32,
+    'bitwidth': 64,
     'arithmetic_field': 97
 }
 
-bitwidth = 32
+bitwidth = 64
 arithmetic_field = 97
 all_pubvals = {}
 all_defs = []

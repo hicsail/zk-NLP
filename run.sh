@@ -26,6 +26,7 @@ else
 fi
 
 cp /code/$path_to /usr/src/app/examples/$path_to
+cp /code/dfa_test_input.txt /usr/src/app/examples/dfa_test_input.txt
 
 echo "Running $path_to ....";
 echo "$code";

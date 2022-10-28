@@ -6,3 +6,8 @@ build/lib/miniwizpl/
 build/lib/miniwizpl/boilerplate
 
 .DS_Store
+
+miniwizpl_test_list_bignumber.cpp
+miniwizpl_test_list_correct.cpp
+miniwizpl_test_list_wrong.cpp
+miniwizpl_test_sub.cpp
