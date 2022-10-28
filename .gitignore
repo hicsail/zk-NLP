@@ -11,5 +11,3 @@ miniwizpl_test_list_bignumber.cpp
 miniwizpl_test_list_correct.cpp
 miniwizpl_test_list_wrong.cpp
 miniwizpl_test_sub.cpp
-
-examples/substring_search/stringlist_between_search.py
