@@ -1,6 +1,6 @@
 import sys
 import functools
-from miniwizpl import SecretInt, SecretList, mux, public_foreach, public_foreach_v2, print_emp
+from miniwizpl import SecretStack, SecretList, mux, public_foreach, public_foreach_v2, print_emp
 from miniwizpl.expr import *
 
 if len(sys.argv) != 2:
@@ -46,8 +46,7 @@ def dfa_from_string(first, last):
 # run a dfa
 def run_dfa(dfa, text_input):
     str_between = []
-    def next_state_fun(string, state):
-        curr_state = state
+    def next_state_fun(string, curr_state):
         for (dfa_state, dfa_str), next_state in dfa.items():
 
             print(
@@ -56,19 +55,19 @@ def run_dfa(dfa, text_input):
                 "input string: ", string, 
                 "dfa string: ", dfa_str,"\n")
 
-            curr_state = mux((curr_state == dfa_state) & (string == dfa_str),
+            curr_state = val_of(mux((curr_state == dfa_state) & (string == dfa_str),
                          next_state,
-                         curr_state)
-            
+                         curr_state))
+
         if ((curr_state == append_state)): 
             print("Appended", integer_to_word(string), "\n")
             str_between.append(integer_to_word(string))
         return curr_state
 
     # public_foreach basically runs the above function but returns in an emp format
-    loop, latest_state=public_foreach_v2(text_input, next_state_fun, zero_state)
+    loop=public_foreach(text_input, next_state_fun, zero_state)
 
-    if latest_state==append_state:
+    if val_of(loop)==append_state:
         str_between.pop()
     return loop, str_between
 
@@ -79,7 +78,7 @@ with open(sys.argv[1], 'r') as f:
 file_data = file_data.split()
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
-string_a = 'sss'
+string_a = 'import'
 string_b = 'what'
 
 dfa = dfa_from_string(string_a, string_b)
