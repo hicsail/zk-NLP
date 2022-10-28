@@ -64,23 +64,6 @@ def public_foreach(xs, f, init):
     loop = Prim('fold', [x, r, a, xs, init], a_val)
     return loop
 
-def public_foreach_v2(xs, f, init):
-    assert isinstance(xs, SecretList)
-    t_a = type(init)
-
-    # TODO: how can we handle the values here?
-    x = SymVar(gensym('x'), SecretInt, None)
-    a = SymVar(gensym('a'), t_a, None)
-    r = f(x, a)
-
-    # compute the actual result
-    a_val = val_of(init)
-    for x_val in val_of(xs):
-        a_val = val_of(f(x_val, a_val))
-
-    loop = Prim('fold', [x, r, a, xs, init], a_val)
-    return loop, a_val
-
 def mux(a, b, c):
     return Prim('mux', [a, b, c], val_of(b) if val_of(a) else val_of(c))
 
