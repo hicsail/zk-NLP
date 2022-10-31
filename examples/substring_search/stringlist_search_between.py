@@ -1,6 +1,6 @@
 import sys
 import functools
-from miniwizpl import SecretStack, SecretList, mux, public_foreach, public_foreach_v2, print_emp
+from miniwizpl import SecretInt, SecretStack, SecretList, mux, public_foreach, public_foreach_v2, print_emp
 from miniwizpl.expr import *
 
 if len(sys.argv) != 2:
@@ -25,26 +25,22 @@ def integer_to_word(integer):
         word+=char
     return word
 
-
-def islast(i, word):
-    if len(word.split()) - 1 == i:
-        return True
-    else:
-        return False
-
 zero_state = 0
 append_state=1
+append_found_state=2
 accept_state=255
 
 
-def dfa_from_string(first, last):
+def dfa_from_string(first,target,last=None):
     next_state = {}
     next_state[(zero_state, word_to_integer(first))]=append_state
-    next_state[(append_state, word_to_integer(last))]=accept_state
+    next_state[(append_state, word_to_integer(target[0]))]=append_found_state #Todo: Update this so it accepts array
+    next_state[(append_found_state, word_to_integer(last))]=accept_state
     return next_state
 
 # run a dfa
 def run_dfa(dfa, text_input):
+    # str_between = SecretStack([])
     str_between = []
     def next_state_fun(string, curr_state):
         for (dfa_state, dfa_str), next_state in dfa.items():
@@ -52,14 +48,18 @@ def run_dfa(dfa, text_input):
             print(
                 "curr state: ", curr_state,
                 "dfa state: ", dfa_state,"\n",
-                "input string: ", string, 
+                "input string: ", string,
                 "dfa string: ", dfa_str,"\n")
 
             curr_state = val_of(mux((curr_state == dfa_state) & (string == dfa_str),
                          next_state,
                          curr_state))
 
-        if ((curr_state == append_state)): 
+        ''' 
+            The following part needs to be updated with Stack
+        '''
+        # str_between.cond_push((curr_state == append_state),integer_to_word(val_of(string)))
+        if ((curr_state == append_state)|(curr_state == append_found_state)): 
             print("Appended", integer_to_word(string), "\n")
             str_between.append(integer_to_word(string))
         return curr_state
@@ -67,7 +67,7 @@ def run_dfa(dfa, text_input):
     # public_foreach basically runs the above function but returns in an emp format
     loop=public_foreach(text_input, next_state_fun, zero_state)
 
-    if val_of(loop)==append_state:
+    if val_of(loop)==append_found_state:
         str_between.pop()
     return loop, str_between
 
@@ -80,14 +80,15 @@ file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 string_a = 'import'
 string_b = 'what'
+string_target = ['numpy']
 
-dfa = dfa_from_string(string_a, string_b)
+dfa = dfa_from_string(string_a, string_target, string_b)
 print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
 loop, str_between = run_dfa(dfa, file_string)
 print("\n", "Result: ",str_between, "\n")
-outputs = (loop == accept_state)
+outputs = (loop == accept_state|append_found_state)
 print(outputs)
 # compile the ZK statement to an EMP file
 print_emp(outputs, 'miniwizpl_test.cpp')
