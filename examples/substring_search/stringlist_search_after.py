@@ -1,6 +1,5 @@
 import sys
-import functools
-from miniwizpl import SecretInt, SecretStack, SecretList, mux, public_foreach, public_foreach_v2, print_emp
+from miniwizpl import SecretList, mux, public_foreach, print_emp
 from miniwizpl.expr import *
 
 if len(sys.argv) != 2:
@@ -48,7 +47,7 @@ def run_dfa(dfa, text_input):
                 This control flow is just for the sake of debugging and must be deleted
             '''
             if (initial_state == found_state)&(string == dfa_str):
-                print("Found", string, "\n")
+                print("Found", integer_to_word(val_of(string)), "\n")
 
             print(
                 "curr state: ", curr_state,
@@ -97,7 +96,7 @@ print("\n", "DFA: ",dfa, "\n")
 # define the ZK statement
 loop = run_dfa(dfa, file_string)
 outputs = (loop == accept_state)
-print(outputs)
+
 # compile the ZK statement to an EMP file
 print_emp(outputs, 'miniwizpl_test.cpp')
 
