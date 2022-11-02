@@ -1,5 +1,5 @@
 import sys
-from miniwizpl import SecretList, mux, public_foreach, print_emp
+from miniwizpl import SecretStack, SecretList, mux, public_foreach, print_emp
 from miniwizpl.expr import *
 
 if len(sys.argv) != 2:
@@ -39,8 +39,8 @@ def dfa_from_string(first,target,last=None):
 
 # run a dfa
 def run_dfa(dfa, text_input):
-    # str_between = SecretStack([])
-    str_between = []
+    str_between = SecretStack([])
+    # str_between = []
     def next_state_fun(string, curr_state):
         for (dfa_state, dfa_str), next_state in dfa.items():
 
@@ -57,10 +57,12 @@ def run_dfa(dfa, text_input):
         ''' 
             The following part needs to be updated with Stack without if statement
         '''
-        # str_between.cond_push((curr_state == append_state),integer_to_word(val_of(string)))
-        if ((curr_state == append_state)|(curr_state == append_found_state)): 
-            print("Appended", integer_to_word(string), "\n")
-            str_between.append(integer_to_word(string))
+        str_between.cond_push((curr_state == append_state),integer_to_word(val_of(string)))
+        # if ((curr_state == append_state)|(curr_state == append_found_state)): 
+        #     print("Appended", integer_to_word(string), "\n")
+        #     str_between.append(integer_to_word(string))
+        #     str_between.append(integer_to_word(string))
+
         return curr_state
 
     # public_foreach basically runs the above function but returns in an emp format
