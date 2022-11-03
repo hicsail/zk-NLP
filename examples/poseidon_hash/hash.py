@@ -96,12 +96,10 @@ class Poseidon:
         self.rc_counter = 0
 
     def s_box(self, element):
-        return pow(element, self.alpha, None)
+        return pow(element, self.alpha, 2**61-1)
 
     def full_rounds(self):
-        #for r in range(0, self.half_full_round):
-        for r in range(0, 2):
-            print(r, self.half_full_round)
+        for r in range(0, self.half_full_round):
             # add round constants, apply s-box
             for i in range(0, self.t):
                 self.state[i] = self.state[i] + self.rc_field[self.rc_counter]
@@ -113,9 +111,7 @@ class Poseidon:
             self.state = np.dot(self.state, self.mds_matrix)
 
     def partial_rounds(self):
-        #for r in range(0, self.partial_round):
-        for r in range(0, 2):
-            print(r, self.partial_round)
+        for r in range(0, self.partial_round):
             # add round constants, apply s-box
             for i in range(0, self.t):
                 self.state[i] = self.state[i] + self.rc_field[self.rc_counter]
