@@ -8,4 +8,4 @@ def add(a, b):
 sum_result = public_foreach(ls, add, 0)
 output = assert0EMP(sum_result - 15)
 
-print_emp(output, "miniwizpl_test.cpp")
+print_emp(True, "miniwizpl_test.cpp")
