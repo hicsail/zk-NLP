@@ -85,6 +85,16 @@ class AST:
     def __rand__(self, other):
         return Prim('and', [self, other], val_of(other) & val_of(self))
 
+    def __int__(self):
+        raise RuntimeError('unsupported: convert SecretInt to int')
+
+    def __bool__(self):
+        raise RuntimeError('unsupported: convert SecretInt to bool')
+
+    def if_else(self, ifval, elseval):
+        return Prim('mux', [self, ifval, elseval], None)
+
+
 @dataclass
 class SymVar(AST):
     name: str
