@@ -1,10 +1,27 @@
 import sys
 import numpy as np
 from dataclasses import dataclass
+from functools import wraps
 import os
 from .globals import *
 from .expr import *
 from .data_types import *
+
+def miniwizpl_recursive(*args, **kwargs):
+    if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
+        raise RuntimeError('For recursive functions, you must provide an unrolling bound')
+
+    bound = kwargs['unrolling_bound']
+    def decorator(func):
+        top = True
+        name = gensym('func')
+        @wraps(func)
+        def wrapped(*args):
+            result = Prim('rec', [name, bound, list(args), func], None)
+            return result
+        return wrapped
+
+    return decorator
 
 def index(arr, val, start, length):
     #return arr[start:end].index(val)
@@ -60,22 +77,21 @@ def pow(a, b, c):
     else:
         return _original_pow(a, b, c)
 
+def public_foreach_unroll(xs, f, init):
+    a = init
+    if isinstance(xs, SecretList):
+        for x in val_of(xs):
+            a = f(SecretInt(x), a)
+    else:
+        for x in xs:
+            a = f(x, a)
+    return a
+
 def public_foreach(xs, f, init):
     assert isinstance(xs, SecretList)
-    t_a = type(init)
 
-    # TODO: how can we handle the values here?
-    x = SymVar(gensym('x'), SecretInt, None)
-    a = SymVar(gensym('a'), t_a, None)
-    r = f(x, a)
-
-    # compute the actual result
-    a_val = val_of(init)
-    for x_val in val_of(xs):
-        a_val = val_of(f(x_val, a_val))
-
-    loop = Prim('fold', [x, r, a, xs, init], a_val)
-    return loop
+    # f is a function x -> accumulator -> new accumulator
+    return Prim('fold', [xs, f, init], None)
 
 def mux(a, b, c):
     return Prim('mux', [a, b, c], val_of(b) if val_of(a) else val_of(c))

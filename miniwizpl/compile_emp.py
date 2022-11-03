@@ -174,11 +174,13 @@ def print_exp(e):
             emit()
             return r
         elif e.op == 'fold':
-            x, body, accum, xs, init = e.args
+            xs, f, init = e.args
 
-            assert isinstance(x, SymVar)
-            assert isinstance(accum, SymVar)
             assert isinstance(xs, SecretList)
+
+            x = SymVar(gensym('x'), int, None)
+            accum = SymVar(gensym('a'), int, None)
+            body = f(x, accum)
 
             a = print_exp(init)
             emit(f'Integer {accum.name} = {a};')
@@ -191,6 +193,7 @@ def print_exp(e):
             all_pubvals = old_pubvals
 
             return accum.name
+
         elif e.op == 'compare_tensors':
             e1, e2 = e.args
             x1 = print_exp(e1)
