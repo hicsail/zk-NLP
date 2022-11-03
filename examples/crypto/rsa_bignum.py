@@ -64,7 +64,7 @@ decrypted_one = dec(encrypted_one)
 print('result:', decrypted_one)
 
 set_bitwidth(128)
-print_emp(decrypted_one, 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')
 
 #decrypted_one = dec(encrypted_one)
 #print('decrypted:', decrypted_one)

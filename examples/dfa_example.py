@@ -74,4 +74,4 @@ output = dfa_loop(string)
 #pprint.pprint(output)
 
 # compile the ZK statement to an EMP file
-print_emp(output, 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')

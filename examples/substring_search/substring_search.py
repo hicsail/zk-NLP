@@ -78,4 +78,4 @@ for s in strings_not_present:
 
 # compile the ZK statement to an EMP file
 output = functools.reduce(lambda a, b: a & b, outputs)
-print_emp(output, 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')

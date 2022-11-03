@@ -5,4 +5,4 @@ y = SecretInt(2)
 output = x + y - 5
 
 assert0EMP(output)
-print_emp(output, "miniwizpl_test.cpp")
+print_emp("miniwizpl_test.cpp")
