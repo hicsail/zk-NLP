@@ -1,7 +1,8 @@
 # miniWizPL
-## A Python library and compiler for writing zero-knowledge statements
 
-----
+A Python library and compiler for writing zero-knowledge statements
+
+[[_TOC_]]
 
 ## Installing
 
@@ -20,20 +21,6 @@ Currently supported backends are:
 - EMP toolkit
 - SIEVE IR0/1 (wip)
 
-## Examples
-
-The `examples` directory contains several examples of miniWizPL
-programs that demonstrate the compiler's features. For example, after
-installing miniWizPL, you can run:
-
-```
-python examples/simple_demos/simple.py
-```
-
-This will produce a new file in the current directory called
-`miniwizpl_test.cpp` containing EMP code encoding the statement that
-the prover knows two numbers `x` and `y` such that `x + y = 5`.
-
 ## Generating Documentation
 
 Documentation can be generated with `pdoc3`:
@@ -47,8 +34,7 @@ pdoc --http localhost:8080 miniwizpl
 This section will explain step-by-step how to use MiniWizPL to prove
 in ZK that the execution of a secret neural network model produces
 a specific output given a secret input. The code snippets are taken
-from the example python file:
-`examples/simple_demos/nn_tutorial_example.py`.
+from the example python file: [nn_tutorial_example.py](examples/neural_networks/nn_tutorial_example.py).
 
 
 By default the Python file produces a ZK statement that can be
@@ -154,20 +140,141 @@ a file called `miniwizpl_test.cpp.emp_wit`.
 print_emp(output, "miniwizpl_test.cpp")
 ```
 
-In order to compile our output we must next install
-[EMP-ZK](https://github.com/emp-toolkit/emp-zk) by running the
+(TODO: perhaps make the example more concrete? Like MNIST?)
+
+
+## Walkthrough: DSA
+
+This section will explain step-by-step how to use MiniWizPL to verify
+in ZK a cryptographic signature computed via
+[DSA](https://en.wikipedia.org/wiki/Digital_Signature_Algorithm). The
+code snippets are taken from the example python file:
+[dsa.py](examples/crypto/dsa.py).
+
+We will make use of the third party library
+[Galois](https://github.com/mhostetter/galois) to handle finite field operations
+
+```python
+import random
+import galois
+```
+
+Additionally, we must import the relevant MiniWizPL libraries:
+
+```python
+from miniwizpl import SecretInt, assertTrueEMP, pow, print_emp, set_bitwidth
+```
+
+The class `SecretInt` is a wrapper for adding Python integers to the
+Witness. The function `assertTrueEMP` adds an assertion will get
+inserted as a statement in the resulting ZK statement that will be
+checked the verifier when running the EMP executable. The function
+`print_emp` produces the C++ file to be compiled against EMP-ZK.  The
+function `pow` is a MiniWizPL overload of the Python math exponent
+function. Finally the function `set_bitwidth` is used to set a
+configuration variable in EMP.
+
+Our next steps are just vanilla DSA: implement functions for
+generating the key pair, signing and verifying the message:
+
+```python
+
+
+# Generate the parameters for DSA
+
+def gen_params():
+    N = 8
+    L = 12  # we get this many bits of security
+
+    q = galois.random_prime(N)
+    p = galois.random_prime(L)
+    while (p-1)%q != 0:
+        p = galois.next_prime(p)
+
+    h = 2
+    g = pow(h, (p-1)//q, p)
+    return p, q, g
+
+p, q, g = gen_params()
+
+# Generate keys
+def gen_key():
+    x = random.randint(1, q-1)
+    y = pow(g, x, p)
+    return x, y
+
+# Sign the message
+def sign(m):
+    k = random.randint(1, q-1)
+    r = pow(g, k, p) % q
+    s = (pow(k, q-2, q) * (m + sk*r)) % q
+    return r, s
+
+# Verify the message
+def verify(r, s, m):
+    w = pow(s, q-2, q)
+    u1 = (m*w) % q
+    u2 = (r*w) % q
+    v = ((pow(g, u1, p) * pow(pk, u2, p)) % p) % q
+    return v == r
+
+
+
+message = 5
+
+# generate keys and sign the message
+sk, pk = gen_key()
+r, s = sign(message)
+
+```
+
+Finally, we generate our statement to be verified, by
+passing in `SecretInt(message)`, along with the signature
+parameters. We pass the output into `assertTrueEMP` so that it checked
+by the Verifier, and we finally call `print_emp` to generate the cpp
+file to be compiled against EMP-ZK.
+
+```python
+output = verify(r, s, SecretInt(message))
+assertTrueEMP(output)
+print_emp(True, 'miniwizpl_test.cpp')
+
+```
+
+## Compiling the generated C++ code
+
+In order to compile the outputted file `miniwizpl_test.cpp` we next
+install [EMP-ZK](https://github.com/emp-toolkit/emp-zk) by running the
 following commands:
 
-```
-wget https://raw.githubusercontent.com/emp-toolkit/emp-readme/master/scripts/install.py
-python3 install.py --deps --tool --ot --zk
+```sh
+git clone https://github.com/emp-toolkit/emp-tool.git --branch 0.2.4
+cd emp-tool
+cmake -DCMAKE_BUILD_TYPE=Release .
+make -j4
+make install
+cd ..
+git clone https://github.com/emp-toolkit/emp-ot.git --branch 0.2.3
+cd emp-ot
+cmake -DCMAKE_BUILD_TYPE=Release .
+make -j4
+make install
+cd ..
+git clone https://github.com/emp-toolkit/emp-zk.git --branch 0.2.0
+cd emp-zk
+cmake -DCMAKE_BUILD_TYPE=Release .
+make -j4
+make install
+cd ..
 ```
 
-Once we have installed EMP-ZK, we can now compile the generated `cpp`
+## Executing your example in EMP-ZK
+
+Once we have installed EMP-ZK, we can now compile the generated C++
 file, making sure that we add the directory `miniwizpl/boilerplate` to
 the include path for the compiler.
 
-```
+```sh
 cp examples/neural_networks/miniwizpl_test.cpp examples/neural_networks/miniwizpl_test.cpp.emp_wit .
 g++ -I./miniwizpl/boilerplate \
     -pthread -Wall -funroll-loops -Wno-ignored-attributes -Wno-unused-result -march=native -maes -mrdseed -std=c++11 -O3 \
@@ -175,16 +282,15 @@ g++ -I./miniwizpl/boilerplate \
     -o miniwizpl_test
 ```
 
-Once we have compiled our EMP code, we can run the `miniwizpl_test`
-executable in the following way, with the prover running:
-
-```
-./miniwizpl_test 1 12349
+Once we have compiled our EMP code, the prover runs:
+```sh
+./miniwizpl_test 1 $PORT_NUMBER
 ```
 
-and the verifier running:
-```
-./miniwizpl_test 2 12349
+and the verifier runs:
+
+```sh
+./miniwizpl_test 2 $PORT_NUMBER
 ```
 
 The first command line argument indicates whether or not to run the
@@ -200,5 +306,3 @@ only accessible to the prover. Clarify how to compile these two files
 separately into two executables. Also, clarify how we would handle
 communication between separate machines as "localhost" is currently
 hardcoded into miniWizPL)
-
-(TODO: perhaps make the example more concrete? Like MNIST?)

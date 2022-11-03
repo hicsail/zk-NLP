@@ -84,6 +84,8 @@ class AST:
         return Prim('and', [self, other], val_of(self) & val_of(other))
     def __rand__(self, other):
         return Prim('and', [self, other], val_of(other) & val_of(self))
+    def __invert__(self):
+        return Prim('not', [self], not val_of(self))
 
 @dataclass
 class SymVar(AST):
@@ -106,6 +108,8 @@ class Prim(AST):
         return Prim('equals', [self, other], val_of(self) == val_of(other))
     def __req__(self, other):
         return Prim('equals', [other, self], val_of(other) == val_of(self))
+    def __invert__(self):
+        return Prim('not', [self], not val_of(self))
 
 def exp_mod(a, b, c):
     return Prim('exp_mod', [a, b, c], pow(val_of(a), val_of(b), val_of(c)))
@@ -116,6 +120,3 @@ def relu(x):
 
 def compare_tensors(a, b):
     return Prim('compare_tensors', [a, b], None) # TODO: fill in value
-
-def assert0EMP(a):
-    return Prim('assert0EMP', [a], val_of(a) == 0)
