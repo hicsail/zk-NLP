@@ -1,4 +1,5 @@
 from miniwizpl import *
+from parameters import *
 
 poseidon_simple, t = case_simple()
 
