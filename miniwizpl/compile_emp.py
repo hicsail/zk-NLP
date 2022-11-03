@@ -74,7 +74,15 @@ def print_exp(e):
                       SecretTensor, SecretInt, SymVar, PublicTensor)):
         return e.name
     elif isinstance(e, bool):
-        raise Exception(e)
+        if e in all_pubvals:
+            return all_pubvals[e]
+        else:
+            ss = str(e).replace('-', 'minus')
+            r = f'public_bit_{ss}'
+            all_pubvals[e] = r
+            emit(f'  Bit {r} = Bit({int(e)}, PUBLIC);')
+            emit()
+            return r
     elif isinstance(e, int):
         if e in all_pubvals:
             return all_pubvals[e]
@@ -84,7 +92,8 @@ def print_exp(e):
             all_pubvals[e] = r
 
             if bitsof(e) < 32:
-                emit(f'  Integer {r} = Integer({bitwidth}, {e}, PUBLIC);')
+                bw = params['bitwidth']
+                emit(f'  Integer {r} = Integer({bw}, {e}, PUBLIC);')
                 emit()
                 return r
             else:
@@ -128,6 +137,14 @@ def print_exp(e):
             emit(f'  {x1}->write({x2}, {x3});')
             return None
         elif e.op == 'neg':
+            assert len(e.args) == 1
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            r = gensym('result_bitval')
+            emit(f'  Bit {r} = !{x1};')
+            emit()
+            return r
+        elif e.op == 'not':
             assert len(e.args) == 1
             e1 = e.args[0]
             x1 = print_exp(e1)
@@ -186,6 +203,16 @@ def print_exp(e):
             e1 = e.args[0]
             x1 = print_exp(e1)
             emit(f'  assert(assert0EMP({x1}));')
+            return x1
+        elif e.op == 'assertTrueEMP':
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            emit(f'  assert({x1}.reveal<bool>(PUBLIC));')
+            return x1
+        elif e.op == 'assertFalseEMP':
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            emit(f'  assert(!{x1}.reveal<bool>(PUBLIC));')
             return x1
         elif e.op == 'stack_pop':
             assert len(e.args) == 1
@@ -279,20 +306,21 @@ def emit_bigint(r, e):
     emit(f'  for (int i = 0; i < {len(bin_str)}; ++i)')
     emit(f'    {r}_vec.push_back(Bit({r}_init[i], PUBLIC));')
     emit(f'  Integer {r} = Integer({r}_vec);')
-    emit(f'  {r}.resize({bitwidth});')
+    bw = params['bitwidth']
+    emit(f'  {r}.resize({bw});')
     emit()
 
 
 def print_defs(defs):
-    global bitwidth
-
     for d in defs:
         name = d.name
         x = d.val
 
         if isinstance(d, SecretInt):
             if bitsof(x) < 32:
-                emit(f'  Integer {name} = Integer({bitwidth}, {x}, ALICE);')
+                bw = params['bitwidth']
+
+                emit(f'  Integer {name} = Integer({bw}, {x}, ALICE);')
                 emit()
             else:
                 emit_bigint(name, x)

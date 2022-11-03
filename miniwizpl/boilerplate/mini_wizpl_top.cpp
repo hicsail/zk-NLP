@@ -106,6 +106,10 @@ bool assert0EMP(Integer a) {
   return a.equal(Integer(32, 0, PUBLIC)).reveal<bool>(PUBLIC);
 }
 
+bool assert0EMP(Bit a) {
+  return !(a.reveal<bool>(PUBLIC));
+}
+
 // *************************************************************************
 
 void test(BoolIO<NetIO> *ios[threads], int party) {

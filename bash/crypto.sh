@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-#declare -a examples=("rsa_bignum.py" "dsa.py" "fv.py")
-declare -a examples=("rsa_bignum.py")
+#declare -a examples=("rsa_bignum.py" "fv.py")
+declare -a examples=("rsa_bignum.py" "dsa.py")
 for i in "${examples[@]}"
 do
     cd examples/crypto
