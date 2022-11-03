@@ -4,6 +4,7 @@ set -euo pipefail
 declare -a examples=("secret_indexing.py"	"simple.py" "simple_loop.py" "stack_example.py")
 for i in "${examples[@]}"
 do
+    echo "testing ${i}"
     cd examples/simple_demos
     python3 $i
     cp miniwizpl_test.cpp miniwizpl_test.cpp.emp_wit ../..
