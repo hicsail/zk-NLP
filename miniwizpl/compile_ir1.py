@@ -8,6 +8,8 @@ from .expr import *
 from .data_types import *
 import sys
 
+sys.setrecursionlimit(10000)
+
 output_file = None
 emp_output_string = ""
 current_wire = 0
@@ -102,8 +104,19 @@ def subst(x, v, e):
 
 
 function_unrollings = defaultdict(int)
+exp_cache = {}
+
 
 def print_exp_ir1(e):
+    global exp_cache
+    if id(e) in exp_cache:
+        return exp_cache[id(e)]
+    else:
+        r = print_exp_ir1_(e)
+        exp_cache[id(e)] = r
+        return r
+
+def print_exp_ir1_(e):
     global all_pubvals
     global params
     global current_wire
@@ -300,6 +313,18 @@ def print_exp_ir1(e):
             emit(f'  {negated_x2} <- @mulc({x1}, < {c} >);')
             r = next_wire()
             emit(f'  {r} <- @add({negated_x2}, < {1} >);')
+            return r
+        elif e.op == 'exp_mod':
+            a, b, p = e.args
+            # TODO: need to check p here
+            # we assume p is our current field, so just do a*a b times
+            assert isinstance(b, int)
+            a_wire = print_exp_ir1(a)
+            result_wire = a_wire
+            for _ in range(b):
+                r = next_wire()
+                emit(f'  {r} <- @mul({a_wire}, {result_wire});')
+                result_wire = r
             return r
         elif e.op == 'assert0':
             assert len(e.args) == 1
