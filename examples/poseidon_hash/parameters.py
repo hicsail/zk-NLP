@@ -1,5 +1,5 @@
 from miniwizpl import *
-from .hash import Poseidon
+from hash import Poseidon
 
 def case_simple():
     security_level = 128

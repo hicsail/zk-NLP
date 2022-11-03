@@ -10,5 +10,5 @@ print("Input: ", input_vec)
 #
 poseidon_digest = poseidon_simple.run_hash(input_vec)
 assert0(len(input_vec.val) - 9)
-print(poseidon_digest)
+print('digest:', poseidon_digest)
 print_ir1("miniwizpl_test_ir1")

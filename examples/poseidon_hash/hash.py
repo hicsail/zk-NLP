@@ -90,14 +90,18 @@ class Poseidon:
             self.rc_field = rc.calc_round_constants(self.t, self.full_round, self.partial_round, self.p, self.field_p,
                                                     self.alpha, self.prime_bit_len)
 
-        self.state = self.field_p.Zeros(self.t)
+        self.rc_field = np.array(self.rc_field)
+        self.mds_matrix = np.array(self.mds_matrix)
+        self.state = np.zeros(self.t)
         self.rc_counter = 0
 
     def s_box(self, element):
-        return element ** self.alpha
+        return pow(element, self.alpha, None)
 
     def full_rounds(self):
-        for r in range(0, self.half_full_round):
+        #for r in range(0, self.half_full_round):
+        for r in range(0, 2):
+            print(r, self.half_full_round)
             # add round constants, apply s-box
             for i in range(0, self.t):
                 self.state[i] = self.state[i] + self.rc_field[self.rc_counter]
@@ -109,7 +113,9 @@ class Poseidon:
             self.state = np.dot(self.state, self.mds_matrix)
 
     def partial_rounds(self):
-        for r in range(0, self.partial_round):
+        #for r in range(0, self.partial_round):
+        for r in range(0, 2):
+            print(r, self.partial_round)
             # add round constants, apply s-box
             for i in range(0, self.t):
                 self.state[i] = self.state[i] + self.rc_field[self.rc_counter]
@@ -127,7 +133,7 @@ class Poseidon:
         """
         # TODO: This is not right
         if isinstance(input_vec, SecretList):
-            new_vec = input_vec.val
+            new_vec = [SecretInt(v) for v in input_vec.val]
             if len(input_vec.val) < self.t:
                 new_vec.extend([0] * (self.t - len(input_vec.val)))
         else:
@@ -135,26 +141,27 @@ class Poseidon:
             if len(input_vec) < self.t:
                 new_vec.extend([0] * (self.t - len(input_vec)))
 
-        self.state = self.field_p(new_vec)
+        #self.state = self.field_p(new_vec)
+        self.state = new_vec
         self.rc_counter = 0
 
         # First full rounds
-        # self.full_rounds()
-        print(self.state)
-        output = public_foreach(SecretList(new_vec), self.full_rounds(), 0)
+        self.full_rounds()
+        print('first round done')
+        #output = public_foreach(SecretList(new_vec), self.full_rounds(), 0)
         # Middle partial rounds
-        # self.partial_rounds()
-        print(self.state)
-        output += public_foreach(SecretList(self.state), self.partial_rounds(), 0)
+        self.partial_rounds()
+        print('second round done')
+        #print(self.state)
+        #output += public_foreach(SecretList(self.state), self.partial_rounds(), 0)
 
         # Last full rounds
-        # self.full_rounds()
-        print(self.state)
-        output += public_foreach(SecretList(self.state), self.full_rounds(), 0)
+        self.full_rounds()
+        print('third round done')
+        #print(self.state)
+        #output += public_foreach(SecretList(self.state), self.full_rounds(), 0)
 
-        # return self.state[1]
-        # return AST
-        return output
+        return self.state[1]
 
 class OptimizedPoseidon(Poseidon):
     def __init__(self, h_type, p, security_level, alpha, input_rate, t,
