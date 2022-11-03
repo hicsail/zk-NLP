@@ -1,7 +1,7 @@
 import sys
 import random
 
-from miniwizpl import SecretInt, print_emp, exp_mod, set_bitwidth
+from miniwizpl import SecretInt, assertTrueEMP, exp_mod, print_emp, set_bitwidth
 
 sys.setrecursionlimit(10000)
 # taken from:
@@ -63,8 +63,7 @@ print('enc:', encrypted_one)
 decrypted_one = dec(encrypted_one)
 print('result:', decrypted_one)
 
+assertTrueEMP(decrypted_one == 1)
+
 set_bitwidth(128)
 print_emp('miniwizpl_test.cpp')
-
-#decrypted_one = dec(encrypted_one)
-#print('decrypted:', decrypted_one)
