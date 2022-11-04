@@ -73,7 +73,7 @@ def pow(a, b, c):
     Performs modular exponentiation.
     """
     if isinstance(a, AST) or isinstance(b, AST) or isinstance(c, AST):
-        return Prim('exp_mod', [a, b, c], _original_pow(val_of(a), val_of(b), val_of(c)))
+        return Prim('exp_mod', [a, b, c], _original_pow(int(val_of(a)), val_of(b), val_of(c)))
     else:
         return _original_pow(a, b, c)
 

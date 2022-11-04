@@ -130,6 +130,11 @@ def print_exp_ir1_(e):
         # just return the wire name
         return e.name
 
+    elif isinstance(e, np.int64):
+        r = next_wire()
+        emit(f'  {r} <- < {e} >;')
+        return r
+
     elif isinstance(e, int):
         r = next_wire()
         emit(f'  {r} <- < {e} >;')

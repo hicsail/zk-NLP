@@ -43,8 +43,7 @@ class Poseidon:
 
         # TODO: For now alpha is fixed parameter
         # Needed to cast p into an unsigned long
-        prime = (p - 1) + 2 ** 32
-        if np.gcd(alpha, prime) == 1:
+        if np.gcd(alpha, p-1) == 1:
             self.alpha = alpha
         else:
             print("Not available alpha")
@@ -90,7 +89,8 @@ class Poseidon:
             self.rc_field = rc.calc_round_constants(self.t, self.full_round, self.partial_round, self.p, self.field_p,
                                                     self.alpha, self.prime_bit_len)
 
-        self.rc_field = np.array(self.rc_field)
+        self.rc_field = np.array([int(x) for x in self.rc_field])
+
         self.mds_matrix = np.array(self.mds_matrix)
         self.state = np.zeros(self.t)
         self.rc_counter = 0
