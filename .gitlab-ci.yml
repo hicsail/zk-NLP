@@ -1,0 +1,41 @@
+#
+# Copyright (C) Stealth Software Technologies, Inc.
+#
+# For the complete copyright information, please see the
+# associated README file.
+#
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages: [stage_1]
+
+build:
+  stage: stage_1
+  image: registry.stealthsoftwareinc.com/stealth/builder-images/ubuntu:20.04
+  script:
+    - apt-get update
+    - apt-get -q -y install python3-pip sudo
+    - pip install .
+    - git clone https://github.com/emp-toolkit/emp-tool.git --branch 0.2.4
+    - cd emp-tool
+    - cmake -DCMAKE_BUILD_TYPE=Release .
+    - make -j4
+    - make install
+    - cd ..
+    - git clone https://github.com/emp-toolkit/emp-ot.git --branch 0.2.3
+    - cd emp-ot
+    - cmake -DCMAKE_BUILD_TYPE=Release .
+    - make -j4
+    - make install
+    - cd ..
+    - git clone https://github.com/emp-toolkit/emp-zk.git --branch 0.2.0
+    - cd emp-zk
+    - cmake -DCMAKE_BUILD_TYPE=Release .
+    - make -j4
+    - make install
+    - cd ..
+    - sudo ldconfig
+    - ./bash/crypto.sh
+    - ./bash/misc.sh
+    - ./bash/neural_networks.sh
+    - ./bash/simple.sh

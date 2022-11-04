@@ -140,3 +140,25 @@ class SecretTensor(AST):
     def __getattr__(self, name):
         print('getattr', name)
         return getattr(self.arr, name)
+
+class PublicTensor(AST):
+    """
+    An n-dimensional tensor of public values, integrated with PyTorch's tensor library.
+    """
+    def __init__(self, arr):
+        global all_defs
+        all_defs.append(self)
+        self.arr = arr
+        self.val = arr
+        self.name = gensym('tensor')
+
+    def __str__(self):
+        return f'PublicTensor({self.val.shape})'
+    __repr__ = __str__
+
+    def tensor(self):
+        return self.arr
+
+    def __getattr__(self, name):
+        print('getattr', name)
+        return getattr(self.arr, name)

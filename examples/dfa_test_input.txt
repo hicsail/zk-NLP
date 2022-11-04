@@ -1,7 +1,1 @@
-import numpy
-import 
-import socket
-what does this mean
-hello world end file
-there is a problem with like this: hello world;
-in this case, world; is not in our alphabet
+Test input file with the string WANACRY!

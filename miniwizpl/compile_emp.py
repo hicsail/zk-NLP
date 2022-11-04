@@ -8,6 +8,7 @@ from .utils import *
 from .data_types import *
 
 emp_output_string = ""
+witness_output_string = ""
 witness_map = []
 current_wire = 0
 assertions = []
@@ -63,13 +64,25 @@ def emit(s=''):
     global emp_output_string
     emp_output_string += s + '\n'
 
+def emit_witness(s=''):
+    global witness_output_string
+    witness_output_string += s + '\n'
+
 def print_exp(e):
     global all_pubvals
     if isinstance(e, (SecretList, SecretIndexList, SecretArray, SecretStack,
-                      SecretTensor, SecretInt, SymVar)):
+                      SecretTensor, SecretInt, SymVar, PublicTensor)):
         return e.name
     elif isinstance(e, bool):
-        raise Exception(e)
+        if e in all_pubvals:
+            return all_pubvals[e]
+        else:
+            ss = str(e).replace('-', 'minus')
+            r = f'public_bit_{ss}'
+            all_pubvals[e] = r
+            emit(f'  Bit {r} = Bit({int(e)}, PUBLIC);')
+            emit()
+            return r
     elif isinstance(e, int):
         if e in all_pubvals:
             return all_pubvals[e]
@@ -79,7 +92,8 @@ def print_exp(e):
             all_pubvals[e] = r
 
             if bitsof(e) < 64:
-                emit(f'  Integer {r} = Integer({bitwidth}, {e}, PUBLIC);')
+                bw = params['bitwidth']
+                emit(f'  Integer {r} = Integer({bw}, {e}, PUBLIC);')
                 emit()
                 return r
             else:
@@ -130,6 +144,14 @@ def print_exp(e):
             emit(f'  Bit {r} = !{x1};')
             emit()
             return r
+        elif e.op == 'not':
+            assert len(e.args) == 1
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            r = gensym('result_bitval')
+            emit(f'  Bit {r} = !{x1};')
+            emit()
+            return r
         elif e.op == 'exp_mod':
             e1, e2, e3 = e.args
             x1 = print_exp(e1)
@@ -152,11 +174,13 @@ def print_exp(e):
             emit()
             return r
         elif e.op == 'fold':
-            x, body, accum, xs, init = e.args
+            xs, f, init = e.args
 
-            assert isinstance(x, SymVar)
-            assert isinstance(accum, SymVar)
             assert isinstance(xs, SecretList)
+
+            x = SymVar(gensym('x'), int, None)
+            accum = SymVar(gensym('a'), int, None)
+            body = f(x, accum)
 
             a = print_exp(init)
             emit(f'Integer {accum.name} = {a};')
@@ -169,11 +193,27 @@ def print_exp(e):
             all_pubvals = old_pubvals
 
             return accum.name
-        elif e.op == 'compare_secret_tensors':
+
+        elif e.op == 'compare_tensors':
             e1, e2 = e.args
             x1 = print_exp(e1)
             x2 = print_exp(e2)
             emit(f'  assert(compare_qs_matrices({x1}, {x2}));')
+        elif e.op == 'assert0EMP':
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            emit(f'  assert(assert0EMP({x1}));')
+            return x1
+        elif e.op == 'assertTrueEMP':
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            emit(f'  assert({x1}.reveal<bool>(PUBLIC));')
+            return x1
+        elif e.op == 'assertFalseEMP':
+            e1 = e.args[0]
+            x1 = print_exp(e1)
+            emit(f'  assert(!{x1}.reveal<bool>(PUBLIC));')
+            return x1
         elif e.op == 'stack_pop':
             assert len(e.args) == 1
             e1 = e.args[0]
@@ -266,7 +306,8 @@ def emit_bigint(r, e):
     emit(f'  for (int i = 0; i < {len(bin_str)}; ++i)')
     emit(f'    {r}_vec.push_back(Bit({r}_init[i], PUBLIC));')
     emit(f'  Integer {r} = Integer({r}_vec);')
-    emit(f'  {r}.resize({bitwidth});')
+    bw = params['bitwidth']
+    emit(f'  {r}.resize({bw});')
     emit()
 
 
@@ -279,14 +320,16 @@ def print_defs(defs):
 
         if isinstance(d, SecretInt):
             if bitsof(x) < 64:
-                emit(f'  Integer {name} = Integer({bitwidth}, {x}, ALICE);')
+                bw = params['bitwidth']
+
+                emit(f'  Integer {name} = Integer({bw}, {x}, ALICE);')
                 emit()
             else:
                 emit_bigint(name, x)
         elif isinstance(d, (SecretList)):
             n1 = len(d.arr)
             p = f"""
-  static long int {name}_init[] = {print_list(x)};
+  static int {name}_init[] = {print_list(x)};
   vector<Integer> {name};
   for (int i = 0; i < {n1}; ++i)
     {name}.push_back(Integer(64, {name}_init[i], ALICE));
@@ -294,20 +337,24 @@ def print_defs(defs):
             emit(p)
         elif isinstance(d, (SecretIndexList)):
             n1 = len(d.arr)
+            print_witness(x)
             p = f"""
-  static long int {name}_init[] = {print_list(x)};
   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
-  for (int i = 0; i < {n1}; ++i)
-    {name}->write(Integer(index_sz, i, PUBLIC), Integer(64, {name}_init[i], ALICE));
+  for (int i = 0; i < {n1}; ++i) {{
+    is >> tmp;
+    {name}->write(Integer(index_sz, i, PUBLIC), Integer(64, tmp, ALICE));
+  }}
 """
             emit(p)
         elif isinstance(d, (SecretStack)):
             n1 = len(d.arr)
+            print_witness(x)
             p = f"""
-  static long int {name}_init[] = {print_list(x)};
   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
-  for (int i = 0; i < {n1}; ++i)
-    {name}->write(Integer(index_sz, i, PUBLIC), Integer(64, {name}_init[i], ALICE));
+  for (int i = 0; i < {n1}; ++i) {{
+    is >> tmp;
+    {name}->write(Integer(index_sz, i, PUBLIC), Integer(64, tmp, ALICE));
+  }}
   Integer {name}_top = Integer(64, {n1-1}, ALICE);
 """
             emit(p)
@@ -331,8 +378,32 @@ for (int i = 0; i < {n1}; ++i)
 }}
 """
             emit(p)
+        elif isinstance(d, PublicTensor):
+            e2s = x.shape
+            if len(e2s) == 1:
+                n1 = 1
+                n2 = e2s[0]
+            elif len(e2s) == 2:
+                n1 = e2s[0]
+                n2 = e2s[1]
+            else:
+                raise Exception(f'unsupported array shape: {e2s}')
+
+            p = f"""
+float {name}_init[{n1}][{n2}] = {print_mat(x)};
+QSMatrix<float> {name}({n1}, {n2}, 0);
+for (int i = 0; i < {n1}; ++i)
+  for (int j = 0; j < {n2}; ++j) {{
+    {name}(i, j) = {name}_init[i][j];
+}}
+"""
+            emit(p)
         else:
             raise Exception(f'unsupported secret type: {type(d)}')
+
+def print_witness(x):
+    for e in x:
+        emit_witness(str(e))
 
 def print_list(x):
     return '{' + ', '.join([str(i) for i in x]) + '}'
@@ -368,11 +439,11 @@ def print_ram_checks(defs):
 def print_emp(outp, filename):
     global all_defs
     global emp_output_string
+    global witness_output_string
     global all_statements
 
     with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_top.cpp', 'r') as f1:
         top_boilerplate = f1.read()
-            
     emit(top_boilerplate)
 
     emit('  cout << "starting defs\\n";')
@@ -384,22 +455,25 @@ def print_emp(outp, filename):
         print_exp(s)
     final_output_var = print_exp(outp)
 
-    if isinstance(outp.val, bool):
-        emit(f'  bool final_result = {final_output_var}.reveal<bool>(PUBLIC);')
-        emit('  cout << "final result:" << final_result << "\\n";')
-        emit()
-    elif isinstance(outp.val, int):
-        emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
-        emit('  cout << "final result:" << final_result << "\\n";')
-        emit()
+    # if isinstance(outp.val, bool):
+    #     emit(f'  bool final_result = {final_output_var}.reveal<bool>(PUBLIC);')
+    #     emit('  cout << "final result:" << final_result << "\\n";')
+    #     emit()
+    # elif isinstance(outp.val, int):
+    #     emit(f'  int final_result = {final_output_var}.reveal<int>(PUBLIC);')
+    #     emit('  cout << "final result:" << final_result << "\\n";')
+    #     emit()
 
     print_ram_checks(all_defs)
-    
+
 
     with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_bottom.cpp', 'r') as f2:
         bottom_boilerplate = f2.read()
-            
+
     emit(bottom_boilerplate)
 
     with open(filename, 'w') as f:
         f.write(emp_output_string)
+
+    with open(filename + '.emp_wit', 'w') as f:
+        f.write(witness_output_string)
