@@ -39,8 +39,8 @@ def dfa_from_string(first,target,last=None):
 
 # run a dfa
 def run_dfa(dfa, text_input):
-    str_between = SecretStack([])
-    # str_between = []
+    # str_between = SecretStack([])
+    str_between = []
     def next_state_fun(string, curr_state):
         for (dfa_state, dfa_str), next_state in dfa.items():
 
@@ -50,18 +50,17 @@ def run_dfa(dfa, text_input):
                 "input string: ", string,
                 "dfa string: ", dfa_str,"\n")
 
-            curr_state = val_of(mux((curr_state == dfa_state) & (string == dfa_str),
+            curr_state = mux((curr_state == dfa_state) & (string == dfa_str),
                          next_state,
-                         curr_state))
+                         curr_state)
 
         ''' 
             The following part needs to be updated with Stack without if statement
         '''
-        str_between.cond_push((curr_state == append_state),integer_to_word(val_of(string)))
-        # if ((curr_state == append_state)|(curr_state == append_found_state)): 
-        #     print("Appended", integer_to_word(string), "\n")
-        #     str_between.append(integer_to_word(string))
-        #     str_between.append(integer_to_word(string))
+        # str_between.cond_push((curr_state == append_state),integer_to_word(val_of(string)))
+        if ((val_of(curr_state) == append_state)|(val_of(curr_state) == append_found_state)): 
+            print("Appended", integer_to_word(string), "\n")
+            str_between.append(integer_to_word(string))
 
         return curr_state
 
@@ -93,7 +92,7 @@ print("\n", "DFA: ",dfa, "\n")
 loop, str_between = run_dfa(dfa, file_string)
 print("\n", "Result: ",str_between, "\n")
 outputs = (loop == accept_state|append_found_state)
-print(outputs)
+
 # compile the ZK statement to an EMP file
 print_emp(outputs, 'miniwizpl_test.cpp')
 
