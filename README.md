@@ -124,3 +124,4 @@ pdoc --http localhost:8080 miniwizpl
 <li> Sudo prefix is removed from install.py to fit Dockerfile's style </li>
 <li> Added "prefix to mnist.pt directory in examples/neural_networks/mnist_wizpl.py, so that the system can find the file inside container </li>
 
+<li> OR operation added to class AST in miniwizpl/expr.py, in order to implement stringlist_search_between </li>
