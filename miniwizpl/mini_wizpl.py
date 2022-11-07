@@ -93,6 +93,14 @@ def public_foreach(xs, f, init):
     # f is a function x -> accumulator -> new accumulator
     return Prim('fold', [xs, f, init], None)
 
+def public_foreach_prev(xs, f, init):
+    assert isinstance(xs, SecretList)
+    # compute the actual result
+    a_val = val_of(init)
+    for x_val in val_of(xs):
+        a_val = val_of(f(x_val, a_val))
+    return Prim('fold', [xs, f, init], a_val)
+
 def mux(a, b, c):
     return Prim('mux', [a, b, c], val_of(b) if val_of(a) else val_of(c))
 

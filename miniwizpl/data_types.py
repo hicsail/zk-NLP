@@ -115,6 +115,15 @@ class SecretStack(AST):
         all_statements.append(Prim('assign', [x, Prim('stack_pop', [self], None)], None))
         return x
 
+    # TODO: work in progress
+    def cond_pop(self, condition):
+        """Conditional pop."""
+        global all_statements
+        xn = gensym('stack_val')
+        x = SymVar(xn, int, None)
+        all_statements.append(Prim('assign', [x, Prim('stack_cond_pop', [self, condition], None)], None))
+        return x
+        
     def __str__(self):
         return f'SecretStack({len(self.arr)})'
     __repr__ = __str__

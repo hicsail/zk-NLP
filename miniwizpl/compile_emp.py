@@ -251,6 +251,17 @@ def print_exp(e):
 
             #emit(f'  cout << "P" << party << " stack PUSH, new top: " << {x1}_top.reveal<int>(PUBLIC) << " condition: " << {x2}.reveal<bool>(PUBLIC) << "\\n";')
             return None
+        # TODO: work in progress
+        elif e.op == 'stack_cond_pop':
+            e1, e2 = e.args
+            x1 = print_exp(e1)
+            x2 = print_exp(e2)
+            r = gensym('stack_val')
+
+            # conditional, address might be out of range!
+            emit(f'  Integer {r} = mux({x2}, {x1}_top, Integer(64, 0, ALICE));')
+            emit(f'  {x1}_top = {x1}_top - Integer(64, 1, ALICE);')
+            return r
         elif e.op == 'assign':
             e1, e2 = e.args
             assert isinstance(e1, SymVar)
@@ -329,7 +340,7 @@ def print_defs(defs):
         elif isinstance(d, (SecretList)):
             n1 = len(d.arr)
             p = f"""
-  static int {name}_init[] = {print_list(x)};
+  static long int {name}_init[] = {print_list(x)};
   vector<Integer> {name};
   for (int i = 0; i < {n1}; ++i)
     {name}.push_back(Integer(64, {name}_init[i], ALICE));

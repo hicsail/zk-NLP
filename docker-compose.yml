@@ -1,7 +1,7 @@
 version: '3'
 services:
-  sieve:
-    container_name: sieve
+  sieve_new:
+    container_name: sieve_new
     platform: linux/amd64
     build: ./
     volumes:
