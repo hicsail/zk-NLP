@@ -24,21 +24,39 @@ def integer_to_word(integer):
         word+=char
     return word
 
-zero_state = 1
-accept_state=0
-found_state=2
-error_state=-1
+def isNotlaststring(word, text):
+    lastString=word_to_integer(text[-1])
+    return   lastString!= word
+
+'''
+    Change this section to experiment
+'''
+string_a = 'not'
+string_target =  ['in', 'our', 'alphabet']
+zero_state = 0
+found_states=[i for i in range(1,len(string_target)+1)]
+accept_state = found_states[-1]*10
+error_state = found_states[-1]*100
 
 def dfa_from_string(first, target):
     next_state = {}
-    interim_found_state=3 #Explanation inside the run_dfa function
-    next_state[(zero_state, word_to_integer(first))]=interim_found_state
-    for i in range(len(target)-1):
-        next_state[(interim_found_state, word_to_integer(target[i]))]=interim_found_state+1
-        interim_found_state+=1
-    next_state[(found_state, word_to_integer(target[-1]))]=accept_state
-
+    assert(len(target)>0)
+    next_state[(zero_state, word_to_integer(first))]=found_states[0]
+    for i in range(0,len(target)-1):
+      next_state[(found_states[i], word_to_integer(target[i]))]=found_states[i+1]
+    next_state[(found_states[-1], word_to_integer(target[-1]))]=accept_state
     return next_state
+
+def flip_interim_found_state(curr_state):
+    x=len(found_states)
+    res=""
+    for i in range(1,x+1):
+        res += f"mux(curr_state=={-i}, {i},"
+    res += "curr_state"
+    for i in range(1,x+1):
+        res += ")"
+    print(res, '\n')
+    return eval(res,{'curr_state':curr_state, 'mux':mux, 'val_of':val_of})
 
 # run a dfa
 def run_dfa(dfa, text_input):
@@ -51,49 +69,50 @@ def run_dfa(dfa, text_input):
             ''' 
                 This control flow is just for the sake of debugging and must be deleted
             '''
-            if (initial_state == found_state) & (val_of(string) == dfa_str):
-                print("Found", integer_to_word(val_of(string)), "\n")
-            else:
-                print("None")
-
-            print(
-                "curr state: ", val_of(curr_state),
-                "dfa state: ", dfa_state,"\n",
-                "input string: ", val_of(string),
-                "dfa string: ", dfa_str,"\n")
+            if (val_of(curr_state) in found_states) & (val_of(string) == dfa_str):
+                print(
+                    "curr state: ", val_of(curr_state),
+                    "dfa state: ", dfa_state,"\n",
+                    "input string: ", val_of(string),
+                    "dfa string: ", dfa_str,"\n",
+                    "next_state", next_state,"\n")
 
             curr_state = mux((curr_state == dfa_state) & (string == dfa_str),
-                         next_state,
-                         mux((curr_state == dfa_state) & (string != dfa_str),
+                         -next_state,
+                         mux((curr_state == dfa_state) & (curr_state >0) & (string != dfa_str),
                          error_state,
                          curr_state))
 
+        ''' Flip the current state if Found/Accepted this iteration
+            If you found the target string in this iteration, the state will be set interim_found state, which does not exist in DFA, till the end of the current iteration, 
+            because right after finding the target string, the next state of the DFA is found_state but the dfa_string of that state is different from our taerget,
+            unless the string_a you just found and the target string are same.
+            With the interim_found state, subsequent process of this iteration will have no effect, but after the above iteration in the below line, interim_found will be updated to found_state, which exists in the DFA.
+            Therefore, the next iteration can examine whether or not the target string immeidately follow the string_a.
+        '''
+        curr_state=flip_interim_found_state(curr_state)
+
+        ''' 
+            Combined transformation for all error state, accept state, and illegal case(accept state in the middle of the input text)
+        '''
+        curr_state = mux(initial_state == accept_state, accept_state, mux(initial_state == error_state, error_state, mux((curr_state == accept_state) & (isNotlaststring(string, file_data)),
+                         error_state, mux((curr_state == -accept_state), accept_state, curr_state))))
         ''' 
             The following part needs to be updated with Stack without if statement
         '''
         # str_between.cond_push((curr_state == found_state),integer_to_word(val_of(string)))
-        if (val_of(curr_state) == accept_state): 
-            print("Appended", integer_to_word(val_of(string)), "\n")
+        if (val_of(initial_state) in found_states) or (val_of(curr_state) == accept_state and not isNotlaststring(string, file_data)):
+            print("Appended '", integer_to_word(val_of(string)), "' \n")
             str_between.append(integer_to_word(val_of(string)))
-        
-        ''' If you found the target string in this iteration, the state will be set interim_found state, which does not exist in DFA, till the end of the current iteration, 
-        because right after finding the target string, the next state of the DFA is found_state but the dfa_string of that state is different from our taerget,
-        unless the string_a you just found and the target string are same.
-        With the interim_found state, subsequent process of this iteration will have no effect, but after the above iteration in the below line, interim_found will be updated to found_state, which exists in the DFA.
-        Therefore, the next iteration can examine whether or not the target string immeidately follow the string_a.
-        '''
-        curr_state = mux(curr_state >2, found_state, curr_state)
-        
-        '''
-        If you have already reached accept_state in the beginning, the returned state will remain final state, no matter what operation is done above
-        '''
-        curr_state = mux(initial_state == accept_state, accept_state, curr_state)
-
+        if val_of(curr_state) == error_state and str_between[-1]!="Error":
+            print("Error ----------------- \n")
+            str_between.clear()
+            str_between.append("Error")
         return curr_state
 
     # public_foreach basically runs the above function but returns in an emp format
-    loop=public_foreach(text_input, next_state_fun, zero_state)
-    return loop, str_between
+    latest_state=public_foreach(text_input, next_state_fun, zero_state)
+    return latest_state, str_between
 
 with open(sys.argv[1], 'r') as f:
     file_data = f.read()
@@ -102,17 +121,14 @@ with open(sys.argv[1], 'r') as f:
 file_data = file_data.split()
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
-string_a = 'not'
-string_target =  ['in', 'our'] 
-
 dfa = dfa_from_string(string_a, string_target)
 print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
-loop,str_between = run_dfa(dfa, file_string)
+latest_state ,str_between = run_dfa(dfa, file_string)
 print("\n", "Result: ",str_between, "\n")
-outputs = (loop == accept_state)
-
+outputs = (latest_state == accept_state)
+print("\n", "Latest State: ",val_of(latest_state), "\n")
 # compile the ZK statement to an EMP file
 print_emp(outputs, 'miniwizpl_test.cpp')
 
