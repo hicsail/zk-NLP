@@ -1,5 +1,5 @@
 import sys
-from miniwizpl import SecretList, mux, public_foreach, print_emp
+from miniwizpl import *
 from miniwizpl.expr import *
 
 if len(sys.argv) != 2:
@@ -24,11 +24,6 @@ def integer_to_word(integer):
         word+=char
     return word
 
-'''
-    Change this section to experiment
-'''
-string_a = 'import'
-string_target = 'numpy'
 zero_state = 0
 interim_found_state=1 #Explanation inside the run_dfa function
 found_state=2
@@ -51,16 +46,18 @@ def run_dfa(dfa, text_input):
             ''' 
                 This control flow is just for the sake of debugging and must be deleted
             '''
-            if (initial_state == found_state) & (string == dfa_str):
-                print(
-                    "curr state: ", val_of(curr_state),
-                    "dfa state: ", dfa_state,"\n",
-                    "input string: ", val_of(string),
-                    "dfa string: ", dfa_str,"\n")
-                print("Found", integer_to_word(val_of(string)), "\n")
+            # if (initial_state == found_state) & (string == dfa_str):
+            #     print("Found", integer_to_word(val_of(string)), "\n")
+
+            print(
+                "curr state: ", val_of(curr_state),
+                "dfa state: ", dfa_state,"\n",
+                "input string: ", val_of(string),
+                "dfa string: ", dfa_str,"\n")
 
             curr_state = mux((curr_state == dfa_state) & (string == dfa_str),
-                         next_state,mux((curr_state == dfa_state) & (string != dfa_str),
+                         next_state,
+                         mux((curr_state == dfa_state) & (string != dfa_str),
                          error_state,
                          curr_state))
 
@@ -80,8 +77,8 @@ def run_dfa(dfa, text_input):
         return curr_state
 
     # public_foreach basically runs the above function but returns in an emp format
-    loop=public_foreach(text_input, next_state_fun, zero_state)
-    return loop
+    latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+    return latest_state
 
 with open(sys.argv[1], 'r') as f:
     file_data = f.read()
@@ -90,13 +87,18 @@ with open(sys.argv[1], 'r') as f:
 file_data = file_data.split()
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
+string_a = 'import'
+string_target = 'numpy'
+
 dfa = dfa_from_string(string_a, string_target)
 print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
-loop = run_dfa(dfa, file_string)
-outputs = (loop == accept_state)
+latest_state = run_dfa(dfa, file_string)
 
 # compile the ZK statement to an EMP file
-print_emp(outputs, 'miniwizpl_test.cpp')
+assert0EMP(latest_state - accept_state)
+print("\n", "Latest State: ",val_of(latest_state), "\n")
+# compile the ZK statement to an EMP file
+print_emp(True, 'miniwizpl_test.cpp')
 

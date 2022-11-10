@@ -1,5 +1,5 @@
 import sys
-from miniwizpl import SecretList, mux, public_foreach, print_emp
+from miniwizpl import *
 from miniwizpl.expr import *
 
 if len(sys.argv) != 2:
@@ -111,7 +111,7 @@ def run_dfa(dfa, text_input):
         return curr_state
 
     # public_foreach basically runs the above function but returns in an emp format
-    latest_state=public_foreach(text_input, next_state_fun, zero_state)
+    latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
     return latest_state, str_between
 
 with open(sys.argv[1], 'r') as f:
@@ -127,8 +127,8 @@ print("\n", "DFA: ",dfa, "\n")
 # define the ZK statement
 latest_state ,str_between = run_dfa(dfa, file_string)
 print("\n", "Result: ",str_between, "\n")
-outputs = (latest_state == accept_state)
+assertTrueEMP(latest_state == accept_state)
 print("\n", "Latest State: ",val_of(latest_state), "\n")
 # compile the ZK statement to an EMP file
-print_emp(outputs, 'miniwizpl_test.cpp')
+print_emp(True, 'miniwizpl_test.cpp')
 
