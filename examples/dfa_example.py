@@ -1,7 +1,7 @@
 import pprint
 import random
 import sys
-from miniwizpl import SecretInt, SecretList, assertTrueEMP, mux, print_emp, public_foreach
+from miniwizpl import SecretInt, SecretList, assertTrueEMP, mux, print_emp, reduce
 
 if len(sys.argv) != 2:
     print("Usage: python dfa_example.py <target_filename>")
@@ -92,9 +92,9 @@ def run_dfa(dfa, string):
                      output)
         return output
 
-    return public_foreach(string,
-                          next_state_fun,
-                          0)
+    return reduce(next_state_fun,
+                  string,
+                  0)
 
 # search for strings present & not present
 dfa1 = dfa_from_string('os.system(f"python client_request.py')
