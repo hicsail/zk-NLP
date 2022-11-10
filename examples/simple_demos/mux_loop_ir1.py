@@ -5,7 +5,7 @@ ls = SecretList(list(range(1, 5)))
 def f(x, accum):
     return mux(x == 3, accum + x, accum)
 
-sum_result = public_foreach(ls, f, 0)
+sum_result = reduce(f, ls, 0)
 output = assert0(sum_result - 15)
 
 print(sum_result)

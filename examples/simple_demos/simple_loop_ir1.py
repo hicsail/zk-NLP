@@ -5,7 +5,7 @@ ls = SecretList(list(range(1, 5)))
 def add(a, b):
     return b + a
 
-sum_result = public_foreach(ls, add, 0)
+sum_result = reduce(add, ls, 0)
 output = assert0(sum_result - 15)
 
 print(sum_result)
