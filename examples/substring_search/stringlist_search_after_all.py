@@ -33,7 +33,6 @@ def isNotlaststring(word, text):
 '''
 string_a = 'not'
 string_target =  ['in', 'our', 'alphabet']
-global curr_state
 zero_state = 0
 found_states=[i for i in range(1,len(string_target)+1)]
 accept_state = found_states[-1]*10
