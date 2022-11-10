@@ -257,10 +257,12 @@ def print_exp(e):
             x1 = print_exp(e1)
             x2 = print_exp(e2)
             r = gensym('stack_val')
+            a = gensym('cond_addr')
 
             # conditional, address might be out of range!
-            emit(f'  Integer {r} = mux({x2}, {x1}_top, Integer(64, 0, ALICE));')
-            emit(f'  {x1}_top = {x1}_top - Integer(64, 1, ALICE);')
+            emit(f'  Integer {a} = mux({x2}, {x1}_top, Integer(64, 0, ALICE));')
+            emit(f'  {x1}_top = mux({x2}, {x1}_top - Integer(64, 1, ALICE), {x1}_top);')
+            emit(f'  Integer {r} = mux({x2}, {x1}->read({a}), Integer(64, 0, ALICE));')
             return r
         elif e.op == 'assign':
             e1, e2 = e.args
