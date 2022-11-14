@@ -76,9 +76,9 @@ class AST:
         return Prim('equals', [other, self], val_of(other) == val_of(self))
 
     def __ne__(self, other):
-        return Prim('not_equals', [self, other], val_of(self) == val_of(other))
+        return Prim('not_equals', [self, other], val_of(self) != val_of(other))
     def __rne__(self, other):
-        return Prim('not_equals', [other, self], val_of(other) == val_of(self))
+        return Prim('not_equals', [other, self], val_of(other) != val_of(self))
 
     def __and__(self, other):
         return Prim('and', [self, other], val_of(self) & val_of(other))
