@@ -58,6 +58,18 @@ def flip_interim_found_state(curr_state):
     print(res, '\n')
     return eval(res,{'curr_state':curr_state, 'mux':mux, 'val_of':val_of})
 
+def is_in_found_states(initial_state):
+    res="("
+    for val in found_states:
+        res += "(val_of(initial_state)=="
+        res += f"{val}"
+        res += ")|"
+    res=res[0:-1]
+    res += ")"
+    print(res, '\n')
+
+    return eval(res,{'initial_state':initial_state, 'val_of':val_of})
+
 # run a dfa
 def run_dfa(dfa, text_input):
     # str_between = SecretStack([])
@@ -99,7 +111,7 @@ def run_dfa(dfa, text_input):
             The following part needs to be updated with Stack without if statement
         '''
         # str_between.cond_push((curr_state == found_state),integer_to_word(val_of(string)))
-        if (val_of(initial_state) in found_states) or (val_of(curr_state) == -appendedAll_state) or (val_of(curr_state) == -accept_state):
+        if (is_in_found_states(initial_state)) or (val_of(curr_state) == -appendedAll_state) or (val_of(curr_state) == -accept_state):
             print("Appended '", integer_to_word(val_of(string)), "' \n")
             str_between.append(integer_to_word(val_of(string)))
         elif (val_of(curr_state) == error_state) and str_between[-1]!="Error":
@@ -136,7 +148,8 @@ print("\n", "DFA: ",dfa, "\n")
 # define the ZK statement
 latest_state ,str_between = run_dfa(dfa, file_string)
 print("\n", "Result: ",str_between, "\n")
-# assertTrueEMP(latest_state == accept_state)
+# assertTrueEMP((latest_state == accept_state)|(latest_state == appendedAll_state))
+assertTrueEMP((latest_state == accept_state)|(latest_state == appendedAll_state))
 print("\n", "Latest State: ",val_of(latest_state), "\n")
 # compile the ZK statement to an EMP file
 print_emp(True, 'miniwizpl_test.cpp')
