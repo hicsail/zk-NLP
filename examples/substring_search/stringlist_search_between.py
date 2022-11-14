@@ -61,6 +61,21 @@ def flip_interim_found_state(curr_state):
 def is_in_found_states(initial_state):
     res="("
     for val in found_states:
+        res += "(initial_state=="
+        res += f"{val}"
+        res += ")|"
+    res=res[0:-1]
+    res += ")"
+    print(res, '\n')
+
+    return eval(res,{'initial_state':initial_state})
+
+'''
+    We will delete the following module
+'''
+def is_in_found_states_todelete(initial_state):
+    res="("
+    for val in found_states:
         res += "(val_of(initial_state)=="
         res += f"{val}"
         res += ")|"
@@ -72,7 +87,7 @@ def is_in_found_states(initial_state):
 
 # run a dfa
 def run_dfa(dfa, text_input):
-    # str_between = SecretStack([])
+    Secret_str_between = SecretStack([])
     str_between = []
     def next_state_fun(string, initial_state):
         curr_state=initial_state
@@ -107,19 +122,21 @@ def run_dfa(dfa, text_input):
         '''
         curr_state = mux(initial_state == accept_state, accept_state, mux(initial_state == error_state, error_state, curr_state))
                          
+        Secret_str_between.cond_push(is_in_found_states(initial_state)|(curr_state == appendedAll_state)|(val_of(curr_state) == -accept_state),string)
         ''' 
             The following part needs to be updated with Stack without if statement
         '''
         # str_between.cond_push((curr_state == found_state),integer_to_word(val_of(string)))
-        if (is_in_found_states(initial_state)) or (val_of(curr_state) == -appendedAll_state) or (val_of(curr_state) == -accept_state):
+        if (is_in_found_states_todelete(initial_state)) or (val_of(curr_state) == -appendedAll_state) or (val_of(curr_state) == -accept_state):
             print("Appended '", integer_to_word(val_of(string)), "' \n")
             str_between.append(integer_to_word(val_of(string)))
         elif (val_of(curr_state) == error_state) and str_between[-1]!="Error":
             print("Error ----------------- \n")
             str_between.clear()
             str_between.append("Error")
-        '''
-            
+        
+        ''' 
+            Adding sub string if in one of found states or accept state, reading the last word in the text
         '''
         curr_state=mux(curr_state == -appendedAll_state, appendedAll_state, mux((curr_state == -accept_state), accept_state, curr_state))
         
@@ -129,7 +146,12 @@ def run_dfa(dfa, text_input):
     loop=public_foreach_unroll(text_input, next_state_fun, zero_state)
     
     ''' 
-        The following part needs to be updated with Stack without if statement
+        Pop the last element if no string_b found and if you're read the last substring of the target between strings
+    '''
+    Secret_str_between.cond_pop(loop==appendedAll_state)
+    
+    ''' 
+        The following part needs to be updated with SecretStack without if statement
     '''
     if val_of(loop)==appendedAll_state:
         str_between.pop()

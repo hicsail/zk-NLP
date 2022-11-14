@@ -24,6 +24,10 @@ def integer_to_word(integer):
         word+=char
     return word
 
+def isLaststring(word, text):
+    lastString=word_to_integer(text[-1])
+    return   lastString== word
+
 def isNotlaststring(word, text):
     lastString=word_to_integer(text[-1])
     return   lastString!= word
@@ -61,6 +65,22 @@ def flip_interim_found_state(curr_state):
 def is_in_found_states(initial_state):
     res="("
     for val in found_states:
+        res += "(initial_state=="
+        res += f"{val}"
+        res += ")|"
+    res=res[0:-1]
+    res += ")"
+    print(res, '\n')
+
+    return eval(res,{'initial_state':initial_state})
+
+'''
+    We will delete the following module
+'''
+
+def is_in_found_states_todelete(initial_state):
+    res="("
+    for val in found_states:
         res += "(val_of(initial_state)=="
         res += f"{val}"
         res += ")|"
@@ -72,8 +92,8 @@ def is_in_found_states(initial_state):
 
 # run a dfa
 def run_dfa(dfa, text_input):
-    # str_between = SecretStack([])
-    str_between = []
+    Secret_str_after = SecretStack([])
+    str_after = []
     def next_state_fun(string, initial_state):
         curr_state=initial_state
         
@@ -109,23 +129,27 @@ def run_dfa(dfa, text_input):
         '''
         curr_state = mux(initial_state == accept_state, accept_state, mux(initial_state == error_state, error_state, mux((curr_state == accept_state) & (isNotlaststring(string, file_data)),
                          error_state, mux((curr_state == -accept_state), accept_state, curr_state))))
+        
+        ''' 
+            Adding sub string if in one of found states or accept state, reading the last word in the text
+        '''
+        Secret_str_after.cond_push(is_in_found_states(initial_state)|(curr_state == accept_state) & isLaststring(string, file_data),string)
+
         ''' 
             The following part needs to be updated with Stack without if statement
         '''
-        # str_between.cond_push((curr_state == found_state),integer_to_word(val_of(string)))
-        # if (val_of(initial_state) in found_states) or (val_of(curr_state) == accept_state and not isNotlaststring(string, file_data)):
-        if (is_in_found_states(initial_state)) or (val_of(curr_state) == accept_state and not isNotlaststring(string, file_data)):
+        if (is_in_found_states_todelete(initial_state)) or (val_of(curr_state) == accept_state and not isNotlaststring(string, file_data)):
             print("Appended '", integer_to_word(val_of(string)), "' \n")
-            str_between.append(integer_to_word(val_of(string)))
-        if val_of(curr_state) == error_state and str_between[-1]!="Error":
+            str_after.append(integer_to_word(val_of(string)))
+        if val_of(curr_state) == error_state and str_after[-1]!="Error":
             print("Error ----------------- \n")
-            str_between.clear()
-            str_between.append("Error")
+            str_after.clear()
+            str_after.append("Error")
         return curr_state
 
     # public_foreach basically runs the above function but returns in an emp format
     latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
-    return latest_state, str_between
+    return latest_state, str_after
 
 with open(sys.argv[1], 'r') as f:
     file_data = f.read()
@@ -138,8 +162,8 @@ dfa = dfa_from_string(string_a, string_target)
 print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
-latest_state ,str_between = run_dfa(dfa, file_string)
-print("\n", "Result: ",str_between, "\n")
+latest_state ,str_after = run_dfa(dfa, file_string)
+print("\n", "Result: ",str_after, "\n")
 assertTrueEMP(latest_state == accept_state)
 print("\n", "Latest State: ",val_of(latest_state), "\n")
 # compile the ZK statement to an EMP file
