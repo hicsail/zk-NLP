@@ -90,14 +90,15 @@ class SecretStack(AST):
         all_defs.append(self)
         self.arr = arr
         self.val = arr
+        self.current_val = arr.copy()
         self.name = gensym('stack')
         self.max_size = len(arr)
 
-    # TODO: need to fix values for these
     def push(self, item):
         """Unconditional push."""
         global all_statements
         self.max_size += 1
+        self.current_val.append(val_of(item))
 
         all_statements.append(Prim('stack_push', [self, item], None))
 
@@ -105,14 +106,18 @@ class SecretStack(AST):
         """Conditional push."""
         global all_statements
         self.max_size += 1
+        if val_of(condition):
+            self.current_val.append(val_of(item))
+
         all_statements.append(Prim('stack_cond_push', [self, condition, item], None))
 
     def pop(self):
         """Unconditional pop."""
         global all_statements
         xn = gensym('stack_val')
-        x = SymVar(xn, int, None)
-        all_statements.append(Prim('assign', [x, Prim('stack_pop', [self], None)], None))
+        v = self.current_val.pop()
+        x = SymVar(xn, int, v)
+        all_statements.append(Prim('assign', [x, Prim('stack_pop', [self], v)], None))
         return x
 
     # TODO: work in progress
@@ -120,8 +125,14 @@ class SecretStack(AST):
         """Conditional pop."""
         global all_statements
         xn = gensym('stack_val')
-        x = SymVar(xn, int, None)
-        all_statements.append(Prim('assign', [x, Prim('stack_cond_pop', [self, condition], None)], None))
+
+        if val_of(condition):
+            v = self.current_val.pop()
+        else:
+            v = None
+
+        x = SymVar(xn, int, v)
+        all_statements.append(Prim('assign', [x, Prim('stack_cond_pop', [self, condition], v)], None))
         return x
         
     def __str__(self):
