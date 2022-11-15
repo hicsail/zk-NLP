@@ -98,9 +98,9 @@ def run_dfa(dfa, string):
 
 # search for strings present & not present
 dfa1 = dfa_from_string('os.system(f"python client_request.py')
-assertTrueEMP(run_dfa(dfa1, file_string) == accept_state)
+assertTrueEMP(run_dfa(dfa1, file_string) != accept_state)
 
 dfa2 = dfa_from_string("import socket")
-assertTrueEMP(run_dfa(dfa2, file_string) != accept_state)
+assertTrueEMP(run_dfa(dfa2, file_string) == accept_state)
 
 print_emp("miniwizpl_test.cpp")
