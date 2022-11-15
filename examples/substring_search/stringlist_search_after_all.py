@@ -59,7 +59,7 @@ def flip_interim_found_state(curr_state):
     res += "curr_state"
     for i in range(1,x+1):
         res += ")"
-    print(res, '\n')
+    # print(res, '\n')
     return eval(res,{'curr_state':curr_state, 'mux':mux, 'val_of':val_of})
 
 def is_in_found_states(initial_state):
@@ -70,25 +70,8 @@ def is_in_found_states(initial_state):
         res += ")|"
     res=res[0:-1]
     res += ")"
-    print(res, '\n')
-
+    # print(res, '\n')
     return eval(res,{'initial_state':initial_state})
-
-'''
-    We will delete the following module
-'''
-
-def is_in_found_states_todelete(initial_state):
-    res="("
-    for val in found_states:
-        res += "(val_of(initial_state)=="
-        res += f"{val}"
-        res += ")|"
-    res=res[0:-1]
-    res += ")"
-    print(res, '\n')
-
-    return eval(res,{'initial_state':initial_state, 'val_of':val_of})
 
 # run a dfa
 def run_dfa(dfa, text_input):
@@ -98,17 +81,6 @@ def run_dfa(dfa, text_input):
         curr_state=initial_state
         
         for (dfa_state, dfa_str), next_state in dfa.items():
-            ''' 
-                This control flow is just for the sake of debugging and must be deleted
-            '''
-            if (val_of(curr_state) in found_states) & (val_of(string) == dfa_str):
-                print(
-                    "curr state: ", val_of(curr_state),
-                    "dfa state: ", dfa_state,"\n",
-                    "input string: ", val_of(string),
-                    "dfa string: ", dfa_str,"\n",
-                    "next_state", next_state,"\n")
-
             curr_state = mux((curr_state == dfa_state) & (string == dfa_str),
                          -next_state,
                          mux((curr_state == dfa_state) & (curr_state >0) & (string != dfa_str),
@@ -128,27 +100,17 @@ def run_dfa(dfa, text_input):
             Combined transformation for all error state, accept state, and illegal case(accept state in the middle of the input text)
         '''
         curr_state = mux(initial_state == accept_state, accept_state, mux(initial_state == error_state, error_state, mux((curr_state == accept_state) & (isNotlaststring(string, file_data)),
-                         error_state, mux((curr_state == -accept_state), accept_state, curr_state))))
+                         error_state, mux(curr_state == -accept_state, accept_state, curr_state))))
         
         ''' 
             Adding sub string if in one of found states or accept state, reading the last word in the text
         '''
         Secret_str_after.cond_push(is_in_found_states(initial_state)|(curr_state == accept_state) & isLaststring(string, file_data),string)
 
-        ''' 
-            The following part needs to be updated with Stack without if statement
-        '''
-        if (is_in_found_states_todelete(initial_state)) or (val_of(curr_state) == accept_state and not isNotlaststring(string, file_data)):
-            print("Appended '", integer_to_word(val_of(string)), "' \n")
-            str_after.append(integer_to_word(val_of(string)))
-        if val_of(curr_state) == error_state and str_after[-1]!="Error":
-            print("Error ----------------- \n")
-            str_after.clear()
-            str_after.append("Error")
         return curr_state
 
     # public_foreach basically runs the above function but returns in an emp format
-    latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+    latest_state=public_foreach(text_input, next_state_fun, zero_state)
     return latest_state, str_after
 
 with open(sys.argv[1], 'r') as f:

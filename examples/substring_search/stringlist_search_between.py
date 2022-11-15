@@ -36,7 +36,6 @@ appendedAll_state = found_states[-1]*10
 accept_state = found_states[-1]*11
 error_state = found_states[-1]*100
 
-
 def dfa_from_string(first,target,last):
     next_state = {}
     assert(len(target)>0)
@@ -55,7 +54,7 @@ def flip_interim_found_state(curr_state):
     res += "curr_state"
     for i in range(1,x+1):
         res += ")"
-    print(res, '\n')
+    # print(res, '\n')
     return eval(res,{'curr_state':curr_state, 'mux':mux, 'val_of':val_of})
 
 def is_in_found_states(initial_state):
@@ -66,48 +65,21 @@ def is_in_found_states(initial_state):
         res += ")|"
     res=res[0:-1]
     res += ")"
-    print(res, '\n')
-
+    # print(res, '\n')
     return eval(res,{'initial_state':initial_state})
-
-'''
-    We will delete the following module
-'''
-def is_in_found_states_todelete(initial_state):
-    res="("
-    for val in found_states:
-        res += "(val_of(initial_state)=="
-        res += f"{val}"
-        res += ")|"
-    res=res[0:-1]
-    res += ")"
-    print(res, '\n')
-
-    return eval(res,{'initial_state':initial_state, 'val_of':val_of})
 
 # run a dfa
 def run_dfa(dfa, text_input):
     Secret_str_between = SecretStack([])
-    str_between = []
     def next_state_fun(string, initial_state):
         curr_state=initial_state
         for (dfa_state, dfa_str), next_state in dfa.items():
-
-            # if ((val_of(curr_state) ==appendedAll_state)|(val_of(curr_state) in found_states)) & (val_of(string) == dfa_str):
-            print(
-                    "curr state: ", val_of(curr_state),
-                    "dfa state: ", dfa_state,"\n",
-                    "input string: ", val_of(string),
-                    "dfa string: ", dfa_str,"\n",
-                    "next_state", next_state,"\n")
-
             curr_state = mux((curr_state == dfa_state) & (string == dfa_str),
                          -next_state,
                          mux((curr_state == dfa_state) & (curr_state >0) & (curr_state!=appendedAll_state) & (string != dfa_str),
                          error_state,
                          curr_state))
                          
-            print("Updated state: ", val_of(curr_state))
         ''' Flip the current state if Found/Accepted this iteration
             If you found the target string in this iteration, the state will be set interim_found state, which does not exist in DFA, till the end of the current iteration, 
             because right after finding the target string, the next state of the DFA is found_state but the dfa_string of that state is different from our taerget,
@@ -122,40 +94,23 @@ def run_dfa(dfa, text_input):
         '''
         curr_state = mux(initial_state == accept_state, accept_state, mux(initial_state == error_state, error_state, curr_state))
                          
-        Secret_str_between.cond_push(is_in_found_states(initial_state)|(curr_state == appendedAll_state)|(val_of(curr_state) == -accept_state),string)
-        ''' 
-            The following part needs to be updated with Stack without if statement
-        '''
-        # str_between.cond_push((curr_state == found_state),integer_to_word(val_of(string)))
-        if (is_in_found_states_todelete(initial_state)) or (val_of(curr_state) == -appendedAll_state) or (val_of(curr_state) == -accept_state):
-            print("Appended '", integer_to_word(val_of(string)), "' \n")
-            str_between.append(integer_to_word(val_of(string)))
-        elif (val_of(curr_state) == error_state) and str_between[-1]!="Error":
-            print("Error ----------------- \n")
-            str_between.clear()
-            str_between.append("Error")
-        
+        Secret_str_between.cond_push(is_in_found_states(initial_state)|(curr_state == appendedAll_state)|(curr_state == -accept_state),string)
+        print(Secret_str_between.current_val)
         ''' 
             Adding sub string if in one of found states or accept state, reading the last word in the text
         '''
-        curr_state=mux(curr_state == -appendedAll_state, appendedAll_state, mux((curr_state == -accept_state), accept_state, curr_state))
+        curr_state=mux(curr_state == -appendedAll_state, appendedAll_state, mux(curr_state == -accept_state, accept_state, curr_state))
         
         return curr_state
 
     # public_foreach basically runs the above function but returns in an emp format
-    loop=public_foreach_unroll(text_input, next_state_fun, zero_state)
-    
+    loop=public_foreach(text_input, next_state_fun, zero_state)
     ''' 
         Pop the last element if no string_b found and if you're read the last substring of the target between strings
     '''
     Secret_str_between.cond_pop(loop==appendedAll_state)
-    
-    ''' 
-        The following part needs to be updated with SecretStack without if statement
-    '''
-    if val_of(loop)==appendedAll_state:
-        str_between.pop()
-    return loop, str_between
+
+    return loop, Secret_str_between
 
 with open(sys.argv[1], 'r') as f:
     file_data = f.read()
@@ -168,8 +123,8 @@ dfa = dfa_from_string(string_a, string_target, string_b)
 print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
-latest_state ,str_between = run_dfa(dfa, file_string)
-print("\n", "Result: ",str_between, "\n")
+latest_state ,Secret_str_between = run_dfa(dfa, file_string)
+print("\n", "Result: ",Secret_str_between.current_val, "\n")
 # assertTrueEMP((latest_state == accept_state)|(latest_state == appendedAll_state))
 assertTrueEMP((latest_state == accept_state)|(latest_state == appendedAll_state))
 print("\n", "Latest State: ",val_of(latest_state), "\n")
