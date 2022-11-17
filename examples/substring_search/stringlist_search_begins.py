@@ -24,19 +24,14 @@ def integer_to_word(integer):
         word+=char
     return word
 
-string_a = 'import'
-string_target = 'numpy'
+string_target = 'import'
 zero_state = 0
-interim_found_state=1 #Explanation inside the run_dfa function
-found_state=2
-error_state=3
-accept_state=255
+accept_state=1
+error_state=-1
 
-
-def dfa_from_string(first, target):
+def dfa_from_string(target):
     next_state = {}
-    next_state[(zero_state, word_to_integer(first))]=interim_found_state
-    next_state[(found_state, word_to_integer(target))]=accept_state
+    next_state[(zero_state, word_to_integer(target))]=accept_state
     return next_state
 
 # run a dfa
@@ -48,9 +43,6 @@ def run_dfa(dfa, text_input):
             ''' 
                 This control flow is just for the sake of debugging and must be deleted
             '''
-            # if (initial_state == found_state) & (string == dfa_str):
-            #     print("Found", integer_to_word(val_of(string)), "\n")
-
             print(
                 "curr state: ", val_of(curr_state),
                 "dfa state: ", dfa_state,"\n",
@@ -62,19 +54,6 @@ def run_dfa(dfa, text_input):
                          mux((curr_state == dfa_state) & (string != dfa_str),
                          error_state,
                          curr_state))
-
-        ''' If you found the target string in this iteration, the state will be set interim_found state, which does not exist in DFA, till the end of the current iteration, 
-        because right after finding the target string, the next state of the DFA is found_state but the dfa_string of that state is different from our taerget,
-        unless the string_a you just found and the target string are same.
-        With the interim_found state, subsequent process of this iteration will have no effect, but after the above iteration in the below line, interim_found will be updated to found_state, which exists in the DFA.
-        Therefore, the next iteration can examine whether or not the target string immeidately follow the string_a.
-        '''
-        curr_state = mux(curr_state == interim_found_state, found_state, curr_state)
-        
-        '''
-        If you have already reached accept_state in the beginning, the returned state will remain final state, no matter what operation is done above
-        '''
-        curr_state = mux(initial_state == accept_state, accept_state, curr_state)
         
         return curr_state
 
@@ -89,7 +68,7 @@ with open(sys.argv[1], 'r') as f:
 file_data = file_data.split()
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
-dfa = dfa_from_string(string_a, string_target)
+dfa = dfa_from_string(string_target)
 print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement

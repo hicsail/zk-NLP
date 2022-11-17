@@ -36,11 +36,13 @@ def isNotlaststring(word, text):
     Change this section to experiment
 '''
 string_a = 'not'
-string_target =  ['in', 'our', 'alphabet']
+string_target =  ['in', 'our']
 zero_state = 0
 found_states=[i for i in range(1,len(string_target)+1)]
 accept_state = found_states[-1]*10
 error_state = found_states[-1]*100
+# Secret_str_after = SecretStack([])
+str_after = []
 
 def dfa_from_string(first, target):
     next_state = {}
@@ -59,7 +61,7 @@ def flip_interim_found_state(curr_state):
     res += "curr_state"
     for i in range(1,x+1):
         res += ")"
-    # print(res, '\n')
+    print(res, '\n')
     return eval(res,{'curr_state':curr_state, 'mux':mux, 'val_of':val_of})
 
 def is_in_found_states(initial_state):
@@ -70,48 +72,79 @@ def is_in_found_states(initial_state):
         res += ")|"
     res=res[0:-1]
     res += ")"
-    # print(res, '\n')
+    print(res, '\n')
+
     return eval(res,{'initial_state':initial_state})
+
+'''
+    We will delete the following module
+'''
+
+def is_in_found_states_todelete(initial_state):
+    res="("
+    for val in found_states:
+        res += "(val_of(initial_state)=="
+        res += f"{val}"
+        res += ")|"
+    res=res[0:-1]
+    res += ")"
+    print(res, '\n')
+
+    return eval(res,{'initial_state':initial_state, 'val_of':val_of})
 
 # run a dfa
 def run_dfa(dfa, text_input):
-    Secret_str_after = SecretStack([])
-    str_after = []
     def next_state_fun(string, initial_state):
         curr_state=initial_state
-        
         for (dfa_state, dfa_str), next_state in dfa.items():
-            curr_state = mux((curr_state == dfa_state) & (string == dfa_str),
-                         -next_state,
-                         mux((curr_state == dfa_state) & (curr_state >0) & (string != dfa_str),
+            ''' 
+                This control flow is just for the sake of debugging and must be deleted
+            '''
+            if (val_of(curr_state) in found_states) & (val_of(string) == dfa_str):
+                print(
+                    "curr state: ", val_of(curr_state),
+                    "dfa state: ", dfa_state,"\n",
+                    "input string: ", val_of(string),
+                    "dfa string: ", dfa_str,"\n",
+                    "next_state", next_state,"\n")
+
+            curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
+                         next_state,
+                         mux((initial_state == dfa_state) & (string != dfa_str),
                          error_state,
                          curr_state))
-
-        ''' Flip the current state if Found/Accepted this iteration
-            If you found the target string in this iteration, the state will be set interim_found state, which does not exist in DFA, till the end of the current iteration, 
-            because right after finding the target string, the next state of the DFA is found_state but the dfa_string of that state is different from our taerget,
-            unless the string_a you just found and the target string are same.
-            With the interim_found state, subsequent process of this iteration will have no effect, but after the above iteration in the below line, interim_found will be updated to found_state, which exists in the DFA.
-            Therefore, the next iteration can examine whether or not the target string immeidately follow the string_a.
-        '''
-        curr_state=flip_interim_found_state(curr_state)
+            print("Updated state: ", val_of(curr_state))
 
         ''' 
-            Combined transformation for all error state, accept state, and illegal case(accept state in the middle of the input text)
+            Determine whether or not to go to the error state:
+            1) If alreayd in error state, then always error state
+            2) If already in accept_state but not the last substring, go to error)
+            3) Otherwise stay in the current state
         '''
-        curr_state = mux(initial_state == accept_state, accept_state, mux(initial_state == error_state, error_state, mux((curr_state == accept_state) & (isNotlaststring(string, file_data)),
-                         error_state, mux(curr_state == -accept_state, accept_state, curr_state))))
+        curr_state = mux(initial_state == error_state, error_state, 
+                     mux((initial_state == accept_state) & (isNotlaststring(string, file_data)), error_state, 
+                     curr_state))
         
         ''' 
-            Adding sub string if in one of found states or accept state, reading the last word in the text
+            Adding sub string if in one of found states or accept state and reading the last word in the text
         '''
-        Secret_str_after.cond_push(is_in_found_states(initial_state)|(curr_state == accept_state) & isLaststring(string, file_data),string)
-
+        # Secret_str_after.cond_push(is_in_found_states(initial_state)|(curr_state == accept_state) & isLaststring(string, file_data),string)
+        # print(Secret_str_between.current_val)
+        ''' 
+            The following part needs to be updated with Stack without if statement
+        '''
+        if (is_in_found_states_todelete(initial_state)) or (val_of(curr_state) == accept_state and not isNotlaststring(string, file_data)):
+            print("Appended '", integer_to_word(val_of(string)), "' \n")
+            str_after.append(integer_to_word(val_of(string)))
+        if val_of(curr_state) == error_state and str_after[-1]!="Error":
+            print("Error ----------------- \n")
+            str_after.clear()
+            str_after.append("Error")
         return curr_state
 
-    # public_foreach basically runs the above function but returns in an emp format
+    # latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
     latest_state=public_foreach(text_input, next_state_fun, zero_state)
-    return latest_state, str_after
+    return latest_state
 
 with open(sys.argv[1], 'r') as f:
     file_data = f.read()
@@ -124,10 +157,10 @@ dfa = dfa_from_string(string_a, string_target)
 print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
-latest_state ,str_after = run_dfa(dfa, file_string)
+latest_state = run_dfa(dfa, file_string)
+print("\n", "Latest State: ",val_of(latest_state), "\n")
 print("\n", "Result: ",str_after, "\n")
 assertTrueEMP(latest_state == accept_state)
-print("\n", "Latest State: ",val_of(latest_state), "\n")
 # compile the ZK statement to an EMP file
 print_emp(True, 'miniwizpl_test.cpp')
 
