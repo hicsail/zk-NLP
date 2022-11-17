@@ -28,14 +28,14 @@ def integer_to_word(integer):
     Change this section to experiment
 '''
 string_a = 'not'
-string_b = 'our'
-string_target = ['in', 'alphabet']
+string_b = 'alphabet'
+string_target = ['in', 'our']
 zero_state = 0
 found_states=[i for i in range(1,len(string_target)+1)]
 appendedAll_state = found_states[-1]*10
 accept_state = found_states[-1]*11
 error_state = found_states[-1]*100
-# Secret_str_after = SecretStack([])
+Secret_str_between = SecretStack([])
 str_between = []
 
 def dfa_from_string(first,target,last):
@@ -117,7 +117,7 @@ def run_dfa(dfa, text_input):
         ''' 
             Adding sub string if in one of found states or accept state and reading the last word in the text
         '''
-        # Secret_str_between.cond_push(is_in_found_states(initial_state)|(curr_state == appendedAll_state)|(curr_state == accept_state),string)
+        # Secret_str_between.cond_push(is_in_found_states(curr_state)|(curr_state == appendedAll_state),string)
         # print(Secret_str_between.current_val)
 
         ''' 
@@ -130,11 +130,10 @@ def run_dfa(dfa, text_input):
             print("Error ----------------- \n")
             str_between.clear()
             str_between.append("Error")
-
         return curr_state
 
-    latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
-    # latest_state=public_foreach(text_input, next_state_fun, zero_state)
+    # latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+    latest_state=public_foreach(text_input, next_state_fun, zero_state)
     ''' 
         Pop the last element if no string_b found and if you're read the last substring of the target between strings
     '''
@@ -155,9 +154,8 @@ print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
 latest_state = run_dfa(dfa, file_string)
+assertTrueEMP((latest_state == accept_state)|(latest_state == appendedAll_state))
 print("\n", "Latest State: ",val_of(latest_state), "\n")
 print("\n", "Result: ",str_between, "\n")
-# assertTrueEMP((latest_state == accept_state)|(latest_state == appendedAll_state))
-assertTrueEMP((latest_state == accept_state)|(latest_state == appendedAll_state))
 # compile the ZK statement to an EMP file
 print_emp(True, 'miniwizpl_test.cpp')

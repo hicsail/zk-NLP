@@ -57,8 +57,8 @@ def run_dfa(dfa, text_input):
         
         return curr_state
 
-    latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
-    # latest_state=public_foreach(text_input, next_state_fun, zero_state)
+    # latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+    latest_state=public_foreach(text_input, next_state_fun, zero_state)
     return latest_state
 
 with open(sys.argv[1], 'r') as f:

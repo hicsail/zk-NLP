@@ -122,7 +122,7 @@ def run_dfa(dfa, text_input):
             3) Otherwise stay in the current state
         '''
         curr_state = mux(initial_state == error_state, error_state, 
-                     mux((initial_state == accept_state) & (isNotlaststring(string, file_data)), error_state, 
+                     mux((initial_state == accept_state) & isNotlaststring(string, file_data), error_state, 
                      curr_state))
         
         ''' 
@@ -158,9 +158,9 @@ print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
 latest_state = run_dfa(dfa, file_string)
+assertTrueEMP(latest_state == accept_state)
 print("\n", "Latest State: ",val_of(latest_state), "\n")
 print("\n", "Result: ",str_after, "\n")
-assertTrueEMP(latest_state == accept_state)
 # compile the ZK statement to an EMP file
 print_emp(True, 'miniwizpl_test.cpp')
 
