@@ -24,10 +24,10 @@ def integer_to_word(integer):
         word+=char
     return word
 
-string_target = 'import'
+string_target = 'not'
 zero_state = 0
 accept_state=1
-error_state=-1
+error_state=accept_state*100
 
 def dfa_from_string(target):
     next_state = {}
@@ -49,16 +49,16 @@ def run_dfa(dfa, text_input):
                 "input string: ", val_of(string),
                 "dfa string: ", dfa_str,"\n")
 
-            curr_state = mux((curr_state == dfa_state) & (string == dfa_str),
+            curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
-                         mux((curr_state == dfa_state) & (string != dfa_str),
+                         mux((initial_state == dfa_state) & (string != dfa_str),
                          error_state,
                          curr_state))
         
         return curr_state
 
-    # public_foreach basically runs the above function but returns in an emp format
-    latest_state=public_foreach(text_input, next_state_fun, zero_state)
+    latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+    # latest_state=public_foreach(text_input, next_state_fun, zero_state)
     return latest_state
 
 with open(sys.argv[1], 'r') as f:
@@ -73,8 +73,6 @@ print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
 latest_state = run_dfa(dfa, file_string)
-
-# compile the ZK statement to an EMP file
 assertTrueEMP(latest_state == accept_state)
 print("\n", "Latest State: ",val_of(latest_state), "\n")
 # compile the ZK statement to an EMP file

@@ -29,7 +29,7 @@ def integer_to_word(integer):
 '''
 string_a = 'not'
 string_b = 'our'
-string_target = ['in']
+string_target = ['in', 'alphabet']
 zero_state = 0
 found_states=[i for i in range(1,len(string_target)+1)]
 appendedAll_state = found_states[-1]*10
@@ -91,8 +91,8 @@ def run_dfa(dfa, text_input):
             ''' 
                 This control flow is just for the sake of debugging and must be deleted
             '''
-            if ((val_of(curr_state) ==appendedAll_state)|(val_of(curr_state) in found_states)) & (val_of(string) == dfa_str):
-                print(
+            # if ((val_of(curr_state) ==appendedAll_state)|(val_of(curr_state) in found_states)) & (val_of(string) == dfa_str):
+            print(
                     "curr state: ", val_of(curr_state),
                     "dfa state: ", dfa_state,"\n",
                     "input string: ", val_of(string),
@@ -101,7 +101,7 @@ def run_dfa(dfa, text_input):
 
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
-                         mux((initial_state == dfa_state) & (string != dfa_str),
+                         mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_state),
                          error_state,
                          curr_state))
             print("Updated state: ", val_of(curr_state))                         
@@ -123,24 +123,25 @@ def run_dfa(dfa, text_input):
         ''' 
             The following part needs to be updated with Stack without if statement
         '''
-        if (is_in_found_states_todelete(initial_state)) or (val_of(curr_state) == -appendedAll_state) or (val_of(curr_state) == -accept_state):
+        if (is_in_found_states_todelete(initial_state)) or (val_of(curr_state) == appendedAll_state):
             print("Appended '", integer_to_word(val_of(string)), "' \n")
             str_between.append(integer_to_word(val_of(string)))
-        elif (val_of(curr_state) == error_state) and str_between[-1]!="Error":
+        if (val_of(curr_state) == error_state) and str_between[-1]!="Error":
             print("Error ----------------- \n")
             str_between.clear()
             str_between.append("Error")
 
         return curr_state
 
-    # loop=public_foreach_unroll(text_input, next_state_fun, zero_state)
-    loop=public_foreach(text_input, next_state_fun, zero_state)
+    latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+    # latest_state=public_foreach(text_input, next_state_fun, zero_state)
     ''' 
         Pop the last element if no string_b found and if you're read the last substring of the target between strings
     '''
     # Secret_str_between.cond_pop(loop==appendedAll_state)
-
-    return loop
+    if val_of(latest_state) == appendedAll_state:
+        str_between.pop()
+    return latest_state
 
 with open(sys.argv[1], 'r') as f:
     file_data = f.read()

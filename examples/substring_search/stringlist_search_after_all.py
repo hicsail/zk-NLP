@@ -100,8 +100,8 @@ def run_dfa(dfa, text_input):
             ''' 
                 This control flow is just for the sake of debugging and must be deleted
             '''
-            if (val_of(curr_state) in found_states) & (val_of(string) == dfa_str):
-                print(
+            # if (val_of(curr_state) in found_states) & (val_of(string) == dfa_str):
+            print(
                     "curr state: ", val_of(curr_state),
                     "dfa state: ", dfa_state,"\n",
                     "input string: ", val_of(string),
@@ -110,7 +110,7 @@ def run_dfa(dfa, text_input):
 
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
-                         mux((initial_state == dfa_state) & (string != dfa_str),
+                         mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_state),
                          error_state,
                          curr_state))
             print("Updated state: ", val_of(curr_state))
