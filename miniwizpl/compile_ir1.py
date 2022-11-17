@@ -85,8 +85,6 @@ def modular_inverse(x, p):
 int_ops_ir1 = {
     'add': 'add',
     'mul': 'mul',
-    'div': 'div',
-    'mod': 'mod'
 }
 
 def subst(x, v, e):
@@ -149,6 +147,12 @@ def print_exp_ir1_(e):
 
             emit(f'  {r} <- @{op_sym}({x1}, {x2});')
             return r
+        elif e.op == 'mod':
+            field = params['arithmetic_field']
+            a, p = e.args
+            if p != field:
+                print(f'Warning: attempting mod {p} in field {field}')
+            return print_exp_ir1(a)
         elif e.op == 'rec':
             name, bound, args, func = e.args
             if function_unrollings[name] > bound:
@@ -320,16 +324,25 @@ def print_exp_ir1_(e):
             return r
         elif e.op == 'exp_mod':
             a, b, p = e.args
-            # TODO: need to check p here
-            # we assume p is our current field, so just do a*a b times
+            field = params['arithmetic_field']
+
+            if field != p:
+                print(f'Warning: attempting exponentiation mod {p} in field {field}')
+
+            def exp_by_squaring(x, n):
+                assert n > 0
+                if n%2 == 0:
+                    if n // 2 == 1:
+                        return x * x
+                    else:
+                        return exp_by_squaring(x * x,  n // 2)
+                else:
+                    return x * exp_by_squaring(x * x, (n - 1) // 2)
+
             assert isinstance(b, int)
-            a_wire = print_exp_ir1(a)
-            result_wire = a_wire
-            for _ in range(b):
-                r = next_wire()
-                emit(f'  {r} <- @mul({a_wire}, {result_wire});')
-                result_wire = r
-            return r
+            exp = exp_by_squaring(a, b)
+            exp.val = e.val
+            return print_exp_ir1(exp)
         elif e.op == 'assert0':
             assert len(e.args) == 1
             x1 = print_exp_ir1(e.args[0])
