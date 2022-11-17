@@ -211,7 +211,7 @@ def print_exp_ir1_(e):
                     print_exp_ir1(a_val)
 
                 WRITE_TO_REL = 1
-                return r1
+                return wires[-1]
             elif IR_MODE == 0:
                 a_wire_name = print_exp_ir1(init)
                 a_wire_val = WireVal(a_wire_name, int, val_of(init))
