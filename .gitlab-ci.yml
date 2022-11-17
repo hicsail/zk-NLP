@@ -36,6 +36,5 @@ build:
     - cd ..
     - sudo ldconfig
     - ./bash/crypto.sh
-    - ./bash/misc.sh
     - ./bash/neural_networks.sh
     - ./bash/simple.sh
