@@ -8,4 +8,4 @@ print(xs[i])
 xs[i] = SecretInt(5)
 print(xs[i])
 
-print_emp(xs[i], 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')

@@ -7,4 +7,4 @@ y = xs.pop()
 xs.push(6)
 z = xs.pop()
 
-print_emp(y, 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')

@@ -52,4 +52,4 @@ decrypted = decrypt(sk, e)
 print('decrypted', decrypted)
 
 set_bitwidth(256)
-print_emp(decrypted, 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')
