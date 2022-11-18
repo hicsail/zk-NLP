@@ -123,7 +123,7 @@ def run_dfa(dfa, text_input):
         ''' 
             The following part needs to be updated with Stack without if statement
         '''
-        if (is_in_found_states_todelete(initial_state)) or (val_of(curr_state) == appendedAll_state):
+        if (is_in_found_states_todelete(curr_state)) or (val_of(curr_state) == appendedAll_state):
             print("Appended '", integer_to_word(val_of(string)), "' \n")
             str_between.append(integer_to_word(val_of(string)))
         if (val_of(curr_state) == error_state) and str_between[-1]!="Error":
@@ -139,7 +139,9 @@ def run_dfa(dfa, text_input):
     '''
     # Secret_str_between.cond_pop(loop==appendedAll_state)
     if val_of(latest_state) == appendedAll_state:
-        str_between.pop()
+        x=str_between.pop()
+        print("Popped", x)
+        
     return latest_state
 
 with open(sys.argv[1], 'r') as f:
