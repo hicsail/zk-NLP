@@ -7,6 +7,6 @@ a = SecretInt(20)
 b = SecretInt(30)
 z = mux(x == y, a, b+a)
 output = z
-assert0(output - 30)
+assert0(output - 50)
 
 print_ir1("miniwizpl_test")

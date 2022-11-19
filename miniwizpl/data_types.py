@@ -64,17 +64,15 @@ class SecretIndexList(AST):
         self.name = gensym('list')
 
     def __getitem__(self, key):
-        global all_statements
         xn = gensym('list_val')
         x = SymVar(xn, int, None)
-        all_statements.append(Prim('assign', [x, Prim('listref', [self, key],
+        params['all_statements'].append(Prim('assign', [x, Prim('listref', [self, key],
                                                       val_of(self)[val_of(key)])],
                                              None))
         return x
 
     def __setitem__(self, key, val):
-        global all_statements
-        all_statements.append(Prim('listset', [self, key, val], None))
+        params['all_statements'].append(Prim('listset', [self, key, val], None))
 
     def __str__(self):
         return f'SecretIndexList({len(self.arr)})'
@@ -96,28 +94,28 @@ class SecretStack(AST):
 
     def push(self, item):
         """Unconditional push."""
-        global all_statements
         self.max_size += 1
         self.current_val.append(val_of(item))
 
-        all_statements.append(Prim('stack_push', [self, item], None))
+        params['all_statements'].append(Prim('stack_push', [self, item], None))
 
     def cond_push(self, condition, item):
         """Conditional push."""
-        global all_statements
         self.max_size += 1
+
         if val_of(condition):
             self.current_val.append(val_of(item))
 
-        all_statements.append(Prim('stack_cond_push', [self, condition, item], None))
+        params['all_statements'].append(Prim('stack_cond_push', [self, condition, item], None))
 
     def pop(self):
         """Unconditional pop."""
-        global all_statements
         xn = gensym('stack_val')
+
         v = self.current_val.pop()
         x = SymVar(xn, int, v)
-        all_statements.append(Prim('assign', [x, Prim('stack_pop', [self], v)], None))
+        params['all_statements'].append(Prim('assign', [x, Prim('stack_pop', [self], v)], None))
+
         return x
 
     # TODO: work in progress
