@@ -180,13 +180,22 @@ def print_exp(e):
 
             x = SymVar(gensym('x'), int, None)
             accum = SymVar(gensym('a'), int, None)
+
+            old_all_stmts = params['all_statements']
+            params['all_statements'] = []
+
             body = f(x, accum)
+
+            body_stmts = params['all_statements']
+            params['all_statements'] = old_all_stmts
 
             a = print_exp(init)
             emit(f'Integer {accum.name} = {a};')
 
             old_pubvals = all_pubvals.copy()
             emit(f'for (Integer {x.name} : {xs.name}) {{')
+            for s in body_stmts:
+                print_exp(s)
             output = print_exp(body)
             emit(f'  {accum.name} = {output};')
             emit('}')
@@ -451,7 +460,6 @@ def print_emp(outp, filename):
     global all_defs
     global emp_output_string
     global witness_output_string
-    global all_statements
 
     with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_top.cpp', 'r') as f1:
         top_boilerplate = f1.read()
@@ -463,7 +471,7 @@ def print_emp(outp, filename):
     emit()
     emit('  cout << "defs complete\\n";')
     emit()
-    for s in all_statements:
+    for s in params['all_statements']:
         print_exp(s)
     final_output_var = print_exp(outp)
 

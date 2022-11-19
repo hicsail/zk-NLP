@@ -1,6 +1,7 @@
 params = {
     'bitwidth': 32,
-    'arithmetic_field': 2**31-1
+    'arithmetic_field': 2**31-1,
+    'all_statements': []
 }
 
 bitwidth = 32
