@@ -62,8 +62,52 @@ bool compare_qs_matrices(const QSMatrix<Float>& a, const QSMatrix<Float>& b) {
   return true;
 }
 
+bool compare_qs_matrices(const QSMatrix<float>& a, const QSMatrix<Float>& b) {
+  if (a.get_rows() != b.get_rows()) return false;
+  if (a.get_cols() != b.get_cols()) return false;
+
+  for (unsigned i = 0; i < a.get_rows(); i++) {
+    for (unsigned j = 0; j < a.get_cols(); j++) {
+      if (a(i, j) - b(i, j).reveal<double>(PUBLIC) > .001) return false;
+    }
+  }
+  return true;
+}
+
+bool compare_qs_matrices(const QSMatrix<Float>& a, const QSMatrix<float>& b) {
+  if (a.get_rows() != b.get_rows()) return false;
+  if (a.get_cols() != b.get_cols()) return false;
+
+  for (unsigned i = 0; i < a.get_rows(); i++) {
+    for (unsigned j = 0; j < a.get_cols(); j++) {
+      if (a(i, j).reveal<double>(PUBLIC) - b(i, j) > .001) return false;
+    }
+  }
+  return true;
+}
+
+bool compare_qs_matrices(const QSMatrix<float>& a, const QSMatrix<float>& b) {
+  if (a.get_rows() != b.get_rows()) return false;
+  if (a.get_cols() != b.get_cols()) return false;
+
+  for (unsigned i = 0; i < a.get_rows(); i++) {
+    for (unsigned j = 0; j < a.get_cols(); j++) {
+      if (a(i, j) - b(i, j) > .001) return false;
+    }
+  }
+  return true;
+}
+
 Integer mux(Bit s, Integer a, Integer b) {
   return b.select(s, a);
+}
+
+bool assert0EMP(Integer a) {
+  return a.equal(Integer(64, 0, PUBLIC)).reveal<bool>(PUBLIC);
+}
+
+bool assert0EMP(Bit a) {
+  return !(a.reveal<bool>(PUBLIC));
 }
 
 // *************************************************************************
@@ -74,3 +118,10 @@ void test(BoolIO<NetIO> *ios[threads], int party) {
   cout << "!!\n";
 
   Float pub_zero = Float(0.0, PUBLIC);
+
+  std::ifstream is("miniwizpl_test.cpp.emp_wit");
+  if (! is.good()) {
+    cout << "Error reading the memory dump file\n";
+    exit(1);
+  }
+  int tmp;

@@ -1,78 +1,97 @@
 import sys
-from miniwizpl import SecretStack, SecretList, mux, public_foreach, print_emp
+from miniwizpl import *
 from miniwizpl.expr import *
+from common.util import *
 
 if len(sys.argv) != 2:
     print("Usage: python dfa_example.py <target_filename>")
     sys.exit()
 
-def word_to_integer(word):
-    hash = 0
-
-    for i in range(len(word)):
-        hash += (ord(word[i]) << 8 * i)
-
-    return hash
-
-def integer_to_word(integer):
-    word=""
-    bit = (1<<8)-1
-    while integer>0:
-        bit_char = integer&bit
-        integer=integer>>8
-        char=chr(bit_char)
-        word+=char
-    return word
-
+'''
+    Change this section to experiment
+'''
+string_a = 'not'
+string_b = 'alphabet'
+string_target = ['in', 'our']
 zero_state = 0
-append_state=1
-append_found_state=2
-accept_state=255
+found_states=[i for i in range(1,len(string_target)+1)]
+appendedAll_state = found_states[-1]*10
+accept_state = found_states[-1]*11
+error_state = found_states[-1]*100
+Secret_str_between = SecretStack([])
+str_between = []
 
-
-def dfa_from_string(first,target,last=None):
+def dfa_from_string(first,target,last):
     next_state = {}
-    next_state[(zero_state, word_to_integer(first))]=append_state
-    next_state[(append_state, word_to_integer(target[0]))]=append_found_state #Todo: Update this so it accepts array
-    next_state[(append_found_state, word_to_integer(last))]=accept_state
+    assert(len(target)>0)
+    next_state[(zero_state, word_to_integer(first))]=found_states[0]
+    for i in range(0,len(target)-1):
+      next_state[(found_states[i], word_to_integer(target[i]))]=found_states[i+1]
+    next_state[(found_states[-1], word_to_integer(target[-1]))]=appendedAll_state
+    next_state[(appendedAll_state, word_to_integer(last))]=accept_state
     return next_state
 
 # run a dfa
 def run_dfa(dfa, text_input):
-    # str_between = SecretStack([])
-    str_between = []
-    def next_state_fun(string, curr_state):
+    def next_state_fun(string, initial_state):
+        curr_state=initial_state
         for (dfa_state, dfa_str), next_state in dfa.items():
-
+            ''' 
+                This control flow is just for the sake of debugging and must be deleted
+            '''
+            # if ((val_of(curr_state) ==appendedAll_state)|(val_of(curr_state) in found_states)) & (val_of(string) == dfa_str):
             print(
-                "curr state: ", curr_state,
-                "dfa state: ", dfa_state,"\n",
-                "input string: ", string,
-                "dfa string: ", dfa_str,"\n")
+                    "curr state: ", val_of(curr_state),
+                    "dfa state: ", dfa_state,"\n",
+                    "input string: ", val_of(string),
+                    "dfa string: ", dfa_str,"\n",
+                    "next_state", next_state,"\n")
 
-            curr_state = mux((curr_state == dfa_state) & (string == dfa_str),
+            curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
-                         curr_state)
+                         mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_state),
+                         error_state,
+                         curr_state))
+            print("Updated state: ", val_of(curr_state))                         
+
+        ''' 
+            Regardless of changes above, if
+            1) already in accept state, always accept state
+            2) already in error state, always error state
+        '''
+        curr_state = mux(initial_state == accept_state, accept_state, 
+                     mux(initial_state == error_state, error_state, 
+                     curr_state))
+        ''' 
+            Adding sub string if in one of found states or accept state and reading the last word in the text
+        '''
+        Secret_str_between.cond_push(is_in_found_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
+        print(Secret_str_between.current_val)
 
         ''' 
             The following part needs to be updated with Stack without if statement
         '''
-        # str_between.cond_push((curr_state == append_state),integer_to_word(val_of(string)))
-        if ((val_of(curr_state) == append_state)|(val_of(curr_state) == append_found_state)): 
-            print("Appended", integer_to_word(string), "\n")
-            str_between.append(integer_to_word(string))
-
+        if (is_in_found_states_todelete(curr_state, found_states)) or (val_of(curr_state) == appendedAll_state):
+            print("Appended '", integer_to_word(val_of(string)), "' \n")
+            str_between.append(integer_to_word(val_of(string)))
+        if (val_of(curr_state) == error_state) and str_between[-1]!="Error":
+            print("Error ----------------- \n")
+            str_between.clear()
+            str_between.append("Error")
         return curr_state
 
-    # public_foreach basically runs the above function but returns in an emp format
-    loop=public_foreach(text_input, next_state_fun, zero_state)
-    
+    # latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+    latest_state=public_foreach(text_input, next_state_fun, zero_state)
     ''' 
-        The following part needs to be updated with Stack without if statement
+        Pop the last element if no string_b found and if you're read the last substring of the target between strings
     '''
-    if val_of(loop)==append_found_state:
-        str_between.pop()
-    return loop, str_between
+    Secret_str_between.cond_pop(latest_state==appendedAll_state)
+    print(Secret_str_between.current_val)
+    if val_of(latest_state) == appendedAll_state:
+        x=str_between.pop()
+        print("Popped", x)
+        
+    return latest_state
 
 with open(sys.argv[1], 'r') as f:
     file_data = f.read()
@@ -81,18 +100,13 @@ with open(sys.argv[1], 'r') as f:
 file_data = file_data.split()
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
-string_a = 'import'
-string_b = 'what'
-string_target = ['numpy']
-
 dfa = dfa_from_string(string_a, string_target, string_b)
 print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
-loop, str_between = run_dfa(dfa, file_string)
+latest_state = run_dfa(dfa, file_string)
+assertTrueEMP((latest_state == accept_state)|(latest_state == appendedAll_state))
+print("\n", "Latest State: ",val_of(latest_state), "\n")
 print("\n", "Result: ",str_between, "\n")
-outputs = (loop == accept_state|append_found_state)
-
 # compile the ZK statement to an EMP file
-print_emp(outputs, 'miniwizpl_test.cpp')
-
+print_emp(True, 'miniwizpl_test.cpp')

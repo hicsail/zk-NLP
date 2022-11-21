@@ -1,9 +1,11 @@
 params = {
     'bitwidth': 64,
-    'arithmetic_field': 97
+    'arithmetic_field': 2**31-1,
+    'all_statements': []
 }
 
 bitwidth = 64
+
 arithmetic_field = 97
 all_pubvals = {}
 all_defs = []

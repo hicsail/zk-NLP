@@ -64,17 +64,15 @@ class SecretIndexList(AST):
         self.name = gensym('list')
 
     def __getitem__(self, key):
-        global all_statements
         xn = gensym('list_val')
         x = SymVar(xn, int, None)
-        all_statements.append(Prim('assign', [x, Prim('listref', [self, key],
+        params['all_statements'].append(Prim('assign', [x, Prim('listref', [self, key],
                                                       val_of(self)[val_of(key)])],
                                              None))
         return x
 
     def __setitem__(self, key, val):
-        global all_statements
-        all_statements.append(Prim('listset', [self, key, val], None))
+        params['all_statements'].append(Prim('listset', [self, key, val], None))
 
     def __str__(self):
         return f'SecretIndexList({len(self.arr)})'
@@ -90,31 +88,51 @@ class SecretStack(AST):
         all_defs.append(self)
         self.arr = arr
         self.val = arr
+        self.current_val = arr.copy()
         self.name = gensym('stack')
         self.max_size = len(arr)
 
-    # TODO: need to fix values for these
     def push(self, item):
         """Unconditional push."""
-        global all_statements
         self.max_size += 1
+        self.current_val.append(val_of(item))
 
-        all_statements.append(Prim('stack_push', [self, item], None))
+        params['all_statements'].append(Prim('stack_push', [self, item], None))
 
     def cond_push(self, condition, item):
         """Conditional push."""
-        global all_statements
         self.max_size += 1
-        all_statements.append(Prim('stack_cond_push', [self, condition, item], None))
+
+        if val_of(condition):
+            self.current_val.append(val_of(item))
+
+        params['all_statements'].append(Prim('stack_cond_push', [self, condition, item], None))
 
     def pop(self):
         """Unconditional pop."""
-        global all_statements
         xn = gensym('stack_val')
-        x = SymVar(xn, int, None)
-        all_statements.append(Prim('assign', [x, Prim('stack_pop', [self], None)], None))
+
+        v = self.current_val.pop()
+        x = SymVar(xn, int, v)
+        params['all_statements'].append(Prim('assign', [x, Prim('stack_pop', [self], v)], None))
+
         return x
 
+    # TODO: work in progress
+    def cond_pop(self, condition):
+        """Conditional pop."""
+        global all_statements
+        xn = gensym('stack_val')
+
+        if val_of(condition):
+            v = self.current_val.pop()
+        else:
+            v = None
+
+        x = SymVar(xn, int, v)
+        all_statements.append(Prim('assign', [x, Prim('stack_cond_pop', [self, condition], v)], None))
+        return x
+        
     def __str__(self):
         return f'SecretStack({len(self.arr)})'
     __repr__ = __str__
@@ -132,6 +150,28 @@ class SecretTensor(AST):
 
     def __str__(self):
         return f'SecretTensor({self.val.shape})'
+    __repr__ = __str__
+
+    def tensor(self):
+        return self.arr
+
+    def __getattr__(self, name):
+        print('getattr', name)
+        return getattr(self.arr, name)
+
+class PublicTensor(AST):
+    """
+    An n-dimensional tensor of public values, integrated with PyTorch's tensor library.
+    """
+    def __init__(self, arr):
+        global all_defs
+        all_defs.append(self)
+        self.arr = arr
+        self.val = arr
+        self.name = gensym('tensor')
+
+    def __str__(self):
+        return f'PublicTensor({self.val.shape})'
     __repr__ = __str__
 
     def tensor(self):
