@@ -85,8 +85,6 @@ def modular_inverse(x, p):
 int_ops_ir1 = {
     'add': 'add',
     'mul': 'mul',
-    'div': 'div',
-    'mod': 'mod'
 }
 
 def subst(x, v, e):
@@ -149,6 +147,12 @@ def print_exp_ir1_(e):
 
             emit(f'  {r} <- @{op_sym}({x1}, {x2});')
             return r
+        elif e.op == 'mod':
+            field = params['arithmetic_field']
+            a, p = e.args
+            if p != field:
+                print(f'Warning: attempting mod {p} in field {field}')
+            return print_exp_ir1(a)
         elif e.op == 'rec':
             name, bound, args, func = e.args
             if function_unrollings[name] > bound:
@@ -188,13 +192,14 @@ def print_exp_ir1_(e):
                 WRITE_TO_WIT = 0
                 loop_body = f(a_wire_val, x_wire_val)
 
-                emit(f' {wires[0]}...{wires[-1]} <- @for i @first {r1} @last {rf}')
-                emit(f'   $(i+{len(val_of(xs)) + 1}) <- @anon_call($i, $(i + {len(val_of(xs))})));')
+                emit(f' {wires[0]}...{wires[-1]} <- @for i @first {0} @last {len(val_of(xs))}')
+                emit(f'   $(i+{len(val_of(xs)) + 1}) <- @anon_call($i, $(i + {len(val_of(xs))}), @instance: 0, @short_witness : 0)')
                 ocw = current_wire
                 current_wire = 3
                 output_wire = print_exp_ir1(loop_body)
                 current_wire = ocw
                 emit(f'   $0 <- {output_wire};')
+                emit(f'   @end')
                 emit(f' @end')
 
                 # step 2: run the loop "concretely" with actual values instead of abstracted function inputs
@@ -210,16 +215,15 @@ def print_exp_ir1_(e):
                     print_exp_ir1(a_val)
 
                 WRITE_TO_REL = 1
-                return r1
+                return wires[-1]
             elif IR_MODE == 0:
                 a_wire_name = print_exp_ir1(init)
                 a_wire_val = WireVal(a_wire_name, int, val_of(init))
-
                 for x_val in val_of(xs):
                     new_a_val = f(SecretInt(x_val), a_wire_val)
+                    add_to_witness(new_a_val)
                     a_wire_name = print_exp_ir1(new_a_val)
                     a_wire_val = WireVal(a_wire_name, int, val_of(new_a_val))
-
                 return a_wire_name
 
             else:
@@ -230,13 +234,14 @@ def print_exp_ir1_(e):
             x2 = print_exp_ir1(e2)
             x3 = print_exp_ir1(e3)
             c = params['arithmetic_field'] - 1
-
             r1 = next_wire()
-            emit(f'  {r1} <- @mul({x1}, < {x2} >);')
+            emit(f'  {r1} <- @mul({x1}, {x2});')
             r2 = next_wire()
             emit(f'  {r2} <- @mulc({x1}, < {c} >);')
+            r4 = next_wire()
+            emit(f'  {r4} <- @addc({r2}, < {1} >);')
             r3 = next_wire()
-            emit(f'  {r3} <- @mul({r2}, {x3});')
+            emit(f'  {r3} <- @mul({r4}, {x3});')
             r_val = next_wire()
             emit(f'  {r_val} <- @add({r1}, {r3});')
             return r_val
@@ -244,9 +249,7 @@ def print_exp_ir1_(e):
             e1, e2 = e.args
             x1 = print_exp_ir1(e1)
             x2 = print_exp_ir1(e2)
-
             diff = e1 - e2
-            #print('diff is:', diff)
             temp_wire_1 = next_wire()
             wire_name_for_diff = next_wire()
             c = params['arithmetic_field'] - 1
@@ -273,7 +276,7 @@ def print_exp_ir1_(e):
             emit(f'  {temp_wire_1} <- @addc({wire_name_for_diff_inv}, < 1 >);')
 
             temp_wire_2 = next_wire()
-            emit(f'  {temp_wire_2} <- @mul({wire_name_for_diff_inv}, {temp_wire_1});')
+            emit(f'  {temp_wire_2} <- @mul({wire_name_for_diff}, {temp_wire_1});')
 
             temp_wire_1 = next_wire()
             emit(f'  {temp_wire_1} <- @mul({temp_wire_2}, {wire_name_for_res});')
@@ -285,10 +288,10 @@ def print_exp_ir1_(e):
 
             temp_wire_1 = next_wire()
             emit(f'  {temp_wire_1} <- @mulc({wire_name_for_diff}, < {c} >);')
-            temp_wire_3 = next_wire()
-            emit(f'  {temp_wire_3} <- @add({temp_wire_2}, {temp_wire_1});')
+            temp_wire_4 = next_wire()
+            emit(f'  {temp_wire_4} <- @add({temp_wire_3}, {temp_wire_1});')
 
-            emit(f'  @assert_zero({temp_wire_3});')
+            emit(f'  @assert_zero({temp_wire_4});')
             return r_res
         elif e.op == 'sub':
             # implementation: multiply x2 by -1
@@ -321,16 +324,25 @@ def print_exp_ir1_(e):
             return r
         elif e.op == 'exp_mod':
             a, b, p = e.args
-            # TODO: need to check p here
-            # we assume p is our current field, so just do a*a b times
+            field = params['arithmetic_field']
+
+            if field != p:
+                print(f'Warning: attempting exponentiation mod {p} in field {field}')
+
+            def exp_by_squaring(x, n):
+                assert n > 0
+                if n%2 == 0:
+                    if n // 2 == 1:
+                        return x * x
+                    else:
+                        return exp_by_squaring(x * x,  n // 2)
+                else:
+                    return x * exp_by_squaring(x * x, (n - 1) // 2)
+
             assert isinstance(b, int)
-            a_wire = print_exp_ir1(a)
-            result_wire = a_wire
-            for _ in range(b):
-                r = next_wire()
-                emit(f'  {r} <- @mul({a_wire}, {result_wire});')
-                result_wire = r
-            return r
+            exp = exp_by_squaring(a, b)
+            exp.val = e.val
+            return print_exp_ir1(exp)
         elif e.op == 'assert0':
             assert len(e.args) == 1
             x1 = print_exp_ir1(e.args[0])
@@ -378,7 +390,7 @@ instance
 field characteristic {field} degree 1;
 relation
 gate_set: arithmetic;
-features: @function, @switch;
+features: @function, @for, @switch;
 @begin""")
 
         for a in assertions:
