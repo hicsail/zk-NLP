@@ -46,14 +46,25 @@ Now you are inside docker shell
 Then run:
 
 ```
-/bin/bash ./run.sh -f <sub_folder> -c <Python script name>
+/bin/bash ./run.sh -f <sub_folder> -c <Python script name> -o <Optional: test or debug>
 ```
 
 For example, you can run:
 
 ```
-/bin/bash ./run.sh -f simple_demos -c simple.py 
+/bin/bash ./run.sh -f substring_search -c stringlist_search_between.py -o debug
 ```
+
+The argument at the end is optional. 
+    <li> "debug" prints the intermediate results of DFA transitions (It does not compile with miniwizpl).
+    <li> "test" produces a synthetic test case, including an input text and target substrings. 
+    <li> If the thrid argument is empty, it will use the user defined target text in "dfa_test_input.txt" and you have to set target: https://github.com/hicsail/SIEVE/blob/200b8dc6076e8024352815e4753204b658544a43/examples/substring_search/stringlist_search_after_all.py#L13
+
+
+Also, you can choose a scale of test cases (i.e., difficulty of tests) in generate_text() function (default to 0 = original length of text)
+
+https://github.com/hicsail/SIEVE/blob/a3c52beb324c2908f695b1422f1fca22fea92a2d/examples/substring_search/stringlist_search_after_all.py#L8
+
 
 If you want to run a script just beneath examples directory, then run without -f flag like:
 
