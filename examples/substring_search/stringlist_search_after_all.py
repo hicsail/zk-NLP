@@ -3,14 +3,23 @@ from miniwizpl import *
 from miniwizpl.expr import *
 from common.util import *
 
-if len(sys.argv) != 2:
-    print("Usage: python dfa_example.py <target_filename>")
-    sys.exit()
+''' Prepping target text and substrings'''
 
-file_data=generate_text()
-string_a, string_target=generate_target(file_data, "after_all")
+if (len(sys.argv)>1 and sys.argv[1] =="test") or (len(sys.argv)>2 and sys.argv[2] =="debug"):
+    file_data=generate_text()
+    string_a, string_target=generate_target(file_data, "after_all")
+
+else:
+    string_a = 'not'
+    string_target =  ['in', 'our']
+    with open(sys.argv[1], 'r') as f:
+        file_data = f.read()
+    file_data = file_data.split()
+
 print("Text: ", file_data, "\n")
 print("Start: ", string_a, "\n", "Target: ", string_target, "\n")
+# Transform the text file to search into miniwizpl format
+file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 zero_state = 0
 found_states=[i for i in range(1,len(string_target)+1)]
@@ -33,10 +42,9 @@ def run_dfa(dfa, text_input):
     def next_state_fun(string, initial_state):
         curr_state=initial_state
         for (dfa_state, dfa_str), next_state in dfa.items():
-            ''' 
-                This control flow is just for the sake of debugging and must be deleted
-            '''
-            print(
+
+            if len(sys.argv)==3 and sys.argv[2] =="debug":
+                print(
                     "curr state: ", val_of(curr_state),
                     "dfa state: ", dfa_state,"\n",
                     "input string: ", val_of(string),
@@ -48,6 +56,9 @@ def run_dfa(dfa, text_input):
                          mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_state),
                          error_state,
                          curr_state))
+                         
+            if len(sys.argv)==3 and sys.argv[2] =="debug":
+                print("Updated state: ", val_of(curr_state))
 
         ''' 
             Determine whether or not to go to the error state:
@@ -65,18 +76,11 @@ def run_dfa(dfa, text_input):
         '''
         Secret_str_after.cond_push(is_in_found_states(initial_state, found_states),string)
         return curr_state
-
-    # latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
-    latest_state=public_foreach(text_input, next_state_fun, zero_state)
+    if len(sys.argv)==3 and sys.argv[2] =="debug":
+        latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+    else:
+        latest_state=public_foreach(text_input, next_state_fun, zero_state)
     return latest_state
-
-# with open(sys.argv[1], 'r') as f:
-#     file_data = f.read()
-
-# Transform the text file to search into miniwizpl format
-# file_data = file_data.split()
-
-file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 # build DFA
 dfa = dfa_from_string(string_a, string_target)
@@ -85,9 +89,12 @@ print("\n", "DFA: ",dfa, "\n")
 # define the ZK statement
 latest_state = run_dfa(dfa, file_string)
 assertTrueEMP(latest_state == accept_state)
-print("\n", "Latest State: ",val_of(latest_state), "\n")
-print("\n", "Result:   ",Secret_str_after.current_val, "\n")
-expected=[word_to_integer(x) for x in string_target]
-print("\n", "Expected: ",expected, "\n")
+
+if len(sys.argv)==3 and sys.argv[2] =="debug":
+    print("\n", "Latest State: ",val_of(latest_state), "\n")
+    print("\n", "Result:   ",Secret_str_after.current_val, "\n")
+    expected=[word_to_integer(x) for x in string_target]
+    print("\n", "Expected: ",expected, "\n")
+
 # compile the ZK statement to an EMP file
 print_emp(True, 'miniwizpl_test.cpp')

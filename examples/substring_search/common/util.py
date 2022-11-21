@@ -68,10 +68,12 @@ def is_in_found_states_todelete(initial_state, found_states):
 
     return eval(res,{'initial_state':initial_state, 'val_of':val_of})
 
-def generate_text():
+def generate_text(scale=0):
     print("\n")
     fake = Faker(['en_US'])
     file_data=fake.text()
+    for s in range(scale):
+        file_data+=file_data
     print("Before cleaning text: ", file_data, "\n")
     regex = re.compile('[,\.!?]')
     file_data=regex.sub('', file_data)
