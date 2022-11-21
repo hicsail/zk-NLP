@@ -65,8 +65,8 @@ def run_dfa(dfa, text_input):
         ''' 
             Adding sub string if in one of found states or accept state and reading the last word in the text
         '''
-        # Secret_str_between.cond_push(is_in_found_states(curr_state)|(curr_state == appendedAll_state),string)
-        # print(Secret_str_between.current_val)
+        Secret_str_between.cond_push(is_in_found_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
+        print(Secret_str_between.current_val)
 
         ''' 
             The following part needs to be updated with Stack without if statement
@@ -85,7 +85,8 @@ def run_dfa(dfa, text_input):
     ''' 
         Pop the last element if no string_b found and if you're read the last substring of the target between strings
     '''
-    # Secret_str_between.cond_pop(loop==appendedAll_state)
+    Secret_str_between.cond_pop(latest_state==appendedAll_state)
+    print(Secret_str_between.current_val)
     if val_of(latest_state) == appendedAll_state:
         x=str_between.pop()
         print("Popped", x)

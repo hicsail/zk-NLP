@@ -7,19 +7,16 @@ if len(sys.argv) != 2:
     print("Usage: python dfa_example.py <target_filename>")
     sys.exit()
 
-file_data=generate_text()
-string_a, string_target=generate_target(file_data, "after_all")
-print("start: ", string_a, "\n", "target: ", string_target, "\n")
-
 '''
     Change this section to experiment
 '''
-
+string_a = 'not'
+string_target = ['in', 'our', 'alphabet']
 zero_state = 0
 found_states=[i for i in range(1,len(string_target)+1)]
 accept_state = found_states[-1]*10
 error_state = found_states[-1]*100
-# Secret_str_after = SecretStack([])
+Secret_str_after = SecretStack([])
 str_after = []
 
 def dfa_from_string(first, target):
@@ -67,8 +64,8 @@ def run_dfa(dfa, text_input):
         ''' 
             Adding sub string if in one of found states or accept state and reading the last word in the text
         '''
-        # Secret_str_after.cond_push(is_in_found_states(initial_state, found_states)|(curr_state == accept_state) & isLaststring(string, file_data),string)
-        # print(Secret_str_between.current_val)
+        Secret_str_after.cond_push(is_in_found_states(initial_state, found_states),string)
+        print(Secret_str_after.current_val)
         ''' 
             The following part needs to be updated with Stack without if statement
         '''
@@ -85,6 +82,11 @@ def run_dfa(dfa, text_input):
     latest_state=public_foreach(text_input, next_state_fun, zero_state)
     return latest_state
 
+with open(sys.argv[1], 'r') as f:
+    file_data = f.read()
+
+# Transform the text file to search into miniwizpl format
+file_data = file_data.split()
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 # build DFA
@@ -98,4 +100,3 @@ print("\n", "Latest State: ",val_of(latest_state), "\n")
 print("\n", "Result: ",str_after, "\n")
 # compile the ZK statement to an EMP file
 print_emp(True, 'miniwizpl_test.cpp')
-

@@ -4,7 +4,7 @@ venv/
 build/
 build/lib/miniwizpl/
 build/lib/miniwizpl/boilerplate
-
+examples/substring_search/stringlist_search_after_all_test.py
 .DS_Store
 
 miniwizpl_test_list_bignumber.cpp

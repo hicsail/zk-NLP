@@ -18,7 +18,7 @@ append_states=[i for i in range(1,len(string_target))]
 appendedAll_state=append_states[-1]*10
 accept_state = append_states[-1]*11
 error_state = append_states[-1]*100
-# Secret_str_before = SecretStack([])
+Secret_str_before = SecretStack([])
 str_before = []
 
 def dfa_from_string(last, target):
@@ -66,8 +66,8 @@ def run_dfa(dfa, text_input):
         ''' 
             Adding sub string if in one of found states or accept state and reading the last word in the text
         '''
-        # Secret_str_before.cond_push(initial_state == zero_state,string)
-        # print(Secret_str_before.current_val)
+        Secret_str_before.cond_push((initial_state == zero_state)|(curr_state == appendedAll_state), string)
+        print(Secret_str_before.current_val)
         ''' 
             The following part needs to be updated with Stack without if statement
         '''
@@ -88,7 +88,7 @@ def run_dfa(dfa, text_input):
     ''' 
         Pop the last element if no string_b found and if you're read the last substring of the target between strings
     '''
-    # Secret_str_between.cond_pop(loop==appendedAll_state)
+    Secret_str_before.cond_pop(latest_state==appendedAll_state)
     if val_of(latest_state) == appendedAll_state:
         str_before.pop()
     return latest_state
