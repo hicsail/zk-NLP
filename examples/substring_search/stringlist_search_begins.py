@@ -7,7 +7,11 @@ if len(sys.argv) != 2:
     print("Usage: python dfa_example.py <target_filename>")
     sys.exit()
 
-string_target = 'not'
+file_data=generate_text()
+string_target=generate_target(file_data, "begins")
+print("Text: ", file_data, "\n")
+print("Target: ", string_target, "\n")
+
 zero_state = 0
 accept_state=1
 error_state=accept_state*100
@@ -44,11 +48,11 @@ def run_dfa(dfa, text_input):
     latest_state=public_foreach(text_input, next_state_fun, zero_state)
     return latest_state
 
-with open(sys.argv[1], 'r') as f:
-    file_data = f.read()
+# with open(sys.argv[1], 'r') as f:
+#     file_data = f.read()
 
 # Transform the text file to search into miniwizpl format
-file_data = file_data.split()
+# file_data = file_data.split()
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 dfa = dfa_from_string(string_target)

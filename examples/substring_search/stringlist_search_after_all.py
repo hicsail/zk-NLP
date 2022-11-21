@@ -7,11 +7,11 @@ if len(sys.argv) != 2:
     print("Usage: python dfa_example.py <target_filename>")
     sys.exit()
 
-'''
-    Change this section to experiment
-'''
-string_a = 'not'
-string_target = ['in', 'our', 'alphabet']
+file_data=generate_text()
+string_a, string_target=generate_target(file_data, "after_all")
+print("Text: ", file_data, "\n")
+print("Start: ", string_a, "\n", "Target: ", string_target, "\n")
+
 zero_state = 0
 found_states=[i for i in range(1,len(string_target)+1)]
 accept_state = found_states[-1]*10
@@ -36,7 +36,6 @@ def run_dfa(dfa, text_input):
             ''' 
                 This control flow is just for the sake of debugging and must be deleted
             '''
-            # if (val_of(curr_state) in found_states) & (val_of(string) == dfa_str):
             print(
                     "curr state: ", val_of(curr_state),
                     "dfa state: ", dfa_state,"\n",
@@ -49,7 +48,6 @@ def run_dfa(dfa, text_input):
                          mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_state),
                          error_state,
                          curr_state))
-            print("Updated state: ", val_of(curr_state))
 
         ''' 
             Determine whether or not to go to the error state:
@@ -62,31 +60,22 @@ def run_dfa(dfa, text_input):
                      curr_state))
         
         ''' 
-            Adding sub string if in one of found states or accept state and reading the last word in the text
+            Adding sub string if in one of found states
+            If you're initially in accept state, it should fail into error state because you were not reading the last word in the text in the previous iteration
         '''
         Secret_str_after.cond_push(is_in_found_states(initial_state, found_states),string)
-        print(Secret_str_after.current_val)
-        ''' 
-            The following part needs to be updated with Stack without if statement
-        '''
-        if (is_in_found_states_todelete(initial_state, found_states)) or (val_of(curr_state) == accept_state):
-            print("Appended '", integer_to_word(val_of(string)), "' \n")
-            str_after.append(integer_to_word(val_of(string)))
-        if (val_of(curr_state) == error_state and str_after[-1]!="Error") or (val_of(initial_state) == accept_state):
-            print("Error ----------------- \n")
-            str_after.clear()
-            str_after.append("Error")
         return curr_state
 
     # latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
     latest_state=public_foreach(text_input, next_state_fun, zero_state)
     return latest_state
 
-with open(sys.argv[1], 'r') as f:
-    file_data = f.read()
+# with open(sys.argv[1], 'r') as f:
+#     file_data = f.read()
 
 # Transform the text file to search into miniwizpl format
-file_data = file_data.split()
+# file_data = file_data.split()
+
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 # build DFA
@@ -97,6 +86,8 @@ print("\n", "DFA: ",dfa, "\n")
 latest_state = run_dfa(dfa, file_string)
 assertTrueEMP(latest_state == accept_state)
 print("\n", "Latest State: ",val_of(latest_state), "\n")
-print("\n", "Result: ",str_after, "\n")
+print("\n", "Result:   ",Secret_str_after.current_val, "\n")
+expected=[word_to_integer(x) for x in string_target]
+print("\n", "Expected: ",expected, "\n")
 # compile the ZK statement to an EMP file
 print_emp(True, 'miniwizpl_test.cpp')

@@ -7,12 +7,11 @@ if len(sys.argv) != 2:
     print("Usage: python dfa_example.py <target_filename>")
     sys.exit()
 
-'''
-    Change this section to experiment
-'''
-string_a = 'not'
-string_b = 'alphabet'
-string_target = ['in', 'our']
+file_data=generate_text()
+string_a, string_target, string_b =generate_target(file_data, "between")
+print("Text: ", file_data, "\n")
+print("Start: ", string_a, "\n", "Target: ", string_target, "\n", "End: ", string_b)
+
 zero_state = 0
 found_states=[i for i in range(1,len(string_target)+1)]
 appendedAll_state = found_states[-1]*10
@@ -63,21 +62,9 @@ def run_dfa(dfa, text_input):
                      mux(initial_state == error_state, error_state, 
                      curr_state))
         ''' 
-            Adding sub string if in one of found states or accept state and reading the last word in the text
+            Add substring if in one of found states or accept state and reading the last word in the text
         '''
         Secret_str_between.cond_push(is_in_found_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
-        print(Secret_str_between.current_val)
-
-        ''' 
-            The following part needs to be updated with Stack without if statement
-        '''
-        if (is_in_found_states_todelete(curr_state, found_states)) or (val_of(curr_state) == appendedAll_state):
-            print("Appended '", integer_to_word(val_of(string)), "' \n")
-            str_between.append(integer_to_word(val_of(string)))
-        if (val_of(curr_state) == error_state) and str_between[-1]!="Error":
-            print("Error ----------------- \n")
-            str_between.clear()
-            str_between.append("Error")
         return curr_state
 
     # latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
@@ -87,17 +74,13 @@ def run_dfa(dfa, text_input):
     '''
     Secret_str_between.cond_pop(latest_state==appendedAll_state)
     print(Secret_str_between.current_val)
-    if val_of(latest_state) == appendedAll_state:
-        x=str_between.pop()
-        print("Popped", x)
-        
     return latest_state
 
-with open(sys.argv[1], 'r') as f:
-    file_data = f.read()
+# with open(sys.argv[1], 'r') as f:
+#     file_data = f.read()
 
 # Transform the text file to search into miniwizpl format
-file_data = file_data.split()
+# file_data = file_data.split()
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 dfa = dfa_from_string(string_a, string_target, string_b)
@@ -107,6 +90,9 @@ print("\n", "DFA: ",dfa, "\n")
 latest_state = run_dfa(dfa, file_string)
 assertTrueEMP((latest_state == accept_state)|(latest_state == appendedAll_state))
 print("\n", "Latest State: ",val_of(latest_state), "\n")
-print("\n", "Result: ",str_between, "\n")
+print("\n", "Result:   ",Secret_str_between.current_val, "\n")
+expected=[word_to_integer(x) for x in string_target]
+expected.insert(0, word_to_integer(string_a))
+print("\n", "Expected: ",expected, "\n")
 # compile the ZK statement to an EMP file
 print_emp(True, 'miniwizpl_test.cpp')
