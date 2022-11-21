@@ -1,28 +1,11 @@
 import sys
 from miniwizpl import *
 from miniwizpl.expr import *
+from common.util import *
 
 if len(sys.argv) != 2:
     print("Usage: python dfa_example.py <target_filename>")
     sys.exit()
-
-def word_to_integer(word):
-    hash = 0
-
-    for i in range(len(word)):
-        hash += (ord(word[i]) << 8 * i)
-
-    return hash
-
-def integer_to_word(integer):
-    word=""
-    bit = (1<<8)-1
-    while integer>0:
-        bit_char = integer&bit
-        integer=integer>>8
-        char=chr(bit_char)
-        word+=char
-    return word
 
 string_target = 'not'
 zero_state = 0

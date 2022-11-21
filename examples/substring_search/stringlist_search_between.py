@@ -1,28 +1,11 @@
 import sys
 from miniwizpl import *
 from miniwizpl.expr import *
+from common.util import *
 
 if len(sys.argv) != 2:
     print("Usage: python dfa_example.py <target_filename>")
     sys.exit()
-
-def word_to_integer(word):
-    hash = 0
-
-    for i in range(len(word)):
-        hash += (ord(word[i]) << 8 * i)
-
-    return hash
-
-def integer_to_word(integer):
-    word=""
-    bit = (1<<8)-1
-    while integer>0:
-        bit_char = integer&bit
-        integer=integer>>8
-        char=chr(bit_char)
-        word+=char
-    return word
 
 '''
     Change this section to experiment
@@ -48,41 +31,6 @@ def dfa_from_string(first,target,last):
     next_state[(appendedAll_state, word_to_integer(last))]=accept_state
     return next_state
 
-def flip_interim_found_state(curr_state):
-    x=len(found_states)
-    res=""
-    for i in range(1,x+1):
-        res += f"mux(curr_state=={-i}, {i},"
-    res += "curr_state"
-    for i in range(1,x+1):
-        res += ")"
-    # print(res, '\n')
-    return eval(res,{'curr_state':curr_state, 'mux':mux, 'val_of':val_of})
-
-def is_in_found_states(initial_state):
-    res="("
-    for val in found_states:
-        res += "(initial_state=="
-        res += f"{val}"
-        res += ")|"
-    res=res[0:-1]
-    res += ")"
-    # print(res, '\n')
-    return eval(res,{'initial_state':initial_state})
-'''
-    We will delete the following module
-'''
-def is_in_found_states_todelete(initial_state):
-    res="("
-    for val in found_states:
-        res += "(val_of(initial_state)=="
-        res += f"{val}"
-        res += ")|"
-    res=res[0:-1]
-    res += ")"
-    print(res, '\n')
-
-    return eval(res,{'initial_state':initial_state, 'val_of':val_of})
 # run a dfa
 def run_dfa(dfa, text_input):
     def next_state_fun(string, initial_state):
@@ -123,7 +71,7 @@ def run_dfa(dfa, text_input):
         ''' 
             The following part needs to be updated with Stack without if statement
         '''
-        if (is_in_found_states_todelete(curr_state)) or (val_of(curr_state) == appendedAll_state):
+        if (is_in_found_states_todelete(curr_state, found_states)) or (val_of(curr_state) == appendedAll_state):
             print("Appended '", integer_to_word(val_of(string)), "' \n")
             str_between.append(integer_to_word(val_of(string)))
         if (val_of(curr_state) == error_state) and str_between[-1]!="Error":
