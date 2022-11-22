@@ -11,7 +11,7 @@ if (len(sys.argv)>1 and sys.argv[1] =="test") or (len(sys.argv)>2 and sys.argv[2
 
 else:
     string_a = 'not'
-    string_target =  ['in', 'our']
+    string_target =  ['in', 's']
     with open(sys.argv[1], 'r') as f:
         file_data = f.read()
     file_data = file_data.split()
@@ -23,8 +23,12 @@ file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 zero_state = 0
 found_states=[i for i in range(1,len(string_target)+1)]
-accept_state = found_states[-1]*10
-error_state = found_states[-1]*100
+if len(found_states)==0:
+    accept_state = 100
+    error_state = -100
+else:
+    accept_state = found_states[-1]*10
+    error_state = found_states[-1]*100
 Secret_str_after = SecretStack([])
 str_after = []
 

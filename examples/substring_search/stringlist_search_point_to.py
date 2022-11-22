@@ -24,9 +24,16 @@ file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 zero_state = 0
 append_states=[i for i in range(1,len(string_target))]
-appendedAll_state=append_states[-1]*10
-accept_state = append_states[-1]*11
-error_state = append_states[-1]*100
+
+if len(append_states)==0:
+    appendedAll_state=10
+    accept_state = 100
+    error_state = -100
+else:
+    appendedAll_state=append_states[-1]*10
+    accept_state = append_states[-1]*100
+    error_state = append_states[-1]*-100
+
 Secret_str_before = SecretStack([])
 str_before = []
 

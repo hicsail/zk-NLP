@@ -22,9 +22,15 @@ file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 zero_state = 0
 found_states=[i for i in range(1,len(string_target)+1)]
-appendedAll_state = found_states[-1]*10
-accept_state = found_states[-1]*11
-error_state = found_states[-1]*100
+if len(found_states)==0:
+    appendedAll_state=10
+    accept_state = 100
+    error_state = -100
+else:
+    appendedAll_state=found_states[-1]*10
+    accept_state = found_states[-1]*100
+    error_state = found_states[-1]*-100
+
 Secret_str_between = SecretStack([])
 str_between = []
 
