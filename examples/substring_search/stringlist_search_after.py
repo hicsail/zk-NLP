@@ -23,8 +23,8 @@ file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 zero_state = 0
 found_state=1 
-accept_state=found_state*10
-error_state=found_state*100
+accept_state=100
+error_state=-100
 
 
 def dfa_from_string(first, target):

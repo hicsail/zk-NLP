@@ -19,8 +19,8 @@ print("Target: ", string_target, "\n")
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 zero_state = 0
-accept_state=1
-error_state=accept_state*100
+accept_state=100
+error_state=-100
 
 def dfa_from_string(target):
     next_state = {}
