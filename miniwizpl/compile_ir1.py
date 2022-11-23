@@ -293,6 +293,9 @@ def print_exp_ir1_(e):
 
             emit(f'  @assert_zero({temp_wire_4});')
             return r_res
+        elif e.op == 'not_equals':
+            exp = Prim('not', [Prim('equals', e.args, not val_of(e))], val_of(e))
+            return print_exp_ir1(exp)
         elif e.op == 'sub':
             # implementation: multiply x2 by -1
             e1, e2 = e.args
@@ -314,13 +317,14 @@ def print_exp_ir1_(e):
             emit(f'  {r} <- @mul({x1}, {x2});')
             return r
         elif e.op == 'not':
-            e1 = e.args
+            assert len(e.args) == 1
+            e1 = e.args[0]
             x1 = print_exp_ir1(e1)
             negated_x2 = next_wire()
             c = params['arithmetic_field'] - 1
             emit(f'  {negated_x2} <- @mulc({x1}, < {c} >);')
             r = next_wire()
-            emit(f'  {r} <- @add({negated_x2}, < {1} >);')
+            emit(f'  {r} <- @addc({negated_x2}, < {1} >);')
             return r
         elif e.op == 'exp_mod':
             a, b, p = e.args
