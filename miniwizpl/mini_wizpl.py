@@ -83,8 +83,12 @@ def public_foreach_unroll(xs, f, init):
 def public_foreach(xs, f, init):
     assert isinstance(xs, SecretList)
 
+    a = val_of(init)
+    for x in val_of(xs):
+        a = val_of(f(val_of(x), a))
+
     # f is a function x -> accumulator -> new accumulator
-    return Prim('fold', [xs, f, init], None)
+    return Prim('fold', [xs, f, init], a)
 
 def mux(a, b, c):
     return Prim('mux', [a, b, c], val_of(b) if val_of(a) else val_of(c))
