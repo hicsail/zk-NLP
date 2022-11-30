@@ -96,6 +96,9 @@ If you want to run a script just beneath examples directory, then run without -f
 ```
 /bin/bash ./run_emp.sh -c dfa_example.py 
 ```
+
+# Todo: Add IR0 implementation
+
 </ul>
 
 <strong> 2) Manual Execution </strong>
