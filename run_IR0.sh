@@ -29,9 +29,6 @@ fi
 
 cp /code/$path_to /usr/src/app/examples/$path_to
 cp /code/dfa_test_input.txt /usr/src/app/examples/dfa_test_input.txt
-mv /usr/src/app/miniwizpl_test_ir0.ins   /usr/src/app/wiztoolkit/miniwizpl_test_ir0.ins
-mv /usr/src/app/miniwizpl_test_ir0.wit   /usr/src/app/wiztoolkit/miniwizpl_test_ir0.wit
-mv /usr/src/app/miniwizpl_test_ir0.rel   /usr/src/app/wiztoolkit/miniwizpl_test_ir0.rel
 
 echo "Running $path_to .... $operation";
 
@@ -40,9 +37,7 @@ if [ "$operation" = "test" ]
         echo "Running synthetic test case"
         if python3 /usr/src/app/examples/$path_to "test"
             then
-                cd wiztoolkit
                 wtk-bolt bolt miniwizpl_test_ir0.rel miniwizpl_test_ir0.wit miniwizpl_test_ir0.ins
-                cd ..
             else
                 echo "Error in the python script - abort"
         fi
@@ -61,9 +56,7 @@ if [ "$operation" = "test" ]
                 echo "Running with your own text input"
                 if python3 /usr/src/app/examples/$path_to /usr/src/app/examples/dfa_test_input.txt
                     then
-                        cd wiztoolkit
                         wtk-bolt bolt miniwizpl_test_ir0.rel miniwizpl_test_ir0.wit miniwizpl_test_ir0.ins
-                        cd ..
                     else
                         echo "Error in the python script - abort"
                 fi
