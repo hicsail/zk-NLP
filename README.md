@@ -57,7 +57,7 @@ There are two avenues to chose from for you to experiment your python scripts in
 You can run your python script and compile by miniwizpl in the following command:
 
 ```
-/bin/bash ./run.sh -f <sub_folder> -c <Python script name> -o <Optional: test or debug>
+/bin/bash ./run_emp.sh -f <sub_folder> -c <Python script name> -o <Optional: test or debug>
 ```
 
 <strong> -f (Optional) </strong> : Set one of subfolders if you're experimenting with one of python scripts in the subfolder.
@@ -86,7 +86,7 @@ You can run your python script and compile by miniwizpl in the following command
 For example, you can run:
 
 ```
-/bin/bash ./run.sh -f substring_search -c stringlist_search_between.py -o debug
+/bin/bash ./run_emp.sh -f substring_search -c stringlist_search_between.py -o debug
 ```
 
 This means that you are running <strong> stringlist_search_between.py </strong> in the <strong> substring_search </strong> in <strong> debug mode </strong>.<br>
@@ -94,7 +94,7 @@ This means that you are running <strong> stringlist_search_between.py </strong> 
 If you want to run a script just beneath examples directory, then run without -f flag like:
 
 ```
-/bin/bash ./run.sh -c dfa_example.py 
+/bin/bash ./run_emp.sh -c dfa_example.py 
 ```
 </ul>
 
