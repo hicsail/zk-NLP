@@ -15,6 +15,10 @@ RUN apt update && apt install -y\
     bash\
     musl-dev\
     nano\
+    wget\
+    unzip\
+    uuid-dev\
+    default-jdk\
     && apt upgrade -y
 
 COPY . .

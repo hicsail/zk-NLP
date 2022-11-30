@@ -1,7 +1,8 @@
 # # #!/bin/sh
 
-[ -e miniwizpl_test ] && rm miniwizpl_test
-[ -e miniwizpl_test.cpp  ] && rm miniwizpl_test.cpp 
+[ -e miniwizpl_test_ir0.ins  ] && rm miniwizpl_test_ir0.ins
+[ -e miniwizpl_test_ir0.rel  ] && rm miniwizpl_test_ir0.rel
+[ -e miniwizpl_test_ir0.rel  ] && rm miniwizpl_test_ir0.wit
 
 while getopts f:c:o: flag
 do
@@ -28,6 +29,9 @@ fi
 
 cp /code/$path_to /usr/src/app/examples/$path_to
 cp /code/dfa_test_input.txt /usr/src/app/examples/dfa_test_input.txt
+mv /usr/src/app/miniwizpl_test_ir0.ins   /usr/src/app/wiztoolkit/miniwizpl_test_ir0.ins
+mv /usr/src/app/miniwizpl_test_ir0.wit   /usr/src/app/wiztoolkit/miniwizpl_test_ir0.wit
+mv /usr/src/app/miniwizpl_test_ir0.rel   /usr/src/app/wiztoolkit/miniwizpl_test_ir0.rel
 
 echo "Running $path_to .... $operation";
 
@@ -36,7 +40,9 @@ if [ "$operation" = "test" ]
         echo "Running synthetic test case"
         if python3 /usr/src/app/examples/$path_to "test"
             then
-                source ./compile.sh
+                cd wiztoolkit
+                wtk-bolt bolt miniwizpl_test_ir0.rel miniwizpl_test_ir0.wit miniwizpl_test_ir0.ins
+                cd ..
             else
                 echo "Error in the python script - abort"
         fi
@@ -47,7 +53,7 @@ if [ "$operation" = "test" ]
                 echo "Running in debug mode"
                 if python3 /usr/src/app/examples/$path_to /usr/src/app/examples/dfa_test_input.txt "debug"
                     then
-                        source ./compile.sh
+                        echo 'Check the output above'
                     else
                         echo "Error in the python script - abort"
                 fi
@@ -55,7 +61,9 @@ if [ "$operation" = "test" ]
                 echo "Running with your own text input"
                 if python3 /usr/src/app/examples/$path_to /usr/src/app/examples/dfa_test_input.txt
                     then
-                        source ./compile.sh
+                        cd wiztoolkit
+                        wtk-bolt bolt miniwizpl_test_ir0.rel miniwizpl_test_ir0.wit miniwizpl_test_ir0.ins
+                        cd ..
                     else
                         echo "Error in the python script - abort"
                 fi
