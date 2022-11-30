@@ -37,7 +37,7 @@ if [ "$operation" = "test" ]
         echo "Running synthetic test case"
         if python3 /usr/src/app/examples/$path_to "test"
             then
-                wtk-bolt bolt miniwizpl_test_ir0.rel miniwizpl_test_ir0.wit miniwizpl_test_ir0.ins
+                wtk-firealarm miniwizpl_test_ir0.rel miniwizpl_test_ir0.wit miniwizpl_test_ir0.ins
             else
                 echo "Error in the python script - abort"
         fi
@@ -56,7 +56,7 @@ if [ "$operation" = "test" ]
                 echo "Running with your own text input"
                 if python3 /usr/src/app/examples/$path_to /usr/src/app/examples/dfa_test_input.txt
                     then
-                        wtk-bolt bolt miniwizpl_test_ir0.rel miniwizpl_test_ir0.wit miniwizpl_test_ir0.ins
+                        wtk-firealarm miniwizpl_test_ir0.rel miniwizpl_test_ir0.wit miniwizpl_test_ir0.ins
                     else
                         echo "Error in the python script - abort"
                 fi
