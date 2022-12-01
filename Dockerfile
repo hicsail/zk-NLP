@@ -28,6 +28,5 @@ RUN python3 install.py --deps --tool --ot --zk
 RUN ldconfig
 
 RUN git clone https://github.com/stealthsoftwareinc/wiztoolkit.git
-RUN CD wiztoolkit && make && make install
 
 CMD [ "sleep", "infinity" ]
