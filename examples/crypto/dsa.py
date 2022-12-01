@@ -58,4 +58,4 @@ print('s:', s)
 
 output = verify(r, s, SecretInt(m))
 assertTrueEMP(output)
-print_emp(True, 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')

@@ -70,7 +70,7 @@ def pow(a, b, c):
     else:
         return _original_pow(a, b, c)
 
-def public_foreach_unroll(xs, f, init):
+def reduce_unroll(f, xs, init):
     a = init
     if isinstance(xs, SecretList):
         for x in val_of(xs):
@@ -80,7 +80,7 @@ def public_foreach_unroll(xs, f, init):
             a = f(x, a)
     return a
 
-def public_foreach(xs, f, init):
+def reduce(f, xs, init):
     assert isinstance(xs, SecretList)
 
     a = val_of(init)

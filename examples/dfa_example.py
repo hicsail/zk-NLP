@@ -1,7 +1,7 @@
 import pprint
 import random
 import sys
-from miniwizpl import SecretInt, SecretList, mux, public_foreach, print_emp
+from miniwizpl import SecretInt, SecretList, mux, reduce, print_emp
 
 if len(sys.argv) != 2:
     print("Usage: python dfa_example.py <target_filename>")
@@ -55,23 +55,23 @@ with open(sys.argv[1], 'r') as f:
 # and wrap it in a SecretList
 string = SecretList([ord(c) for c in data])
 
-# this runs a "public foreach" loop, on each element of the string
+# this runs a "reduce" loop, on each element of the string
 # the string is represented as a SecretList
 # the length of the string is revealed, but not its contents
 def dfa_loop(string):
-    # miniWizPL operator used: public_foreach
-    # public_foreach calls a function on each element of the list
+    # miniWizPL operator used: reduce
+    # reduce calls a function on each element of the list
     # it also maintains an accumulator value
     # in each iteration, it calls the function on:
     #  - the element (first argument)
     #  - the current accumulator value (second argument)
-    return public_foreach(string,       # list to loop over
-                          next_state,   # function to call for each iteration
-                          0)            # initial value for loop accumulator
+    return reduce(next_state,   # function to call for each iteration
+                  string,       # list to loop over
+                  0)            # initial value for loop accumulator
 
 # define the ZK statement
 output = dfa_loop(string)
 #pprint.pprint(output)
 
 # compile the ZK statement to an EMP file
-print_emp(output, 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')
