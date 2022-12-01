@@ -17,17 +17,18 @@ Clone this repo:
 git clone https://github.com/hicsail/SIEVE.git
 ```
 
+Please move into the root directory
+
+```
+cd SIEVE
+```
+
 Then, inside the local repo root directory run to build an image and a container:
 
 ```
 docker-compose up -d --build
 ```
 
-Please move into the root directory
-
-```
-cd SIEVE
-```
 ## 🖥️ Getting started
 
 You have to do above operations only once, and from next time you can run the following command in your terminal to start Docker Shell:
@@ -46,6 +47,25 @@ If you see something like the following in your command line, you are successful
 <img width="300" alt="image" src="https://user-images.githubusercontent.com/62607343/203413803-19021cb9-07ba-4376-ade0-dbdc6c8506c5.png">
 </ul>
 
+Inside the container, move into wiztoolkit:
+
+```
+cd wiztoolkit
+```
+
+And run the following commands to install wiztoolkit (Backend for IR0):
+
+```
+make
+make install
+```
+
+After the installation is done, move back to the parent directory to run experimentations:
+
+```
+cd ..
+```
+
 
 ## 🏋️‍♀️ Experiment your code
 
@@ -57,47 +77,33 @@ There are two avenues to chose from for you to experiment your python scripts in
 You can run your python script and compile by miniwizpl in the following command:
 
 ```
-/bin/bash ./run_emp.sh -f <sub_folder> -c <Python script name> -o <Optional: test or debug>
+/bin/bash ./run_emp.sh -f <Directory of your Python script to run> -o <Optional: test or debug>
 ```
 
-<strong> -f (Optional) </strong> : Set one of subfolders if you're experimenting with one of python scripts in the subfolder.
-  <ul>
-    <li> crypto
-    <li> neural_networks
-    <li> poseidon_hash
-    <li> simple_demos
-    <li> substring_search
-  </ul>
-
-** You can omit this if you are running a python script just below the examples directory.
-
-
-<strong> -c (Required) </strong> : Choose a python script in the subfolder
+<strong> -f (Required) </strong> : Directory of your Python script to run
 
 <strong> -o (Optional) </strong> : Choose a mode to run your python script: 
   <ul>
     <li> "debug" prints the intermediate results of DFA transitions (It does not compile with miniwizpl).
     <li> "test" produces a synthetic test case, including an input text and target substrings. 
-    <li> If the thrid argument is empty, it will use the user defined target text in "dfa_test_input.txt" and you have to set target: 
+    <li> If the second argument is empty, it will use the user defined target text in "dfa_test_input.txt" and you have to set target inside your python script to run: 
   </ul>
   
   https://github.com/hicsail/SIEVE/blob/200b8dc6076e8024352815e4753204b658544a43/examples/substring_search/stringlist_search_after_all.py#L13
 <br>
-For example, you can run:
+When you want to compile into EMP, you can run:
 
 ```
-/bin/bash ./run_emp.sh -f substring_search -c stringlist_search_between.py -o debug
+/bin/bash ./run_emp.sh -f substring_search/stringlist_search_between.py -o debug
 ```
 
-This means that you are running <strong> stringlist_search_between.py </strong> in the <strong> substring_search </strong> in <strong> debug mode </strong>.<br>
-
-If you want to run a script just beneath examples directory, then run without -f flag like:
+Or when you want to compile into IR0, you can run:
 
 ```
-/bin/bash ./run_emp.sh -c dfa_example.py 
+/bin/bash ./run_IR0.sh -f substring_search/stringlist_search_between.py -o debug
 ```
 
-### Todo: Add IR0 implementation
+This means that you are running <strong> stringlist_search_between.py </strong> in the <strong> substring_search </strong> in <strong> debug mode </strong> with <strong>IR0</strong> .<br>
 
 </ul>
 
@@ -147,7 +153,7 @@ a non-zero exit code. For a failed proof, the above should report a failed asser
 
 You may choose a scale of test cases (i.e., difficulty of tests) in generate_text() function (default to 0 = original length of text)
 
-https://github.com/hicsail/SIEVE/blob/a3c52beb324c2908f695b1422f1fca22fea92a2d/examples/substring_search/stringlist_search_after_all.py#L8
+https://github.com/hicsail/SIEVE/blob/a3c52beb324c2908f695b1422f1fca22fea92a2d/examples/substring_search/stringlist_search_after_all.py#L9
 
 
 ----
