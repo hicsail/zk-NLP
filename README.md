@@ -100,7 +100,7 @@ When you want to compile into EMP, you can run:
 Or when you want to compile into IR0, you can run:
 
 ```
-/bin/bash ./run_IR0.sh -f substring_search/stringlist_search_between.py -o debug
+/bin/bash ./run_IR0.sh -f substring_search/IR0_stringlist_search_between.py -o debug
 ```
 
 This means that you are running <strong> stringlist_search_between.py </strong> in the <strong> substring_search </strong> in <strong> debug mode </strong> with <strong>IR0</strong> .<br>
