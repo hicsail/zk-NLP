@@ -108,12 +108,16 @@ exp_cache = {}
 
 
 def print_exp_ir1(e):
-    global exp_cache
     if id(e) in exp_cache:
-        return exp_cache[id(e)]
+        r, e = exp_cache[id(e)]
+        return r
     else:
         r = print_exp_ir1_(e)
-        exp_cache[id(e)] = r
+        # IMPORTANT: the cache needs to save both r and e
+        # otherwise Python will garbage-collect e and re-use its memory location
+        # if this happens, id(e) will point to a new object and we'll get the wrong
+        # value from the cache
+        exp_cache[id(e)] = (r, e)
         return r
 
 def print_exp_ir1_(e):
@@ -234,7 +238,6 @@ def print_exp_ir1_(e):
                 a_wire_val = WireVal(a_wire_name, int, val_of(init))
                 for x_val in val_of(xs):
                     new_a_val = f(SecretInt(x_val), a_wire_val)
-                    add_to_witness(new_a_val)
                     a_wire_name = print_exp_ir1(new_a_val)
                     a_wire_val = WireVal(a_wire_name, int, val_of(new_a_val))
                 return a_wire_name
