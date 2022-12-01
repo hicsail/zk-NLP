@@ -47,7 +47,7 @@ def run_dfa(dfa, text_input):
         curr_state=initial_state
         for (dfa_state, dfa_str), next_state in dfa.items():
 
-            if len(sys.argv)==3 and sys.argv[2] =="debug":
+            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
                 print(
                     "curr state: ", val_of(curr_state),
                     "dfa state: ", dfa_state,"\n",
@@ -61,7 +61,7 @@ def run_dfa(dfa, text_input):
                          error_state,
                          curr_state))
                          
-            if len(sys.argv)==3 and sys.argv[2] =="debug":
+            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
                 print("Updated state: ", val_of(curr_state))
 
         ''' 
@@ -80,7 +80,7 @@ def run_dfa(dfa, text_input):
         '''
         Secret_str_after.cond_push(is_in_found_states(initial_state, found_states),string)
         return curr_state
-    if len(sys.argv)==3 and sys.argv[2] =="debug":
+    if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
         latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
     else:
         latest_state=public_foreach(text_input, next_state_fun, zero_state)
@@ -94,11 +94,11 @@ print("\n", "DFA: ",dfa, "\n")
 latest_state = run_dfa(dfa, file_string)
 assertTrueEMP(latest_state == accept_state)
 
-if len(sys.argv)==3 and sys.argv[2] =="debug":
+if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
     print("\n", "Latest State: ",val_of(latest_state), "\n")
     print("\n", "Result:   ",Secret_str_after.current_val, "\n")
     expected=[word_to_integer(x) for x in string_target]
     print("\n", "Expected: ",expected, "\n")
-
-# compile the ZK statement to an EMP file
-print_emp(True, 'miniwizpl_test.cpp')
+else:
+    # compile the ZK statement to an EMP file
+    print_emp(True, 'miniwizpl_test.cpp')

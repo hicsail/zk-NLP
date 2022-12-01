@@ -2,8 +2,9 @@ import sys
 from miniwizpl import *
 from miniwizpl.expr import *
 from common.util import *
-
-set_field(2**61-1)
+sys.path.append("/usr/src/app/examples/poseidon_hash")
+from parameters import *
+from hash import Poseidon
 
 ''' Prepping targe text and substrings'''
 
@@ -54,7 +55,7 @@ def run_dfa(dfa, text_input):
         curr_state=initial_state
         for (dfa_state, dfa_str), next_state in dfa.items():
 
-            if len(sys.argv)==3 and sys.argv[2] =="debug":
+            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
                 print(
                     "curr state: ", val_of(curr_state),
                     "dfa state: ", dfa_state,"\n",
@@ -68,7 +69,7 @@ def run_dfa(dfa, text_input):
                          error_state,
                          curr_state))
                          
-            if len(sys.argv)==3 and sys.argv[2] =="debug":
+            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
                 print("Updated state: ", val_of(curr_state))                     
 
         ''' 
@@ -85,7 +86,7 @@ def run_dfa(dfa, text_input):
         Secret_str_between.cond_push(is_in_found_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
         return curr_state
 
-    if len(sys.argv)==3 and sys.argv[2] =="debug":
+    if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
         latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
     else:
         latest_state=public_foreach(text_input, next_state_fun, zero_state)
@@ -104,12 +105,25 @@ print("\n", "DFA: ",dfa, "\n")
 latest_state = run_dfa(dfa, file_string)
 assert0((latest_state - accept_state)*(latest_state - appendedAll_state))
 
-if len(sys.argv)==3 and sys.argv[2] =="debug":
+# prove validity of the input text by Poseidon Hash
+security_level = 128
+input_rate = 8
+t = len(file_data)
+alpha = 17
+prime = 2**61-1
+set_field(prime)
+poseidon_new = Poseidon(prime, security_level, alpha, input_rate, t)
+
+poseidon_digest = poseidon_new.run_hash(file_string)
+assert0(poseidon_digest - val_of(poseidon_digest))
+
+if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
     print("\n", "Latest State: ",val_of(latest_state), "\n")
     print("\n", "Result:   ",Secret_str_between.current_val, "\n")
     expected=[word_to_integer(x) for x in string_target]
     expected.insert(0, word_to_integer(string_a))
     print("\n", "Expected: ",expected, "\n")
 
-# compile the ZK statement to an EMP file
-print_ir0('miniwizpl_test_ir0')
+else:
+    # compile the ZK statement to an EMP file
+    print_ir0('miniwizpl_test_ir0')
