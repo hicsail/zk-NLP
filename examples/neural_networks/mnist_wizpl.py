@@ -28,4 +28,4 @@ secret_output = model(secret_input)
 print(secret_output)
 
 # Compile the output to EMP
-print_emp(secret_output, 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')

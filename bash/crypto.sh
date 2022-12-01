@@ -5,6 +5,7 @@ set -euo pipefail
 declare -a examples=("rsa_bignum.py" "dsa.py")
 for i in "${examples[@]}"
 do
+    echo "testing ${i}"
     cd examples/crypto
     python3 $i
     cp miniwizpl_test.cpp miniwizpl_test.cpp.emp_wit ../..
