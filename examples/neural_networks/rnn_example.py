@@ -242,4 +242,4 @@ out = compare_tensors(out, expected_output)
 # print(out)
 
 # Print EMP
-print_emp(out, 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')

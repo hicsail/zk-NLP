@@ -89,14 +89,14 @@ class Poseidon:
             self.rc_field = rc.calc_round_constants(self.t, self.full_round, self.partial_round, self.p, self.field_p,
                                                     self.alpha, self.prime_bit_len)
 
-        self.rc_field = np.array([int(x) for x in self.rc_field])
+        #self.rc_field = np.array([int(x) for x in self.rc_field])
 
-        self.mds_matrix = np.array(self.mds_matrix)
+        #self.mds_matrix = np.array(self.mds_matrix)
         self.state = np.zeros(self.t)
         self.rc_counter = 0
 
     def s_box(self, element):
-        return pow(element, self.alpha, 2**61-1)
+        return pow(element, self.alpha, self.p)
 
     def full_rounds(self):
         for r in range(0, self.half_full_round):
@@ -108,7 +108,7 @@ class Poseidon:
                 self.state[i] = self.s_box(self.state[i])
 
             # apply MDS matrix
-            self.state = np.dot(self.state, self.mds_matrix)
+            self.state = dot(self.state, self.mds_matrix)
 
     def partial_rounds(self):
         for r in range(0, self.partial_round):
@@ -119,7 +119,7 @@ class Poseidon:
             self.state[0] = self.s_box(self.state[0])
 
             # apply MDS matrix
-            self.state = np.dot(self.state, self.mds_matrix)
+            self.state = dot(self.state, self.mds_matrix)
 
     def run_hash(self, input_vec: list):
         """

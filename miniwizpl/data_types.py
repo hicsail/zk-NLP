@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import galois
 import os
 from .globals import *
 from .expr import *
@@ -15,6 +16,21 @@ class SecretInt(AST):
 
     def __str__(self):
         return f'SecretInt({self.val})'
+    __repr__ = __str__
+
+class SecretGF(AST):
+    """
+    A secret finite field element. Its value will be part of the witness for the compiled ZK statement.
+    """
+    def __init__(self, intval):
+        global all_defs
+        all_defs.append(self)
+        p = params['arithmetic_field']
+        self.val = galois.GF(p)(intval)
+        self.name = gensym('gfval')
+
+    def __str__(self):
+        return f'SecretGF({self.val})'
     __repr__ = __str__
 
 class SecretArray(AST):

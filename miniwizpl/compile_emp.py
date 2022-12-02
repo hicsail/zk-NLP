@@ -458,7 +458,7 @@ def print_ram_checks(defs):
         if isinstance(d, (SecretIndexList, SecretStack)):
             emit(f'  {name}->check();')
 
-def print_emp(outp, filename):
+def print_emp(filename):
     global all_defs
     global emp_output_string
     global witness_output_string
@@ -474,7 +474,6 @@ def print_emp(outp, filename):
     emit()
     for s in params['all_statements']:
         print_exp(s)
-    final_output_var = print_exp(outp)
 
     # if isinstance(outp.val, bool):
     #     emit(f'  bool final_result = {final_output_var}.reveal<bool>(PUBLIC);')

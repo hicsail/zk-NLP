@@ -70,7 +70,7 @@ def pow(a, b, c):
     else:
         return _original_pow(a, b, c)
 
-def public_foreach_unroll(xs, f, init):
+def reduce_unroll(f, xs, init):
     a = init
     if isinstance(xs, SecretList):
         for x in val_of(xs):
@@ -80,14 +80,32 @@ def public_foreach_unroll(xs, f, init):
             a = f(x, a)
     return a
 
-def public_foreach(xs, f, init):
+def reduce(f, xs, init):
     assert isinstance(xs, SecretList)
 
+    a = val_of(init)
+    for x in val_of(xs):
+        a = val_of(f(val_of(x), a))
+
     # f is a function x -> accumulator -> new accumulator
-    return Prim('fold', [xs, f, init], None)
+    return Prim('fold', [xs, f, init], a)
 
 def mux(a, b, c):
     return Prim('mux', [a, b, c], val_of(b) if val_of(a) else val_of(c))
+
+def dot(x, y):
+    result = [None for _ in x]
+    # iterate through rows of X
+    for i in range(len(x)):
+        # iterate through columns of Y
+        for j in range(len(y[0])):
+            # iterate through rows of Y
+            for k in range(len(y)):
+                if result[i] is None:
+                    result[i] = x[i] * y[k][j]
+                else:
+                    result[i] += x[i] * y[k][j]
+    return result
 
 def set_bitwidth(b):
     """

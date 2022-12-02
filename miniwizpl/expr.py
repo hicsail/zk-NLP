@@ -88,10 +88,10 @@ class AST:
         return Prim('not', [self], not val_of(self))
 
     def __int__(self):
-        raise RuntimeError('unsupported: convert SecretInt to int')
+        raise RuntimeError('unsupported: convert AST to int')
 
     def __bool__(self):
-        raise RuntimeError('unsupported: convert SecretInt to bool')
+        raise RuntimeError('unsupported: convert AST to bool')
 
     def if_else(self, ifval, elseval):
         return Prim('mux', [self, ifval, elseval], None)

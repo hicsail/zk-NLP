@@ -7,6 +7,7 @@ from .globals import *
 from .expr import *
 from .data_types import *
 import sys
+import galois
 
 sys.setrecursionlimit(10000)
 
@@ -17,6 +18,7 @@ witness_list = []
 IR_MODE = 1
 WRITE_TO_WIT = 1
 WRITE_TO_REL = 1
+all_pubvals = {}
 
 @dataclass
 class WireVal(AST):
@@ -106,12 +108,16 @@ exp_cache = {}
 
 
 def print_exp_ir1(e):
-    global exp_cache
     if id(e) in exp_cache:
-        return exp_cache[id(e)]
+        r, e = exp_cache[id(e)]
+        return r
     else:
         r = print_exp_ir1_(e)
-        exp_cache[id(e)] = r
+        # IMPORTANT: the cache needs to save both r and e
+        # otherwise Python will garbage-collect e and re-use its memory location
+        # if this happens, id(e) will point to a new object and we'll get the wrong
+        # value from the cache
+        exp_cache[id(e)] = (r, e)
         return r
 
 def print_exp_ir1_(e):
@@ -121,7 +127,7 @@ def print_exp_ir1_(e):
     global WRITE_TO_REL
     global WRITE_TO_WIT
 
-    if isinstance(e, (SecretArray, SecretTensor, SecretInt, SymVar)):
+    if isinstance(e, (SecretArray, SecretTensor, SecretInt, SecretGF, SymVar)):
         return add_to_witness(e)
 
     elif isinstance(e, WireVal):
@@ -137,6 +143,17 @@ def print_exp_ir1_(e):
         r = next_wire()
         emit(f'  {r} <- < {e} >;')
         return r
+
+    elif isinstance(e, galois.Array):
+        global all_pubvals
+        if int(e) in all_pubvals:
+            return all_pubvals[int(e)]
+        else:
+            r = next_wire()
+            emit(f'  {r} <- < {int(e)} >;')
+            all_pubvals[int(e)] = r
+            return r
+
     elif isinstance(e, Prim):
         if e.op in int_ops_ir1:
             e1, e2 = e.args
@@ -221,7 +238,6 @@ def print_exp_ir1_(e):
                 a_wire_val = WireVal(a_wire_name, int, val_of(init))
                 for x_val in val_of(xs):
                     new_a_val = f(SecretInt(x_val), a_wire_val)
-                    add_to_witness(new_a_val)
                     a_wire_name = print_exp_ir1(new_a_val)
                     a_wire_val = WireVal(a_wire_name, int, val_of(new_a_val))
                 return a_wire_name
@@ -293,6 +309,9 @@ def print_exp_ir1_(e):
 
             emit(f'  @assert_zero({temp_wire_4});')
             return r_res
+        elif e.op == 'not_equals':
+            exp = Prim('not', [Prim('equals', e.args, not val_of(e))], val_of(e))
+            return print_exp_ir1(exp)
         elif e.op == 'sub':
             # implementation: multiply x2 by -1
             e1, e2 = e.args
@@ -314,13 +333,14 @@ def print_exp_ir1_(e):
             emit(f'  {r} <- @mul({x1}, {x2});')
             return r
         elif e.op == 'not':
-            e1 = e.args
+            assert len(e.args) == 1
+            e1 = e.args[0]
             x1 = print_exp_ir1(e1)
             negated_x2 = next_wire()
             c = params['arithmetic_field'] - 1
             emit(f'  {negated_x2} <- @mulc({x1}, < {c} >);')
             r = next_wire()
-            emit(f'  {r} <- @add({negated_x2}, < {1} >);')
+            emit(f'  {r} <- @addc({negated_x2}, < {1} >);')
             return r
         elif e.op == 'exp_mod':
             a, b, p = e.args

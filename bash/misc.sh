@@ -10,9 +10,9 @@ set -euo pipefail
 #     -o miniwizpl_test
 # ./miniwizpl_test 1 12346 & ./miniwizpl_test 2 12346
 # rm miniwizpl_test.cpp miniwizpl_test.cpp.emp_wit
-
+echo "testing dfa_example.py"
 cd examples
-python3 dfa_example.py dfa_test_input.txt
+python3 dfa_example.py substring_search/BitTorrent_Demo_LE_version.py
 cp miniwizpl_test.cpp miniwizpl_test.cpp.emp_wit ..
 cd ..
 g++ -I./miniwizpl/boilerplate \

@@ -26,4 +26,4 @@ net = net @ outp_layer
 # print the result
 print(net.val)
 
-print_emp(net, 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')

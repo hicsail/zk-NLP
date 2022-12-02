@@ -30,4 +30,4 @@ expected_output = PublicTensor(output.val)
 output = compare_tensors(output, expected_output)
 
 # Compile the output to EMP
-print_emp(output, "miniwizpl_test.cpp")
+print_emp("miniwizpl_test.cpp")

@@ -54,16 +54,16 @@ def run_dfa(dfa, string):
         output = mux(state == accept_state, accept_state, output)
         return output
 
-    return public_foreach(string,
-                          next_state_fun,
-                          0)
+    return reduce(next_state_fun,
+                  string,
+                  0)
 
 # define the ZK statement
 dfa = dfa_from_string('import')
 print(dfa)
 output = run_dfa(dfa, file_string)
 
-assert0(output - accept_state)
+assert0(~(output == accept_state))
 print(output)
 
 

@@ -1,4 +1,4 @@
-from miniwizpl import SecretInt, Prim, print_ir1, assert0, set_field, mux
+from miniwizpl import *
 set_field(2**61 - 1)
 
 x = SecretInt(3)
@@ -9,4 +9,7 @@ z = mux(x == y, a, b+a)
 output = z
 assert0(output - 50)
 
-print_ir1("miniwizpl_test")
+w = mux(x != y, a, b)
+assert0(w - val_of(a))
+
+print_ir0("miniwizpl_test")
