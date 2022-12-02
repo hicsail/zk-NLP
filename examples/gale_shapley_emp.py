@@ -59,6 +59,6 @@ r = gale_shapley()
 # for i in range(len(women)):
 #     log_int(f'marriage of woman {i+len(men)}', r[i])
 print('output:', r)
-print_emp('miniwizpl_test.cpp')
+print_emp(r[0], 'miniwizpl_test.cpp')
 
 #assert r == [1, 2, 0]

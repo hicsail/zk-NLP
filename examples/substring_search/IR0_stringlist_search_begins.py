@@ -3,6 +3,10 @@ from miniwizpl import *
 from miniwizpl.expr import *
 from common.util import *
 
+set_field(2**61-1)
+
+''' Prepping target text and substrings'''
+
 if (len(sys.argv)>1 and sys.argv[1] =="test") or (len(sys.argv)>2 and sys.argv[2] =="debug"):
     file_data=generate_text()
     string_target=generate_target(file_data, "begins")
@@ -20,7 +24,7 @@ file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 zero_state = 0
 accept_state=100
-error_state=-100
+error_state=101
 
 def dfa_from_string(target):
     next_state = {}
@@ -62,11 +66,11 @@ print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
 latest_state = run_dfa(dfa, file_string)
-assertTrueEMP(latest_state == accept_state)
+assert0(latest_state - accept_state)
 
 if len(sys.argv)==3 and sys.argv[2] =="debug":
     print("\n", "Latest State: ",val_of(latest_state), "\n")
 
 # compile the ZK statement to an EMP file
-print_emp(True, 'miniwizpl_test.cpp')
+print_ir0('miniwizpl_test_ir0')
 

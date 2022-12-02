@@ -26,4 +26,4 @@ print('b', val_of(b))
 print('xs', xs.current_val)
 assert0EMP(b-5)
 
-print_emp('miniwizpl_test.cpp')
+print_emp(y, 'miniwizpl_test.cpp')
