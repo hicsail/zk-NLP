@@ -69,9 +69,9 @@ def run_dfa(dfa, text_input):
         return curr_state
 
     if len(sys.argv)==3 and sys.argv[2] =="debug":
-        latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+        latest_state=reduce_unroll(next_state_fun, text_input, zero_state)
     else:
-        latest_state=public_foreach(text_input, next_state_fun, zero_state)
+        latest_state=reduce(next_state_fun, text_input, zero_state)
     return latest_state
 
 dfa = dfa_from_string(string_a, string_target)

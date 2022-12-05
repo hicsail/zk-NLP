@@ -82,9 +82,9 @@ def run_dfa(dfa, text_input):
         return curr_state
 
     if len(sys.argv)==3 and sys.argv[2] =="debug":
-        latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+        latest_state=reduce_unroll(next_state_fun, text_input, zero_state)
     else:
-        latest_state=public_foreach(text_input, next_state_fun, zero_state)
+        latest_state=reduce(next_state_fun, text_input, zero_state)
 
     ''' 
         Pop the last element if no string_b found and if you're read the last substring of the target between strings
@@ -108,4 +108,4 @@ if len(sys.argv)==3 and sys.argv[2] =="debug":
     print("\n", "Expected: ",expected, "\n")
 
 # compile the ZK statement to an EMP file
-print_emp(True, 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')

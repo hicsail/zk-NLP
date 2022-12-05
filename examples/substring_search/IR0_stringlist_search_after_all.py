@@ -83,9 +83,9 @@ def run_dfa(dfa, text_input):
         Secret_str_after.cond_push(is_in_found_states(initial_state, found_states),string)
         return curr_state
     if len(sys.argv)==3 and sys.argv[2] =="debug":
-        latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+        latest_state=reduce_unroll(next_state_fun, text_input, zero_state)
     else:
-        latest_state=public_foreach(text_input, next_state_fun, zero_state)
+        latest_state=reduce(next_state_fun, text_input, zero_state)
     return latest_state
 
 # build DFA
