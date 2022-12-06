@@ -5,7 +5,7 @@ from hash import Poseidon
 
 security_level = 128
 input_rate = 8
-t = 9
+t = 8
 alpha = 17
 prime = 2**61-1
 set_field(prime)

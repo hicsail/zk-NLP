@@ -26,6 +26,7 @@ class SecretGF(AST):
         global all_defs
         all_defs.append(self)
         p = params['arithmetic_field']
+        assert intval <= p
         self.val = galois.GF(p)(intval)
         self.name = gensym('gfval')
 
@@ -62,6 +63,22 @@ class SecretList(AST):
     def __str__(self):
         return f'SecretList({len(self.arr)})'
     __repr__ = __str__
+
+    def as_field_elements(self, k):
+        """
+        Returns the elements of this list as field elements, in chunks of size k
+        """
+
+        # TODO: this is wrong; it adds the value to the witness twice and doesn't
+        # prove a correspondence between the two witness values
+        p = params['arithmetic_field']
+        for x in self.arr:
+            assert x <= p
+
+        gf_arr_pad = np.pad(self.arr, (0, len(self.arr)%k-1)).reshape((-1, k))
+        blocks = [[SecretGF(int(x)) for x in a] for a in gf_arr_pad]
+
+        return blocks
 
 class SecretIndexList(AST):
     """
