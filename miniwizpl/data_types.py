@@ -63,6 +63,24 @@ class SecretList(AST):
         return f'SecretList({len(self.arr)})'
     __repr__ = __str__
 
+    def as_field_elements(self, k):
+        """
+        Returns the elements of this list as field elements, in chunks of size k
+        """
+
+        # TODO: this is wrong; it adds the value to the witness twice and doesn't
+        # prove a correspondence between the two witness values
+        p = params['arithmetic_field']
+        for x in self.arr:
+            assert x <= p
+
+        gfs = [SecretGF(x) for x in val_of(self.arr)]
+        split_gfs = [gfs[i:i + k] for i in range(0, len(gfs), k)]
+        if len(split_gfs[-1]) < k:
+            split_gfs[-1].extend([SecretGF(0)] * (k - len(split_gfs[-1])))
+
+        return split_gfs
+
 class SecretIndexList(AST):
     """
     A list of secret values with secret indexing. The maximum length of the list is public.

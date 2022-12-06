@@ -59,7 +59,7 @@ class Poseidon:
         self.t = t
 
         if 2 ** self.security_level > self.p ** self.t:
-            print("Not secure")
+            raise RuntimeError("Not secure")
 
         print("Initialize Round Numbers")
         if (full_round is not None) & (partial_round is not None):
