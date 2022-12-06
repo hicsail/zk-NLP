@@ -1,0 +1,23 @@
+{
+    "target_note": "Base directory where tests are created",
+    "target": "../tests",
+
+    "ccc_note": "The location of the CCC file to use during generation" ,
+    "ccc": "./ccc.txt",
+
+    "test-families" : {
+
+        "list_sum": {
+            "primes": ["p1", "p2", "p3", "p4"],
+            "size_note": "list will have length 10^size",
+            "sizes": [3, 4]
+        },
+
+        "dot_product": {
+            "primes": ["p1", "p2", "p3", "p4"],
+            "size_note": "vectors will have length 10^size",
+            "sizes": [2, 3]
+        }
+
+    }
+}
