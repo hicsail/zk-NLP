@@ -97,15 +97,14 @@ def generate_target(txt, type):
 
     elif type=="begins":
         return txt[0]
-    
+
     elif type=="between":
-        string_a=random.sample(txt[:-1], 1) # Avoiding the last substring to be picked as target
+        string_a=random.sample(txt[:-2], 1) # Avoiding the last substring to be picked as target
         string_a=string_a[0]
         idx_a=txt.index(string_a)
-
-        string_b=random.sample(txt[idx_a+1:], 1) # Avoiding the last substring to be picked as target
+        string_b=random.sample(txt[idx_a+2:], 1)
         string_b=string_b[0]
-        idx_b=txt.index(string_b)
+        idx_b=txt[idx_a+2:].index(string_b)+idx_a+2
         string_target=txt[idx_a+1:idx_b]
         return string_a, string_target, string_b
 

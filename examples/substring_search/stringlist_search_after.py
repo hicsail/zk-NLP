@@ -5,8 +5,12 @@ from common.util import *
 
 ''' Prepping target text and substrings'''
 
-if (len(sys.argv)>1 and sys.argv[1] =="test") or (len(sys.argv)>2 and sys.argv[2] =="debug"):
-    file_data=generate_text()
+if (len(sys.argv)>1 and sys.argv[1] =="test"):
+    print('Test size: ',sys.argv[2])
+    file_data=generate_text(sys.argv[2])
+    string_a, string_target=generate_target(file_data, "after")
+if (len(sys.argv)>2 and sys.argv[2] =="debug"):
+    file_data=generate_text(sys.argv[3])
     string_a, string_target=generate_target(file_data, "after")
 
 else:
@@ -85,4 +89,3 @@ if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
 else:
     # compile the ZK statement to an EMP file
     print_emp('miniwizpl_test.cpp')
-

@@ -36,12 +36,16 @@ str_between = []
 
 def dfa_from_string(first,target,last):
     next_state = {}
-    assert(len(target)>0)
-    next_state[(zero_state, word_to_integer(first))]=found_states[0]
-    for i in range(0,len(target)-1):
-      next_state[(found_states[i], word_to_integer(target[i]))]=found_states[i+1]
-    next_state[(found_states[-1], word_to_integer(target[-1]))]=appendedAll_state
-    next_state[(appendedAll_state, word_to_integer(last))]=accept_state
+    if len(target)>0:
+        next_state[(zero_state, word_to_integer(first))]=found_states[0]
+        for i in range(0,len(target)-1):
+            next_state[(found_states[i], word_to_integer(target[i]))]=found_states[i+1]
+            next_state[(found_states[-1], word_to_integer(target[-1]))]=appendedAll_state
+            next_state[(appendedAll_state, word_to_integer(last))]=accept_state
+    else:
+        next_state[(zero_state, word_to_integer(first))]=1
+        for i in range(0,len(target)-1):
+            next_state[(1, word_to_integer(last))]=accept_state
     return next_state
 
 # run a dfa

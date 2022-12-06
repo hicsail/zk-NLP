@@ -3,17 +3,17 @@ from miniwizpl import *
 from miniwizpl.expr import *
 from common.util import *
 
+#TODO FIXME : ADD CCC.text check
 set_field(2**61-1)
 
 ''' Prepping target text and substrings'''
-
-if (len(sys.argv)>1 and sys.argv[1] =="test") or (len(sys.argv)>2 and sys.argv[2] =="debug"):
-    file_data=generate_text()
+if (len(sys.argv)>2 and (sys.argv[2] =="debug"or sys.argv[2] =="test")):
+    file_data=generate_text(int(sys.argv[3]))
     string_a, string_target=generate_target(file_data, "point_to")
 
 else:
-    string_target =  ['not', 'in']
-    string_a = 'our'
+    string_target =  ['not']
+    string_a = 'in'
     with open(sys.argv[1], 'r') as f:
         file_data = f.read()
     file_data = file_data.split()
@@ -42,12 +42,17 @@ str_before = []
 def dfa_from_string(last, target):
     next_state = {}
     assert(len(target)>0)
-    next_state[(zero_state, word_to_integer(target[0]))]=append_states[0]
-    for i in range(1,len(target)-1):
-      next_state[(append_states[i-1], word_to_integer(target[i]))]=append_states[i]
-    next_state[(append_states[-1], word_to_integer(target[-1]))]=appendedAll_state
-    next_state[(appendedAll_state, word_to_integer(last))]=accept_state
-    return next_state
+    if len(target)==1:
+        next_state[(zero_state, word_to_integer(target[0]))]=appendedAll_state
+        next_state[(appendedAll_state, word_to_integer(last))]=accept_state
+        return next_state
+    else:
+        next_state[(zero_state, word_to_integer(target[0]))]=append_states[0]
+        for i in range(1,len(target)-1):
+            next_state[(append_states[i-1], word_to_integer(target[i]))]=append_states[i]
+        next_state[(append_states[-1], word_to_integer(target[-1]))]=appendedAll_state
+        next_state[(appendedAll_state, word_to_integer(last))]=accept_state
+        return next_state
 
 # run a dfa
 def run_dfa(dfa, text_input):
@@ -84,7 +89,7 @@ def run_dfa(dfa, text_input):
         ''' 
             Adding sub string if in one of found states or accept state and reading the last word in the text
         '''
-        Secret_str_before.cond_push(is_in_found_states(curr_state, append_states)|(curr_state == appendedAll_state), string)
+        # Secret_str_before.cond_push(is_in_found_states(curr_state, append_states)|(curr_state == appendedAll_state), string)
 
         return curr_state
     if len(sys.argv)==3 and sys.argv[2] =="debug":
@@ -94,7 +99,7 @@ def run_dfa(dfa, text_input):
     ''' 
         Pop the last element if no string_b found and if you're read the last substring of the target between strings
     '''
-    Secret_str_before.cond_pop(latest_state==appendedAll_state)
+    # Secret_str_before.cond_pop(latest_state==appendedAll_state)
     return latest_state
 
 # build DFA
@@ -107,9 +112,9 @@ assert0((latest_state - accept_state)*(latest_state - appendedAll_state))
 
 if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
     print("\n", "Latest State: ",val_of(latest_state), "\n")
-    print("\n", "Result: ",Secret_str_before.current_val, "\n")
+    # print("\n", "Result: ",Secret_str_before.current_val, "\n")
     expected=[word_to_integer(x) for x in string_target]
     print("\n", "Expected: ",expected, "\n")
 else:
     # compile the ZK statement to an EMP file
-    print_ir0('miniwizpl_test_ir0')
+    print_ir0(sys.argv[4]+'/miniwizpl_test_ir0')
