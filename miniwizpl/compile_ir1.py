@@ -388,7 +388,7 @@ def print_ir1(filename):
     current_wire = 0
 
     field = params['arithmetic_field']
-    print('field size:', field)
+    #print('field size:', field)
 
     # INSTANCE OUTPUT
     with open(filename + '.ins', 'w') as f:

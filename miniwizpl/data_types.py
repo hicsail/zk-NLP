@@ -26,6 +26,7 @@ class SecretGF(AST):
         global all_defs
         all_defs.append(self)
         p = params['arithmetic_field']
+        assert intval <= p
         self.val = galois.GF(p)(intval)
         self.name = gensym('gfval')
 
@@ -74,12 +75,10 @@ class SecretList(AST):
         for x in self.arr:
             assert x <= p
 
-        gfs = [SecretGF(x) for x in val_of(self.arr)]
-        split_gfs = [gfs[i:i + k] for i in range(0, len(gfs), k)]
-        if len(split_gfs[-1]) < k:
-            split_gfs[-1].extend([SecretGF(0)] * (k - len(split_gfs[-1])))
+        gf_arr_pad = np.pad(self.arr, (0, len(self.arr)%k-1)).reshape((-1, k))
+        blocks = [[SecretGF(int(x)) for x in a] for a in gf_arr_pad]
 
-        return split_gfs
+        return blocks
 
 class SecretIndexList(AST):
     """

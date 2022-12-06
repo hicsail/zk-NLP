@@ -14,6 +14,19 @@ class HashType(enum.Enum):
     MERKLETREE = "MerkleTree"
 
 
+def calculate_alpha(p):
+    alpha = 2
+    while np.gcd(alpha, p-1) != 1:
+        alpha += 1
+    return alpha
+
+def calculate_length(p):
+    security_level = 128
+    t = 2
+    while 2 ** security_level > p ** t:
+        t += 1
+    return t
+
 class Poseidon:
     def __init__(self, p, security_level, alpha, input_rate, t, full_round: Optional[int] = None,
                  partial_round: Optional[int] = None, mds_matrix: Optional[list] = None,
@@ -46,8 +59,7 @@ class Poseidon:
         if np.gcd(alpha, p-1) == 1:
             self.alpha = alpha
         else:
-            print("Not available alpha")
-            exit(1)
+            raise RuntimeError("Not available alpha")
 
         if prime_bit_len is not None:
             self.prime_bit_len = prime_bit_len
@@ -61,7 +73,6 @@ class Poseidon:
         if 2 ** self.security_level > self.p ** self.t:
             raise RuntimeError("Not secure")
 
-        print("Initialize Round Numbers")
         if (full_round is not None) & (partial_round is not None):
             self.full_round, self.partial_round, self.half_full_round = full_round, partial_round, int(full_round / 2)
         else:
@@ -69,10 +80,8 @@ class Poseidon:
                                                                                               self.security_level,
                                                                                               self.t, self.alpha, True)
 
-        print("Initialize field")
         self.field_p = galois.GF(p)
 
-        print("Initialize MDS matrix")
         if mds_matrix is not None:
             if (len(mds_matrix) != self.t) & (len(mds_matrix[0]) != self.t):
                 raise ValueError('Invalid size of MDS matrix')
@@ -80,7 +89,6 @@ class Poseidon:
         else:
             self.mds_matrix = rc.mds_matrix_generator(self.field_p, self.t)
 
-        print("Initialize Round Constant")
         if rc_list is not None:
             if len(rc_list) != self.t * (self.full_round + self.partial_round):
                 raise ValueError('Invalid number of round constants')
@@ -143,17 +151,17 @@ class Poseidon:
 
         # First full rounds
         self.full_rounds()
-        print('first round done')
+        #print('first round done')
         #output = public_foreach(SecretList(new_vec), self.full_rounds(), 0)
         # Middle partial rounds
         self.partial_rounds()
-        print('second round done')
+        #print('second round done')
         #print(self.state)
         #output += public_foreach(SecretList(self.state), self.partial_rounds(), 0)
 
         # Last full rounds
         self.full_rounds()
-        print('third round done')
+        #print('third round done')
         #print(self.state)
         #output += public_foreach(SecretList(self.state), self.full_rounds(), 0)
 
