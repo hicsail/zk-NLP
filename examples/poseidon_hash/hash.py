@@ -14,6 +14,19 @@ class HashType(enum.Enum):
     MERKLETREE = "MerkleTree"
 
 
+def calculate_alpha(p):
+    alpha = 2
+    while np.gcd(alpha, p-1) != 1:
+        alpha += 1
+    return alpha
+
+def calculate_length(p):
+    security_level = 128
+    t = 2
+    while 2 ** security_level > p ** t:
+        t += 1
+    return t
+
 class Poseidon:
     def __init__(self, p, security_level, alpha, input_rate, t, full_round: Optional[int] = None,
                  partial_round: Optional[int] = None, mds_matrix: Optional[list] = None,

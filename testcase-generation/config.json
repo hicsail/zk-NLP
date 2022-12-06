@@ -17,6 +17,12 @@
             "primes": ["p1", "p2", "p3", "p4"],
             "size_note": "vectors will have length 10^size",
             "sizes": [2, 3]
+        },
+
+        "poseidon_hash": {
+            "primes": ["p1", "p3"],
+            "size_note": "hashes lists of length 2^size",
+            "sizes": [4, 5, 6]
         }
 
     }
