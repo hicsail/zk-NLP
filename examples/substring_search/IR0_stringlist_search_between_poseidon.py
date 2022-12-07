@@ -15,9 +15,9 @@ if (len(sys.argv)>2 and (sys.argv[2] =="debug"or sys.argv[2] =="test")):
     string_a, string_target, string_b =generate_target(file_data, "between")
 
 else:
-    string_a = 'not'
-    string_target =  ['in']
-    string_b = 'our'
+    string_a = 'one'
+    string_target =  ['two']
+    string_b = 'three'
     with open(sys.argv[1], 'r') as f:
         file_data = f.read()
     file_data = file_data.split()
@@ -109,7 +109,7 @@ assert0((latest_state - accept_state)*(latest_state - appendedAll_state))
 
 # prove validity of the input text by Poseidon Hash
 security_level = 128
-input_rate = len(file_data)*2-1
+input_rate = 3
 t = input_rate # these should be the same
 alpha = 17     # depends on the field size (unfortunately)
 prime = 2**61-1

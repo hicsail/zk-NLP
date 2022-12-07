@@ -36,11 +36,11 @@ build {
   provisioner "shell" {
     inline = [
       "sleep 30",
-      "echo 'Creating tmp directory'",
+      "echo 'Creating tmp/SIEVE directory'",
       "mkdir /tmp/SIEVE",
       "echo 'Starting to install dependencies'",
       # "sudo yum update -y",
-      # "sudp yum install build-essential python3 python3-pip python3-dev python3-numpy git cmake make libssl-dev bash musl-dev nano wget unzip uuid-dev default-jdk"
+      # "sudo yum install build-essential python3 python3-pip python3-dev python3-numpy git cmake make libssl-dev bash musl-dev nano wget unzip uuid-dev default-jdk"
     ]
   }
 
@@ -54,20 +54,22 @@ build {
   provisioner "shell" {
     inline = [
       "echo 'Installing python packages'",
-
-      "sudo pip3 install -r /tmp/SIEVE/requirements.txt",
-      "sudo python3 /tmp/SIEVE/install.py --deps --tool --ot --zk",
+      "sudo chmod -R 777 /tmp/",
+      "pip3 install -r /tmp/SIEVE/requirements.txt",
+      "python3 /tmp/SIEVE/install.py --deps --tool --ot --zk",
       "sudo ldconfig",
-      "sudo /tmp/SIEVE/wiztoolkit/make",
-      "sudo /tmp/SIEVE/wiztoolkit/make install",
+      "echo 'installing wiztoolkit'",
+      "cd /tmp/SIEVE/wiztoolkit/",
+      "make",
+      "make install",
     ]
   }
 
   # Run the tests
   provisioner "shell" {
     inline = [
-      "echo 'Running ",
-      "cd /tmp/SIEVE/testcase-generation",
+      "echo 'Running the tests",
+      "cd /tmp/SIEVE",
       "python3 generate_statements_ta1"
     ]
   }
