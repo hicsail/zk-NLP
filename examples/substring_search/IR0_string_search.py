@@ -12,18 +12,16 @@ set_field(2**61-1)
 ''' Prepping target text and substrings'''
 if (len(sys.argv)>2 and (sys.argv[2] =="debug"or sys.argv[2] =="test")):
     file_data=generate_text(int(sys.argv[3]))
-    string_a, string_target, string_b =generate_target(file_data, "between")
+    string_target =generate_target(file_data, "string_search")
 
 else:
-    string_a = 'not'
-    string_target =  ['in']
-    string_b = 'our'
+    string_target =  'in'
     with open(sys.argv[1], 'r') as f:
         file_data = f.read()
     file_data = file_data.split()
 
 print("Text: ", file_data, "\n")
-print("Start: ", string_a, "\n", "Target: ", string_target, "\n", "End: ", string_b)
+print("Target: ", string_target)
 # Transform the text file to search into miniwizpl format
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
@@ -72,13 +70,12 @@ def run_dfa(dfa, string):
                   0)
 
 # define the ZK statement
-dfa = dfa_from_string('import')
+dfa = dfa_from_string(string_target)
 print(dfa)
 output = run_dfa(dfa, file_string)
 
 assert0((output == accept_state))
 print(output)
-
 
 # compile the ZK statement to an EMP file
 print_ir0(sys.argv[4]+'/miniwizpl_test_ir0')

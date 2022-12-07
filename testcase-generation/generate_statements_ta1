@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+# Run a set of tests, based on the config.json file
+
+import sys
+from pathlib import Path
+import json
+import subprocess 
+
+# Map descriptors to files
+desc_to_script = {}
+desc_to_script["after_all"] = "substring_search/IR0_stringlist_search_after_all.py"
+desc_to_script["after"] = "substring_search/IR0_stringlist_search_after.py"
+desc_to_script["begins"] = "substring_search/IR0_stringlist_search_begins.py"
+desc_to_script["between"] = "substring_search/IR0_stringlist_search_between.py"
+desc_to_script["point_to"] = "substring_search/IR0_stringlist_search_point_to.py"
+desc_to_script["stringlist"] = "substring_search/IR0_stringlist_search.py"
+desc_to_script["string"] = "substring_search/IR0_string_search.py"
+
+if __name__ == "__main__":
+
+    if len(sys.argv) > 2:
+        print("Expecting generate_statements <config file>")
+        print("  <config file> default is config.json")
+        exit(1)
+
+    if len(sys.argv) > 1:
+        config_file = sys.argv[1]
+    else:
+        config_file = "config_ta1.json"
+        
+    with open(config_file, 'r') as f:
+      cf = json.load(f)
+      
+    # Extract metadata
+    target = cf['target']
+    # Path(target).mkdir(parents=True, exist_ok=True)
+    for name, family in cf['test-families'].items():
+      script = desc_to_script[name]
+
+      # sizes = " ".join((str(x) for x in family['sizes']))
+      for prime in family['primes']:
+        for size in family['sizes']:
+          size = str(size)
+          #TODO FIXME: add the fol:
+          # target
+          # prime
+          print("* Generating " + script + ' ' + prime + ' ' + size+ ' ' + str(target))
+          try:
+            subprocess.call(['/bin/bash', '/usr/src/app/run_IR0.sh', '-f', script, '-o', 'test', '-s', size, '-t', str(target)])
+          except OSError as e:
+            print("Error:", e, file=sys.stderr)

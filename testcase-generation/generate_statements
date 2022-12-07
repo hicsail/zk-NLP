@@ -7,14 +7,16 @@ import json
 import subprocess 
 
 # Map descriptors to files
-desc_to_script = {}
-desc_to_script["after_all"] = "substring_search/IR0_stringlist_search_after_all.py"
-desc_to_script["after"] = "substring_search/IR0_stringlist_search_after.py"
-desc_to_script["begins"] = "substring_search/IR0_stringlist_search_begins.py"
-desc_to_script["between"] = "substring_search/IR0_stringlist_search_between.py"
-desc_to_script["point_to"] = "substring_search/IR0_stringlist_search_point_to.py"
-#desc_to_script["stringlist"] = "substring_search/IR0_stringlist_search.py" #TODO FIXME Add Kanging's code
-desc_to_script["string"] = "substring_search/IR0_string_search.py"
+# desc_to_script = {}
+# desc_to_script['list_sum'] = 'list_sum.py'
+
+
+prime_names = {}
+prime_names['p0'] = 2
+prime_names['p1'] = 2305843009213693951
+prime_names['p2'] = 21888242871839275222246405745257275088548364400416034343698204186575808495617
+prime_names['p3'] = 1073479681
+prime_names['p4'] = 57896044618658097711785492504343953926634992332820282019728792003956564819949
 
 if __name__ == "__main__":
 
@@ -29,23 +31,31 @@ if __name__ == "__main__":
         config_file = "config.json"
         
     with open(config_file, 'r') as f:
-      cf = json.load(f)
+        cf = json.load(f)
       
     # Extract metadata
     target = cf['target']
-    # Path(target).mkdir(parents=True, exist_ok=True)
+    Path(target).mkdir(parents=True, exist_ok=True)
     for name, family in cf['test-families'].items():
-      script = desc_to_script[name]
+        #script = desc_to_script[name]
+        script = f'{name}.py'
 
-      # sizes = " ".join((str(x) for x in family['sizes']))
-      for prime in family['primes']:
-        for size in family['sizes']:
-          size = str(size)
-          #TODO FIXME: add the fol:
-          # target
-          # prime
-          print("* Generating " + script + ' ' + prime + ' ' + size+ ' ' + str(target))
-          try:
-            subprocess.call(['/bin/bash', '/usr/src/app/run_IR0.sh', '-f', script, '-o', 'test', '-s', size, '-t', str(target)])
-          except OSError as e:
-            print("Error:", e, file=sys.stderr)
+        sizes = " ".join((str(x) for x in family['sizes']))
+        for prime in family['primes']:
+            for size in family['sizes']:
+                this_ex = f'python3 {script} {target} {prime_names[prime]} {prime} {size}'
+                print('* Generating:', this_ex)
+
+                try:
+                    retcode = subprocess.call(this_ex, shell=True)
+                    fname = f'{target}/{name}_{prime}_{size}'
+                    test_ex = f'wtk-firealarm {fname}.rel {fname}.ins {fname}.wit'
+
+                    print('* Testing:', test_ex)
+                    retcode = subprocess.call(test_ex, shell=True)
+                    
+                    if retcode != 0:
+                        print(script + " returned nonzero:", retcode, file=sys.stderr)
+                        sys.exit(retcode)
+                except OSError as e:
+                    print("Error:", e, file=sys.stderr)

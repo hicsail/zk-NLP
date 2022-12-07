@@ -1,41 +1,29 @@
 {
     "target_note": "Base directory where tests are created",
-    "target": "./tests",
-  
+    "target": "../tests",
+
     "ccc_note": "The location of the CCC file to use during generation" ,
     "ccc": "./ccc.txt",
-  
+
     "test-families" : {
-    
-      "after_all": {
-        "primes": ["p1", "p2"],
-        "size_note": "N (Increases the size of a corpus text",
-        "sizes": [0, 1]
-      },
-      "after": {
-        "primes": ["p1", "p2"],
-        "size_note": "N (Increases the size of a corpus text",
-        "sizes": [0, 1]
-      },
-      "begins": {
-        "primes": ["p1", "p2"],
-        "size_note": "N (Increases the size of a corpus text",
-        "sizes": [0, 1]
-      },
-      "between": {
-        "primes": ["p1", "p2"],
-        "size_note": "N (Increases the size of a corpus text",
-        "sizes": [0, 1]
-      },
-      "point_to": {
-        "primes": ["p1", "p2"],
-        "size_note": "N (Increases the size of a corpus text",
-        "sizes": [0, 1]
-      },
-      "string": {
-        "primes": ["p1", "p2"],
-        "size_note": "N (Increases the size of a corpus text",
-        "sizes": [0, 1]
-      }
+
+        "list_sum": {
+            "primes": ["p1", "p2", "p3", "p4"],
+            "size_note": "list will have length 10^size",
+            "sizes": [3, 4]
+        },
+
+        "dot_product": {
+            "primes": ["p1", "p2", "p3", "p4"],
+            "size_note": "vectors will have length 10^size",
+            "sizes": [2, 3]
+        },
+
+        "poseidon_hash": {
+            "primes": ["p1", "p3"],
+            "size_note": "hashes lists of length 2^size",
+            "sizes": [4, 5, 6]
+        }
+
     }
-  }
+}
