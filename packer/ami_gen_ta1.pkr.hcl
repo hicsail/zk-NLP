@@ -4,7 +4,7 @@
 # Execution:
 # AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id)
 # AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key)
-# packer build ami_gen_example.pkr.hcl
+# packer build ami_gen.pkr.hcl
 
 
 locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
@@ -13,16 +13,16 @@ locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 # build blocks to create resources. A build block runs provisioners and
 # post-processors on an instance created by the source.
 source "amazon-ebs" "example" {
-  ami_name      = "sieve_ami_exampleteam_ta1 ${local.timestamp}"
+  ami_name      = "sieve_ami_example_basic ${local.timestamp}"
   instance_type = "t2.micro"
   region        = "us-east-1"
   source_ami_filter {
     filters = {
-      name                = "amzn2-ami-hvm-*-x86_64-gp2"
+      name = "amzn2-ami-hvm-*-x86_64-gp2"
     }
     most_recent = true
     # Indicate that only an ami from Amazon should be used
-    owners      = ["137112412989"]
+    owners = ["137112412989"]
   }
   ssh_username = "ec2-user"
 }
@@ -30,43 +30,45 @@ source "amazon-ebs" "example" {
 # a build block invokes sources and runs provisioning steps on them.
 # https://www.elastic.co/guide/en/beats/metricbeat/current/setup-repositories.html
 build {
-  # this points to the base image specified above
   sources = ["source.amazon-ebs.example"]
 
-  provisioner "shell-local" {
-    inline = ["echo does_nothing_useful_but_demonstrates"]  
-  }
-
+  # Todo: Setup AWS env
   provisioner "shell" {
     inline = [
       "sleep 30",
-      
-      # Copy the necessary files and set up the prover
-      "cd ~/",
-      "mkdir offline_store",
-      "mkdir output",
-      ""
-    ]
-  }
-  
-    
-  provisioner "file" {
-    source = "../../testcase-generation/"
-    destination = "/tmp/gen"
-  }
-  
-  
-  provisioner "shell" {
-    inline = [
-      
-      "mv /tmp/gen/generate_statements ~/generate_statements",
-      "mv /tmp/gen ~/testcase-generation",
-    
-      # Set permissions
-      "chmod 777 ~/generate_statements",
-      "chmod -R 777 ~/testcase-generation",          
-      ""
+      "echo 'Creating tmp directory'",
+      "mkdir /tmp/SIEVE",
+      "echo 'Starting to install dependencies'",
+      # "sudo yum update -y",
+      # "sudp yum install build-essential python3 python3-pip python3-dev python3-numpy git cmake make libssl-dev bash musl-dev nano wget unzip uuid-dev default-jdk"
     ]
   }
 
+  # Upload relevant files
+  provisioner "file" {
+    source      = "../../SIEVE/"
+    destination = "/tmp/SIEVE"
+  }
+
+  # Give permissions for access to the uploaded files
+  provisioner "shell" {
+    inline = [
+      "echo 'Installing python packages'",
+
+      "sudo pip3 install -r /tmp/SIEVE/requirements.txt",
+      "sudo python3 /tmp/SIEVE/install.py --deps --tool --ot --zk",
+      "sudo ldconfig",
+      "sudo /tmp/SIEVE/wiztoolkit/make",
+      "sudo /tmp/SIEVE/wiztoolkit/make install",
+    ]
+  }
+
+  # Run the tests
+  provisioner "shell" {
+    inline = [
+      "echo 'Running ",
+      "cd /tmp/SIEVE/testcase-generation",
+      "python3 generate_statements_ta1"
+    ]
+  }
 }

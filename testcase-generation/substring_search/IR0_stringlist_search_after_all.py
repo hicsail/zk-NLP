@@ -4,7 +4,7 @@ from miniwizpl.expr import *
 from common.util import *
 
 ''' Checking if prime meets our requirement'''
-txt_dir='./ccc.txt' #Relative to where generate_statements(_ta1)
+txt_dir='./testcase-generation/ccc.txt' #Reative to where you run the generate_statements
 target='@field (equals (2305843009213693951))'
 try:
     assert check_prime(txt_dir, target)== True
