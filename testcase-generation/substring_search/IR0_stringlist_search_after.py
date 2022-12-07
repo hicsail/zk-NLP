@@ -6,7 +6,11 @@ from common.util import *
 ''' Checking if prime meets our requirement'''
 txt_dir='./ccc.txt' #Relative to where generate_statements(_ta1)
 target='@field (equals (2305843009213693951))'
-assert check_prime(txt_dir, target)== True
+try:
+    assert check_prime(txt_dir, target)== True
+except:
+    print("no equivalent prime (2305843009213693951) in ccc.txt")
+    sys.exit(1)
 
 assert len(sys.argv) == 5, "Invalid arguments"
 _, target_dir, prime, prime_name, size = sys.argv

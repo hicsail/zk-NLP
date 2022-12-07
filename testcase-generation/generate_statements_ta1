@@ -49,6 +49,9 @@ if __name__ == "__main__":
           print('* Generating:', this_ex)
           try:
             retcode = subprocess.call(this_ex, shell=True)
+            if retcode != 0:
+                print(script + " returned nonzero:", retcode, file=sys.stderr)
+                sys.exit(retcode)
             fname = f'{target}/{name}_{prime}_{size}'
             test_ex = f'wtk-firealarm {fname}.rel {fname}.ins {fname}.wit'
 
