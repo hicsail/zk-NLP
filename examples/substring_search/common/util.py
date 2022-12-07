@@ -78,7 +78,7 @@ def generate_text(scale=0):
     regex = re.compile('[,\.!?]')
     file_data=regex.sub('', file_data)
     print("Removing [,\.!?]: ", file_data, "\n")
-    return file_data.split()
+    return file_data.split()[:10]
 
 def generate_target(txt, type):
     if type=="after_all":

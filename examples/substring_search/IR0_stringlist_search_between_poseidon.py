@@ -109,9 +109,10 @@ assert0((latest_state - accept_state)*(latest_state - appendedAll_state))
 
 # prove validity of the input text by Poseidon Hash
 security_level = 128
-input_rate = len(file_data)
-t = input_rate
-alpha = 17
+# input_rate = 7
+input_rate = len(file_data)*2-1
+t = input_rate # these should be the same
+alpha = 17     # depends on the field size (unfortunately)
 prime = 2**61-1
 set_field(prime)
 poseidon_new = Poseidon(prime, security_level, alpha, input_rate, t)
