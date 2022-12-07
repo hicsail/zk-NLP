@@ -4,8 +4,8 @@ from miniwizpl.expr import *
 from common.util import *
 
 ''' Checking if prime meets our requirement'''
-txt_dir='../ccc.txt'
-target='@field (equals (2305843009213690000))'
+txt_dir='./ccc.txt' #Relative to where generate_statements(_ta1)
+target='@field (equals (2305843009213693951))'
 assert check_prime(txt_dir, target)== True
 
 assert len(sys.argv) == 5, "Invalid arguments"
@@ -79,4 +79,4 @@ latest_state = run_dfa(dfa, file_string)
 assert0(latest_state - accept_state)
 
 # compile the ZK statement
-print_ir0(target_dir + "/" + f"dot_product_{prime_name}_{size}")
+print_ir0(target_dir + "/" + f"after_all_{prime_name}_{size}")

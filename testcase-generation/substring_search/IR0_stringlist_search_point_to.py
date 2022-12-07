@@ -3,7 +3,11 @@ from miniwizpl import *
 from miniwizpl.expr import *
 from common.util import *
 
-#TODO FIXME : ADD CCC.text check
+''' Checking if prime meets our requirement'''
+txt_dir='./ccc.txt' #Relative to where generate_statements(_ta1)
+target='@field (equals (2305843009213693951))'
+assert check_prime(txt_dir, target)== True
+
 assert len(sys.argv) == 5, "Invalid arguments"
 _, target_dir, prime, prime_name, size = sys.argv
 set_field(int(prime))
@@ -89,4 +93,4 @@ latest_state = run_dfa(dfa, file_string)
 assert0((latest_state - accept_state)*(latest_state - appendedAll_state))
 
 # compile the ZK statement
-print_ir0(target_dir + "/" + f"dot_product_{prime_name}_{size}")
+print_ir0(target_dir + "/" + f"point_to_{prime_name}_{size}")
