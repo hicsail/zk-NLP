@@ -3,18 +3,18 @@ from miniwizpl import *
 from miniwizpl.expr import *
 from common.util import *
 
+#TODO FIXME : ADD CCC.text check
 set_field(2**61-1)
 
-''' Prepping targe text and substrings'''
-
-if (len(sys.argv)>1 and sys.argv[1] =="test") or (len(sys.argv)>2 and sys.argv[2] =="debug"):
-    file_data=generate_text()
+''' Prepping target text and substrings'''
+if (len(sys.argv)>2 and (sys.argv[2] =="debug"or sys.argv[2] =="test")):
+    file_data=generate_text(int(sys.argv[3]))
     string_a, string_target, string_b =generate_target(file_data, "between")
 
 else:
     string_a = 'not'
-    string_target =  ['in', 'our']
-    string_b = 'alphabet'
+    string_target =  ['in']
+    string_b = 'our'
     with open(sys.argv[1], 'r') as f:
         file_data = f.read()
     file_data = file_data.split()
@@ -54,7 +54,7 @@ def run_dfa(dfa, text_input):
         curr_state=initial_state
         for (dfa_state, dfa_str), next_state in dfa.items():
 
-            if len(sys.argv)==3 and sys.argv[2] =="debug":
+            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
                 print(
                     "curr state: ", val_of(curr_state),
                     "dfa state: ", dfa_state,"\n",
@@ -68,7 +68,7 @@ def run_dfa(dfa, text_input):
                          error_state,
                          curr_state))
                          
-            if len(sys.argv)==3 and sys.argv[2] =="debug":
+            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
                 print("Updated state: ", val_of(curr_state))                     
 
         ''' 
@@ -82,18 +82,18 @@ def run_dfa(dfa, text_input):
         ''' 
             Add substring if in one of found states or accept state and reading the last word in the text
         '''
-        Secret_str_between.cond_push(is_in_found_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
+        # Secret_str_between.cond_push(is_in_found_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
         return curr_state
 
     if len(sys.argv)==3 and sys.argv[2] =="debug":
-        latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+        latest_state=reduce_unroll(next_state_fun, text_input, zero_state)
     else:
-        latest_state=public_foreach(text_input, next_state_fun, zero_state)
+        latest_state=reduce(next_state_fun, text_input, zero_state)
 
     ''' 
         Pop the last element if no string_b found and if you're read the last substring of the target between strings
     '''
-    Secret_str_between.cond_pop(latest_state==appendedAll_state)
+    # Secret_str_between.cond_pop(latest_state==appendedAll_state)
     return latest_state
 
 # build DFA
@@ -104,12 +104,13 @@ print("\n", "DFA: ",dfa, "\n")
 latest_state = run_dfa(dfa, file_string)
 assert0((latest_state - accept_state)*(latest_state - appendedAll_state))
 
-if len(sys.argv)==3 and sys.argv[2] =="debug":
+if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
     print("\n", "Latest State: ",val_of(latest_state), "\n")
     print("\n", "Result:   ",Secret_str_between.current_val, "\n")
     expected=[word_to_integer(x) for x in string_target]
     expected.insert(0, word_to_integer(string_a))
     print("\n", "Expected: ",expected, "\n")
 
-# compile the ZK statement to an EMP file
-print_ir0('miniwizpl_test_ir0')
+else:
+    # compile the ZK statement to an EMP file
+    print_ir0(sys.argv[4]+'/miniwizpl_test_ir0')

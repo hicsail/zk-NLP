@@ -2,7 +2,7 @@ import pprint
 import random
 import sys
 import functools
-from miniwizpl import SecretInt, SecretList, mux, public_foreach, print_emp
+from miniwizpl import SecretInt, SecretList, mux, reduce, print_emp
 
 if len(sys.argv) != 2:
     print("Usage: python dfa_example.py <target_filename>")
@@ -63,9 +63,9 @@ def run_dfa(dfa, string):
         output = mux(state == accept_state, accept_state, output)
         return output
 
-    return public_foreach(string,
-                          next_state_fun,
-                          0)
+    return reduce(next_state_fun,
+                  string,
+                  0)
 
 # define the ZK statement
 outputs = []
@@ -78,4 +78,4 @@ for s in strings_not_present:
 
 # compile the ZK statement to an EMP file
 output = functools.reduce(lambda a, b: a & b, outputs)
-print_emp(output, 'miniwizpl_test.cpp')
+print_emp('miniwizpl_test.cpp')

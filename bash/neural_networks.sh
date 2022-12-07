@@ -2,9 +2,10 @@
 set -euo pipefail
 
 #declare -a examples=("mnist_wizpl.py" "nn_tutorial_example.py" "nn_example.py" "nn_example2.py" "rnn_example.py")
-declare -a examples=("mnist_wizpl.py" "nn_tutorial_example.py" "rnn_example.py")
+declare -a examples=("mnist_wizpl.py" "nn_tutorial_example.py")
 for i in "${examples[@]}"
 do
+    echo "testing ${i}"
     cd examples/neural_networks
     python3 $i
     cp miniwizpl_test.cpp miniwizpl_test.cpp.emp_wit ../..

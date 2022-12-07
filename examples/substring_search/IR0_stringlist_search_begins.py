@@ -3,12 +3,12 @@ from miniwizpl import *
 from miniwizpl.expr import *
 from common.util import *
 
+#TODO FIXME : ADD CCC.text check
 set_field(2**61-1)
 
 ''' Prepping target text and substrings'''
-
-if (len(sys.argv)>1 and sys.argv[1] =="test") or (len(sys.argv)>2 and sys.argv[2] =="debug"):
-    file_data=generate_text()
+if (len(sys.argv)>2 and (sys.argv[2] =="debug"or sys.argv[2] =="test")):
+    file_data=generate_text(int(sys.argv[3]))
     string_target=generate_target(file_data, "begins")
 
 else:
@@ -37,7 +37,7 @@ def run_dfa(dfa, text_input):
         curr_state=initial_state
 
         for (dfa_state, dfa_str), next_state in dfa.items():
-            if len(sys.argv)==3 and sys.argv[2] =="debug":
+            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
                 print(
                     "curr state: ", val_of(curr_state),
                     "dfa state: ", dfa_state,"\n",
@@ -50,15 +50,15 @@ def run_dfa(dfa, text_input):
                          error_state,
                          curr_state))
 
-            if len(sys.argv)==3 and sys.argv[2] =="debug":
+            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
                 print("Updated state: ", val_of(curr_state))
 
         return curr_state
 
     if len(sys.argv)==3 and sys.argv[2] =="debug":
-        latest_state=public_foreach_unroll(text_input, next_state_fun, zero_state)
+        latest_state=reduce_unroll(next_state_fun, text_input, zero_state)
     else:
-        latest_state=public_foreach(text_input, next_state_fun, zero_state)
+        latest_state=reduce(next_state_fun, text_input, zero_state)
     return latest_state
 
 dfa = dfa_from_string(string_target)
@@ -68,9 +68,10 @@ print("\n", "DFA: ",dfa, "\n")
 latest_state = run_dfa(dfa, file_string)
 assert0(latest_state - accept_state)
 
-if len(sys.argv)==3 and sys.argv[2] =="debug":
+if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
     print("\n", "Latest State: ",val_of(latest_state), "\n")
 
-# compile the ZK statement to an EMP file
-print_ir0('miniwizpl_test_ir0')
+else:
+    # compile the ZK statement to an EMP file
+    print_ir0(sys.argv[4]+'/miniwizpl_test_ir0')
 

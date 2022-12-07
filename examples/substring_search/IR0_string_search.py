@@ -3,14 +3,29 @@ import random
 import sys
 import functools
 from miniwizpl import *
+from miniwizpl.expr import *
+from common.util import *
 
-sys.path.append("../poseidon_hash")
-from parameters import *
-from hash import Poseidon
+#TODO FIXME : ADD CCC.text check
+set_field(2**61-1)
 
-if len(sys.argv) != 2:
-    print("Usage: python dfa_example.py <target_filename>")
-    sys.exit()
+''' Prepping target text and substrings'''
+if (len(sys.argv)>2 and (sys.argv[2] =="debug"or sys.argv[2] =="test")):
+    file_data=generate_text(int(sys.argv[3]))
+    string_a, string_target, string_b =generate_target(file_data, "between")
+
+else:
+    string_a = 'not'
+    string_target =  ['in']
+    string_b = 'our'
+    with open(sys.argv[1], 'r') as f:
+        file_data = f.read()
+    file_data = file_data.split()
+
+print("Text: ", file_data, "\n")
+print("Start: ", string_a, "\n", "Target: ", string_target, "\n", "End: ", string_b)
+# Transform the text file to search into miniwizpl format
+file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
 # the accept state is 1000000
 accept_state = 1000000
@@ -39,12 +54,6 @@ def dfa_from_string(text):
                         pass
     return next_state
 
-# read the target file & convert to secret string
-with open(sys.argv[1], 'r') as f:
-    file_data = f.read()
-
-file_string = SecretList([ord(c) for c in file_data])
-
 # run a dfa
 def run_dfa(dfa, string):
     def next_state_fun(char, state):
@@ -67,27 +76,9 @@ dfa = dfa_from_string('import')
 print(dfa)
 output = run_dfa(dfa, file_string)
 
-assert0(~(output == accept_state))
+assert0((output == accept_state))
 print(output)
-
-# prove validity of the input text by Poseidon Hash
-security_level = 128
-input_rate = 3
-t = input_rate # these should be the same
-alpha = 17     # depends on the field size (unfortunately)
-prime = 2**61-1
-set_field(prime)
-poseidon_new = Poseidon(prime, security_level, alpha, input_rate, t)
-
-print('converting to gfs')
-split_gfs = file_string.as_field_elements(input_rate)
-print('need to do this many hashes:', len(split_gfs))
-
-for g in split_gfs:
-    poseidon_digest = poseidon_new.run_hash(g)
-    #print('digest:', val_of(poseidon_digest))
-    assert0(poseidon_digest - val_of(poseidon_digest))
 
 
 # compile the ZK statement to an EMP file
-print_ir0('miniwizpl_test_ir0')
+print_ir0(sys.argv[4]+'/miniwizpl_test_ir0')

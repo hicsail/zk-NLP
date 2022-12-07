@@ -7,6 +7,7 @@ from .globals import *
 from .expr import *
 from .data_types import *
 import sys
+import galois
 
 sys.setrecursionlimit(10000)
 
@@ -17,6 +18,7 @@ witness_list = []
 IR_MODE = 1
 WRITE_TO_WIT = 1
 WRITE_TO_REL = 1
+all_pubvals = {}
 
 @dataclass
 class WireVal(AST):
@@ -125,7 +127,7 @@ def print_exp_ir1_(e):
     global WRITE_TO_REL
     global WRITE_TO_WIT
 
-    if isinstance(e, (SecretArray, SecretTensor, SecretInt, SymVar)):
+    if isinstance(e, (SecretArray, SecretTensor, SecretInt, SecretGF, SymVar)):
         return add_to_witness(e)
 
     elif isinstance(e, WireVal):
@@ -141,6 +143,17 @@ def print_exp_ir1_(e):
         r = next_wire()
         emit(f'  {r} <- < {e} >;')
         return r
+
+    elif isinstance(e, galois.Array):
+        global all_pubvals
+        if int(e) in all_pubvals:
+            return all_pubvals[int(e)]
+        else:
+            r = next_wire()
+            emit(f'  {r} <- < {int(e)} >;')
+            all_pubvals[int(e)] = r
+            return r
+
     elif isinstance(e, Prim):
         if e.op in int_ops_ir1:
             e1, e2 = e.args
@@ -375,7 +388,7 @@ def print_ir1(filename):
     current_wire = 0
 
     field = params['arithmetic_field']
-    print('field size:', field)
+    #print('field size:', field)
 
     # INSTANCE OUTPUT
     with open(filename + '.ins', 'w') as f:
