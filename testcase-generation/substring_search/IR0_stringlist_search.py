@@ -3,24 +3,22 @@ from miniwizpl import *
 from miniwizpl.expr import *
 from common.util import *
 
-#TODO FIXME : ADD CCC.text check
-set_field(2**61-1)
+''' Checking if prime meets our requirement'''
+txt_dir='./ccc.txt' #Relative to where generate_statements(_ta1)
+target='@field (equals (2305843009213693951))'
+try:
+    assert check_prime(txt_dir, target)== True
+except:
+    print("no equivalent prime (2305843009213693951) in ccc.txt")
+    sys.exit(1)
+
+assert len(sys.argv) == 5, "Invalid arguments"
+_, target_dir, prime, prime_name, size = sys.argv
+set_field(int(prime))
 
 ''' Prepping target text and substrings'''
-if (len(sys.argv)>2 and (sys.argv[2] =="debug"or sys.argv[2] =="test")):
-    file_data=generate_text(int(sys.argv[3]))
-    string_target=generate_target(file_data, "stringlist")
-
-else:
-    string_target = [
-    'import socket',
-    'import numpy',
-    'hello world',
-    'import sys'
-    ]
-    with open(sys.argv[1], 'r') as f:
-        file_data = f.read()
-    file_data = file_data.split()
+file_data=generate_text(int(size))
+string_target=generate_target(file_data, "stringlist")
 
 print("Text: ", file_data, "\n")
 print("Target: ", string_target, "\n")
@@ -136,4 +134,5 @@ outputs = run_dfa(dfa, file_string)
 print('output', outputs)
 assert0(outputs - accept)
 
-print_ir0(sys.argv[4]+'/miniwizpl_test_ir0')
+# compile the ZK statement
+print_ir0(target_dir + "/" + f"stringlist_{prime_name}_{size}")
