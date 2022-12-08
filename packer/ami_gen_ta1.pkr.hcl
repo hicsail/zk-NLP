@@ -39,8 +39,15 @@ build {
       "echo 'Creating tmp/SIEVE directory'",
       "mkdir /tmp/SIEVE",
       "echo 'Starting to install dependencies'",
-      # "sudo yum update -y",
-      # "sudo yum install build-essential python3 python3-pip python3-dev python3-numpy git cmake make libssl-dev bash musl-dev nano wget unzip uuid-dev default-jdk"
+      "sudo yum update",
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sleep 30",
+      "echo 'yum updated'",      
+      "sudo yum install -y python3 python3-pip python3-dev python3-numpy git cmake make libssl-dev bash musl-dev nano wget unzip uuid-dev default-jdk"
     ]
   }
 
@@ -56,10 +63,6 @@ build {
       "echo 'Installing python packages'",
       "sudo chmod -R 777 /tmp/",
       "pip3 install -r /tmp/SIEVE/requirements.txt",
-      "python3 /tmp/SIEVE/install.py --deps --tool --ot --zk",
-      "sudo ldconfig",
-      "echo 'installing wiztoolkit'",
-      "cd /tmp/SIEVE/wiztoolkit/",
       "make",
       "make install",
     ]

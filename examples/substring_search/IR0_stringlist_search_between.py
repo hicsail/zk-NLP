@@ -12,9 +12,9 @@ if (len(sys.argv)>2 and (sys.argv[2] =="debug"or sys.argv[2] =="test")):
     string_a, string_target, string_b =generate_target(file_data, "between")
 
 else:
-    string_a = 'not'
-    string_target =  ['in']
-    string_b = 'our'
+    string_a = 'one'
+    string_target =  ['two']
+    string_b = 'three'
     with open(sys.argv[1], 'r') as f:
         file_data = f.read()
     file_data = file_data.split()
@@ -103,6 +103,8 @@ print("\n", "DFA: ",dfa, "\n")
 # define the ZK statement
 latest_state = run_dfa(dfa, file_string)
 assert0((latest_state - accept_state)*(latest_state - appendedAll_state))
+
+run_poseidon_hash(file_string)
 
 if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
     print("\n", "Latest State: ",val_of(latest_state), "\n")

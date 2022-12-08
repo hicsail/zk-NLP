@@ -4,10 +4,8 @@ from miniwizpl.expr import *
 from common.util import *
 
 ''' Checking if prime meets our requirement'''
-txt_dir='./testcase-generation/ccc.txt' #Reative to where you run the generate_statements
-target='@field (equals (2305843009213693951))'
 try:
-    assert check_prime(txt_dir, target)== True
+    assert check_prime()== True
 except:
     print("no equivalent prime (2305843009213693951) in ccc.txt")
     sys.exit(1)
@@ -76,6 +74,6 @@ output = run_dfa(dfa, file_string)
 
 assert0((output == accept_state))
 print(output)
-
+run_poseidon_hash(file_string)
 # compile the ZK statement
 print_ir0(target_dir + "/" + f"string_{prime_name}_{size}")

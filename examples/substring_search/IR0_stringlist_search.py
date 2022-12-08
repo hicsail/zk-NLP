@@ -136,4 +136,6 @@ outputs = run_dfa(dfa, file_string)
 print('output', outputs)
 assert0(outputs - accept)
 
+run_poseidon_hash(file_string)
+
 print_ir0(sys.argv[4]+'/miniwizpl_test_ir0')
