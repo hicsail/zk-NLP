@@ -32,48 +32,32 @@ source "amazon-ebs" "sieve_ta1" {
 build {
   sources = ["source.amazon-ebs.sieve_ta1"]
 
+  # Packaging necessary modules into tar file
+  provisioner "shell-local" {
+    inline = [
+      "echo 'Removing existing ../tmp-mini'",
+      "rm -rf ../tmp-mini",
+      "git clone git@github.mit.edu:sieve-all/TA1.git ../tmp-mini",
+      ""
+    ]
+  }
+  # Uploading compressed package into AWS server
+  provisioner "file" {
+    source      = "../tmp-mini/"
+    destination = "/tmp/"
+  }
+
   # Todo: Setup AWS env
   provisioner "shell" {
     inline = [
-      "sleep 30",
-      "echo 'Creating tmp/SIEVE directory'",
-      "mkdir /tmp/SIEVE",
-      "echo 'Starting to install dependencies'",
-      "sudo yum update",
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
-      "sleep 30",
-      "echo 'yum updated'",      
-      "sudo yum install -y python3 python3-pip python3-dev python3-numpy git cmake make libssl-dev bash musl-dev nano wget unzip uuid-dev default-jdk"
-    ]
-  }
-
-  # Upload relevant files
-  provisioner "file" {
-    source      = "../../SIEVE/"
-    destination = "/tmp/SIEVE"
-  }
-
-  # Give permissions for access to the uploaded files
-  provisioner "shell" {
-    inline = [
-      "echo 'Installing python packages'",
-      "sudo chmod -R 777 /tmp/",
-      "pip3 install -r /tmp/SIEVE/requirements.txt",
-      "make",
-      "make install",
-    ]
-  }
-
-  # Run the tests
-  provisioner "shell" {
-    inline = [
-      "echo 'Running the tests",
-      "cd /tmp/SIEVE",
-      "python3 generate_statements_ta1"
+      "cd /tmp",
+      "echo $(ls)",
+      "cp /tmp/testcase-generation/generate_statements /tmp/testcase-generation/*.py /home/ec2-user/",
+      "sudo yum -y update",
+      "pip3 install . --no-cache-dir",
+      "cd /home/ec2-user",
+      "./generate_statements /tmp/TA1/testcase-generation/config.json",
+      ""
     ]
   }
 }
