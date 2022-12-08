@@ -30,4 +30,3 @@ RUN ldconfig
 RUN git clone https://github.com/stealthsoftwareinc/wiztoolkit.git
 
 CMD [ "sleep", "infinity" ]
-txt_dir='./testcase-generation/ccc.txt' #Reative to where you run the generate_statements
