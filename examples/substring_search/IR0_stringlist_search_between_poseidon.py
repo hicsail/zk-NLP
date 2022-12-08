@@ -122,8 +122,9 @@ print('need to do this many hashes:', len(split_gfs))
 
 for g in split_gfs:
     poseidon_digest = poseidon_new.run_hash(g)
-    #print('digest:', val_of(poseidon_digest))
-    assert0(poseidon_digest - val_of(poseidon_digest))
+
+#print('digest:', val_of(poseidon_digest))
+assert0(poseidon_digest - val_of(poseidon_digest))
 
 if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
     print("\n", "Latest State: ",val_of(latest_state), "\n")
