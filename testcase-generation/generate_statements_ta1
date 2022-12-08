@@ -9,8 +9,7 @@ import subprocess
 # Map primes here for testing
 prime_names = {}
 prime_names['p1'] = 2305843009213693951
-
-directory='./substring_search/'
+directory='testcase-generation/substring_search/' #Reative to where you run the generate_statements
 
 # Map descriptors to files
 desc_to_script = {}
@@ -31,7 +30,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         config_file = sys.argv[1]
     else:
-        config_file = "./config_ta1.json"
+        config_file = "./testcase-generation/config_ta1.json"
         
     with open(config_file, 'r') as f:
       cf = json.load(f)

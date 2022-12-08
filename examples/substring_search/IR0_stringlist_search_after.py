@@ -81,6 +81,8 @@ print("\n", "DFA: ",dfa, "\n")
 latest_state = run_dfa(dfa, file_string)
 assert0(latest_state - accept_state)
 
+run_poseidon_hash(file_string)
+
 if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
     print("\n", "Latest State: ",val_of(latest_state), "\n")
     

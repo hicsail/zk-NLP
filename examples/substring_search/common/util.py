@@ -4,6 +4,9 @@ from miniwizpl import *
 from miniwizpl.expr import *
 import re
 import hashlib
+sys.path.append("/usr/src/app/examples/poseidon_hash")
+from parameters import *
+from hash import Poseidon
 
 def word_to_integer(word):
     hash = hashlib.sha256(word.encode('utf-8')).digest()
@@ -127,3 +130,33 @@ def generate_target(txt, type):
         idx_b=idx_a+1
         string_b= txt[idx_b]
         return [string_a + ' '+string_b]
+
+def check_prime():
+  txt_dir='./testcase-generation/ccc.txt' #Reative to where you run the generate_statements
+  target='@field (equals (2305843009213693951))'
+  with open(txt_dir) as f:
+      txt = f.read().splitlines() 
+  for t in txt:
+    print(t) # TODO FIXME: Delete this line later
+    if t.find(target)!=-1:
+      return True
+  return False
+
+def run_poseidon_hash(file_string):
+    # prove validity of the input text by Poseidon Hash
+    security_level = 128
+    input_rate = 3
+    t = input_rate # these should be the same
+    alpha = 17     # depends on the field size (unfortunately)
+    prime = 2**61-1
+    set_field(prime)
+    poseidon_new = Poseidon(prime, security_level, alpha, input_rate, t)
+
+    print('converting to gfs')
+    split_gfs = file_string.as_field_elements(input_rate)
+    print('need to do this many hashes:', len(split_gfs))
+
+    for g in split_gfs:
+        poseidon_digest = poseidon_new.run_hash(g)
+        #print('digest:', val_of(poseidon_digest))
+    assert0(poseidon_digest - val_of(poseidon_digest))

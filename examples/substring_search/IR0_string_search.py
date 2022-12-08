@@ -73,6 +73,7 @@ def run_dfa(dfa, string):
 dfa = dfa_from_string(string_target)
 print(dfa)
 output = run_dfa(dfa, file_string)
+run_poseidon_hash(file_string)
 
 assert0((output == accept_state))
 print(output)
