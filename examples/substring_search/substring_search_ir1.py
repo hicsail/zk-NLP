@@ -85,8 +85,10 @@ print('need to do this many hashes:', len(split_gfs))
 
 for g in split_gfs:
     poseidon_digest = poseidon_new.run_hash(g)
-    #print('digest:', val_of(poseidon_digest))
-    assert0(poseidon_digest - val_of(poseidon_digest))
+
+#print('digest:', val_of(poseidon_digest))
+assert0(poseidon_digest - val_of(poseidon_digest))
+
 
 
 # compile the ZK statement to an EMP file
