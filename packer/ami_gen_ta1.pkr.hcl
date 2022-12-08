@@ -12,8 +12,8 @@ locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 # source blocks configure your builder plugins; your source is then used inside
 # build blocks to create resources. A build block runs provisioners and
 # post-processors on an instance created by the source.
-source "amazon-ebs" "example" {
-  ami_name      = "sieve_ami_example_basic ${local.timestamp}"
+source "amazon-ebs" "sieve_ta1" {
+  ami_name      = "sieve_ta1 ${local.timestamp}"
   instance_type = "t2.micro"
   region        = "us-east-1"
   source_ami_filter {
@@ -30,7 +30,7 @@ source "amazon-ebs" "example" {
 # a build block invokes sources and runs provisioning steps on them.
 # https://www.elastic.co/guide/en/beats/metricbeat/current/setup-repositories.html
 build {
-  sources = ["source.amazon-ebs.example"]
+  sources = ["source.amazon-ebs.sieve_ta1"]
 
   # Todo: Setup AWS env
   provisioner "shell" {
