@@ -2,18 +2,19 @@ import pprint
 import random
 import sys
 import functools
+import string
 from miniwizpl import *
 
-sys.path.append("../poseidon_hash")
-from parameters import *
-from hash import Poseidon
+assert len(sys.argv) == 5, "Invalid arguments"
+_, target_dir, prime, prime_name, size = sys.argv
+prime = int(prime)
+set_field(prime)
+n = 2**int(size)
 
-if len(sys.argv) != 2:
-    print("Usage: python dfa_example.py <target_filename>")
-    sys.exit()
+file_data = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase, k=n))
+target_string = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase, k=int(size)))
 
-# the accept state is 1000000
-accept_state = 1000000
+accept_state = 1000
 
 # a Python function to create a dfa from a string
 # we assume a default transition back to 0
@@ -39,10 +40,7 @@ def dfa_from_string(text):
                         pass
     return next_state
 
-# read the target file & convert to secret string
-with open(sys.argv[1], 'r') as f:
-    file_data = f.read()
-
+# simulated bytes of the file
 file_string = SecretList([ord(c) for c in file_data])
 
 # run a dfa
@@ -63,33 +61,9 @@ def run_dfa(dfa, string):
                   0)
 
 # define the ZK statement
-dfa = dfa_from_string('import')
-print(dfa)
+dfa = dfa_from_string(target_string)
+#print(dfa)
 output = run_dfa(dfa, file_string)
 
-assert0(~(output == accept_state))
-print(output)
-
-# prove validity of the input text by Poseidon Hash
-security_level = 128
-input_rate = 3
-t = input_rate # these should be the same
-alpha = 17     # depends on the field size (unfortunately)
-prime = 2**61-1
-set_field(prime)
-poseidon_new = Poseidon(prime, security_level, alpha, input_rate, t)
-
-print('converting to gfs')
-split_gfs = file_string.as_field_elements(input_rate)
-print('need to do this many hashes:', len(split_gfs))
-
-for g in split_gfs:
-    poseidon_digest = poseidon_new.run_hash(g)
-
-#print('digest:', val_of(poseidon_digest))
-assert0(poseidon_digest - val_of(poseidon_digest))
-
-
-
-# compile the ZK statement to an EMP file
-print_ir0('miniwizpl_test_ir0')
+assert0(output - val_of(output))
+print_ir0(target_dir + "/" + f"dfa_search_{prime_name}_{size}")
