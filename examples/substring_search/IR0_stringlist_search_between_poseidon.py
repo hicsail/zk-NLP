@@ -2,21 +2,25 @@ import sys
 from miniwizpl import *
 from miniwizpl.expr import *
 from common.util import *
+sys.path.append("/usr/src/app/examples/poseidon_hash")
+from parameters import *
+from hash import Poseidon
 
-''' Checking if prime meets our requirement'''
-try:
-    assert check_prime()== True
-except:
-    print("no equivalent prime (2305843009213693951) in ccc.txt")
-    sys.exit(1)
-
-assert len(sys.argv) == 5, "Invalid arguments"
-_, target_dir, prime, prime_name, size = sys.argv
-set_field(int(prime))
+#TODO FIXME : ADD CCC.text check
+set_field(2**61-1)
 
 ''' Prepping target text and substrings'''
-file_data=generate_text(int(size))
-string_a, string_target, string_b =generate_target(file_data, "between")
+if (len(sys.argv)>2 and (sys.argv[2] =="debug"or sys.argv[2] =="test")):
+    file_data=generate_text(int(sys.argv[3]))
+    string_a, string_target, string_b =generate_target(file_data, "between")
+
+else:
+    string_a = 'not'
+    string_target =  ['in']
+    string_b = 'our'
+    with open(sys.argv[1], 'r') as f:
+        file_data = f.read()
+    file_data = file_data.split()
 
 print("Text: ", file_data, "\n")
 print("Start: ", string_a, "\n", "Target: ", string_target, "\n", "End: ", string_b)
@@ -52,12 +56,24 @@ def run_dfa(dfa, text_input):
     def next_state_fun(string, initial_state):
         curr_state=initial_state
         for (dfa_state, dfa_str), next_state in dfa.items():
+
+            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
+                print(
+                    "curr state: ", val_of(curr_state),
+                    "dfa state: ", dfa_state,"\n",
+                    "input string: ", val_of(string),
+                    "dfa string: ", dfa_str,"\n",
+                    "next_state", next_state,"\n")
+
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
                          mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_state),
                          error_state,
                          curr_state))
                          
+            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
+                print("Updated state: ", val_of(curr_state))                     
+
         ''' 
             Regardless of changes above, if
             1) already in accept state, always accept state
@@ -72,7 +88,10 @@ def run_dfa(dfa, text_input):
         # Secret_str_between.cond_push(is_in_found_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
         return curr_state
 
-    latest_state=reduce(next_state_fun, text_input, zero_state)
+    if len(sys.argv)==3 and sys.argv[2] =="debug":
+        latest_state=reduce_unroll(next_state_fun, text_input, zero_state)
+    else:
+        latest_state=reduce(next_state_fun, text_input, zero_state)
 
     ''' 
         Pop the last element if no string_b found and if you're read the last substring of the target between strings
@@ -87,6 +106,33 @@ print("\n", "DFA: ",dfa, "\n")
 # define the ZK statement
 latest_state = run_dfa(dfa, file_string)
 assert0((latest_state - accept_state)*(latest_state - appendedAll_state))
-run_poseidon_hash(file_string)
-# compile the ZK statement
-print_ir0(target_dir + "/" + f"between_{prime_name}_{size}")
+
+# prove validity of the input text by Poseidon Hash
+security_level = 128
+input_rate = len(file_data)*2-1
+t = input_rate # these should be the same
+alpha = 17     # depends on the field size (unfortunately)
+prime = 2**61-1
+set_field(prime)
+poseidon_new = Poseidon(prime, security_level, alpha, input_rate, t)
+
+print('converting to gfs')
+split_gfs = file_string.as_field_elements(input_rate)
+print('need to do this many hashes:', len(split_gfs))
+
+for g in split_gfs:
+    poseidon_digest = poseidon_new.run_hash(g)
+
+#print('digest:', val_of(poseidon_digest))
+assert0(poseidon_digest - val_of(poseidon_digest))
+
+if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
+    print("\n", "Latest State: ",val_of(latest_state), "\n")
+    print("\n", "Result:   ",Secret_str_between.current_val, "\n")
+    expected=[word_to_integer(x) for x in string_target]
+    expected.insert(0, word_to_integer(string_a))
+    print("\n", "Expected: ",expected, "\n")
+
+else:
+    # compile the ZK statement to an EMP file
+    print_ir0(sys.argv[4]+'/miniwizpl_test_ir0')
