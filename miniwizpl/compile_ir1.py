@@ -51,13 +51,14 @@ def emit(s=''):
     # emp_output_string += s + '\n'
 
 def add_to_witness(obj, comment=None):
+    wit_fun = '@private()' if IR_MODE == 0 else '@short_witness'
     wire_name = str(next_wire())
     if WRITE_TO_WIT == 1:
         witness_list.append(obj)
     if comment:
-        emit(f'  {wire_name} <- @short_witness; // {comment}')
+        emit(f'  {wire_name} <- {wit_fun}; // {comment}')
     else:
-        emit(f'  {wire_name} <- @short_witness;')
+        emit(f'  {wire_name} <- {wit_fun};')
 
     return wire_name
 
@@ -394,7 +395,15 @@ def print_ir1(filename):
     with open(filename + '.ins', 'w') as f:
         output_file = f
 
-        emit(f"""version 1.0.0;
+        if IR_MODE == 0:
+            emit(f"""version 2.0.0-beta;
+public_input;
+@type field {field};
+@begin
+@end
+""")
+        else:
+            emit(f"""version 1.0.0;
 field characteristic {field} degree 1;
 instance
 @begin
@@ -406,7 +415,13 @@ instance
     with open(filename + '.rel', 'w') as f:
         output_file = f
 
-        emit(f"""version 1.0.0;
+        if IR_MODE == 0:
+            emit(f"""version 2.0.0-beta;
+circuit;
+@type field {field};
+@begin""")
+        else:
+            emit(f"""version 1.0.0;
 field characteristic {field} degree 1;
 relation
 gate_set: arithmetic;
@@ -423,7 +438,13 @@ features: @function, @for, @switch;
         output_file = f
         emp_output_string = ""
 
-        emit(f"""version 1.0.0;
+        if IR_MODE == 0:
+            emit(f"""version 2.0.0-beta;
+private_input;
+@type field {field};
+@begin""")
+        else:
+            emit(f"""version 1.0.0;
 field characteristic {field} degree 1;
 short_witness
 @begin""")
