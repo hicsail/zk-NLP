@@ -37,26 +37,36 @@ build {
     inline = [
       "echo 'Removing existing ../tmp-mini'",
       "rm -rf ../tmp-mini",
+      "rm -rf ../tmp-mini.tar.gz",
       "git clone git@github.mit.edu:sieve-all/TA1.git ../tmp-mini",
+      "echo 'checking tmp-mini directory'",
+      "ls -l ../tmp-mini",
+      "echo 'checking tmp-generation directory'",
+      "ls -l ../tmp-mini/testcase-generation",
+      "echo 'Creating tarball'",
+      "tar -zcf ../tmp-mini.tar.gz ../tmp-mini",
       ""
     ]
   }
-  # Uploading compressed package into AWS server
+
   provisioner "file" {
-    source      = "../tmp-mini/"
+    source      = "../tmp-mini.tar.gz"
     destination = "/tmp/"
   }
 
-  # Todo: Setup AWS env
   provisioner "shell" {
     inline = [
       "cd /tmp",
-      "echo $(ls)",
-      "cp /tmp/testcase-generation/generate_statements /tmp/testcase-generation/*.py /home/ec2-user/",
+      "tar -zxvf tmp-mini.tar.gz",
       "sudo yum -y update",
-      "pip3 install . --no-cache-dir",
-      "cd /home/ec2-user",
-      "./generate_statements /tmp/TA1/testcase-generation/config.json",
+      "sudo yum -y install python3-pip",
+      "cd /tmp/tmp-mini",
+      "pip3 install /tmp/tmp-mini/ --no-cache-dir",
+      "pip3 install https://github.com/gxavier38/pysnark/archive/8a2a571bef430783adf8fe28cb8bb0b0bf8a7c94.zip",
+      "echo 'Running generate_statements'",
+      "python3 /tmp/tmp-mini/testcase-generation/generate_statements_ta1 /tmp/tmp-mini/testcase-generation/config_ta1.json",
+      "echo 'checking IRs generated'",
+      "ls -l /tmp/tests",
       ""
     ]
   }
