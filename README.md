@@ -47,9 +47,10 @@ If you see something like the following in your command line, you are successful
 <img width="300" alt="image" src="https://user-images.githubusercontent.com/62607343/203413803-19021cb9-07ba-4376-ade0-dbdc6c8506c5.png">
 </ul>
 
-Inside the container, move into wiztoolkit:
+Inside the container, clone wiztoolkit repo and move into wiztoolkit:
 
 ```
+git clone https://github.mit.edu/sieve-all/wiztoolkit.git
 cd wiztoolkit
 ```
 

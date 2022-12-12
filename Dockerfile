@@ -27,6 +27,4 @@ RUN pip3 install -r requirements.txt
 RUN python3 install.py --deps --tool --ot --zk
 RUN ldconfig
 
-RUN git clone https://github.mit.edu/sieve-all/wiztoolkit.git
-
 CMD [ "sleep", "infinity" ]
