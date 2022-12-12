@@ -75,7 +75,9 @@ class SecretList(AST):
         for x in self.arr:
             assert x <= p
 
-        gf_arr_pad = np.pad(self.arr, (0, len(self.arr)%k-1)).reshape((-1, k))
+        pad_len = k*(len(self.arr) // k)+k - len(self.arr)
+        gf_arr_pad = np.pad(self.arr, (0, pad_len)).reshape((-1, k))
+        
         blocks = [[SecretGF(int(x)) for x in a] for a in gf_arr_pad]
 
         return blocks

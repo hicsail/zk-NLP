@@ -3,20 +3,20 @@ from miniwizpl import *
 from miniwizpl.expr import *
 from common.util import *
 
-#TODO FIXME : ADD CCC.text check
-set_field(2**61-1)
+''' Checking if prime meets our requirement'''
+try:
+    assert check_prime()== True
+except:
+    print("no equivalent prime (2305843009213693951) in ccc.txt")
+    sys.exit(1)
+
+assert len(sys.argv) == 5, "Invalid arguments"
+_, target_dir, prime, prime_name, size = sys.argv
+set_field(int(prime))
 
 ''' Prepping target text and substrings'''
-if (len(sys.argv)>2 and (sys.argv[2] =="debug"or sys.argv[2] =="test")):
-    file_data=generate_text(int(sys.argv[3]))
-    string_a, string_target=generate_target(file_data, "after_all")
-
-else:
-    string_a = 'not'
-    string_target =  ['in', 'our', 'alphabet']
-    with open(sys.argv[1], 'r') as f:
-        file_data = f.read()
-    file_data = file_data.split()
+file_data=generate_text(int(size))
+string_a, string_target=generate_target(file_data, "after_all")
 
 print("Text: ", file_data, "\n")
 print("Start: ", string_a, "\n", "Target: ", string_target, "\n")
@@ -48,24 +48,11 @@ def run_dfa(dfa, text_input):
     def next_state_fun(string, initial_state):
         curr_state=initial_state
         for (dfa_state, dfa_str), next_state in dfa.items():
-
-            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
-                print(
-                    "curr state: ", val_of(curr_state),
-                    "dfa state: ", dfa_state,"\n",
-                    "input string: ", val_of(string),
-                    "dfa string: ", dfa_str,"\n",
-                    "next_state", next_state,"\n")
-
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
                          mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_state),
                          error_state,
                          curr_state))
-                         
-            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
-                print("Updated state: ", val_of(curr_state))
-
         ''' 
             Determine whether or not to go to the error state:
             1) If alreayd in error state, then always error state
@@ -80,12 +67,9 @@ def run_dfa(dfa, text_input):
             Adding sub string if in one of found states
             If you're initially in accept state, it should fail into error state because you were not reading the last word in the text in the previous iteration
         '''
-        Secret_str_after.cond_push(is_in_found_states(initial_state, found_states),string)
+        # Secret_str_after.cond_push(is_in_found_states(initial_state, found_states),string)
         return curr_state
-    if len(sys.argv)==3 and sys.argv[2] =="debug":
-        latest_state=reduce_unroll(next_state_fun, text_input, zero_state)
-    else:
-        latest_state=reduce(next_state_fun, text_input, zero_state)
+    latest_state=reduce(next_state_fun, text_input, zero_state)
     return latest_state
 
 # build DFA
@@ -98,12 +82,5 @@ assert0(latest_state - accept_state)
 
 run_poseidon_hash(file_string)
 
-if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
-    print("\n", "Latest State: ",val_of(latest_state), "\n")
-    print("\n", "Result:   ",Secret_str_after.current_val, "\n")
-    expected=[word_to_integer(x) for x in string_target]
-    print("\n", "Expected: ",expected, "\n")
-
-else:
-    # compile the ZK statement to an EMP file
-    print_ir0(sys.argv[4]+'/miniwizpl_test_ir0')
+# compile the ZK statement
+print_ir0(target_dir + "/" + f"after_all_{prime_name}_{size}")

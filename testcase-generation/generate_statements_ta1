@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+# Run a set of tests, based on the config.json file
+
+import sys
+from pathlib import Path
+import json
+import subprocess 
+
+# Map primes here for testing
+prime_names = {}
+prime_names['p1'] = 2305843009213693951
+directory='testcase-generation/substring_search/' #Reative to where you run the generate_statements
+
+# Map descriptors to files
+desc_to_script = {}
+desc_to_script["after_all"] = "IR0_stringlist_search_after_all.py"
+desc_to_script["after"] = "IR0_stringlist_search_after.py"
+desc_to_script["begins"] = "IR0_stringlist_search_begins.py"
+desc_to_script["between"] = "IR0_stringlist_search_between.py"
+desc_to_script["point_to"] = "IR0_stringlist_search_point_to.py"
+desc_to_script["stringlist"] = "IR0_stringlist_search.py"
+desc_to_script["string"] = "IR0_string_search.py"
+
+if __name__ == "__main__":
+    if len(sys.argv) > 2:
+        print("Expecting generate_statements <config file>")
+        print("  <config file> default is config.json")
+        exit(1)
+
+    if len(sys.argv) > 1:
+        config_file = sys.argv[1]
+    else:
+        config_file = "./testcase-generation/config_ta1.json"
+        
+    with open(config_file, 'r') as f:
+      cf = json.load(f)
+      
+    # Extract metadata
+    target = cf['target']
+    Path(target).mkdir(parents=True, exist_ok=True)
+    for name, family in cf['test-families'].items():
+      script = directory+desc_to_script[name]
+      # sizes = " ".join((str(x) for x in family['sizes']))
+      for prime in family['primes']:
+        for size in family['sizes']:
+          size = str(size)
+          this_ex = f'python3 {script} {target} {prime_names[prime]} {prime} {size}'
+          print('* Generating:', this_ex)
+          try:
+            retcode = subprocess.call(this_ex, shell=True)
+            if retcode != 0:
+                print(script + " returned nonzero:", retcode, file=sys.stderr)
+                sys.exit(retcode)
+            fname = f'{target}/{name}_{prime}_{size}'
+            test_ex = f'wtk-firealarm {fname}.rel {fname}.ins {fname}.wit'
+
+            print('* Testing:', test_ex)
+            retcode = subprocess.call(test_ex, shell=True)
+            
+            if retcode != 0:
+                print(script + " returned nonzero:", retcode, file=sys.stderr)
+                sys.exit(retcode)
+          except OSError as e:
+            print("Error:", e, file=sys.stderr)
+
