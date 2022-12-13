@@ -76,10 +76,10 @@ def run_dfa(dfa, text_input):
 # build DFA
 print("Creating DFA")
 dfa = dfa_from_string(string_a, string_target)
-print("\n", "DFA: ",dfa, "\n")
+# print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
-print("TRaversing DFA")
+print("Traversing DFA")
 latest_state = run_dfa(dfa, file_string)
 print("Output Assertion")
 assert0(latest_state - accept_state)

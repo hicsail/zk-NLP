@@ -71,7 +71,7 @@ def run_dfa(dfa, string):
 # define the ZK statement
 print("Creating DFA")
 dfa = dfa_from_string(string_target)
-print("TRaversing DFA")
+print("Traversing DFA")
 output = run_dfa(dfa, file_string)
 print("Output Assertion")
 assert0((output == accept_state))

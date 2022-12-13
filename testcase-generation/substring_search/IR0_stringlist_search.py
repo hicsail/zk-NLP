@@ -128,7 +128,7 @@ def public_foreach(ls, fn, init):
 '''
 
 # define the ZK statement
-print("TRaversing DFA")
+print("Traversing DFA")
 outputs = run_dfa(dfa, file_string)
 # TODO: instead of comparing the run_dfa result, we will need to compare the actual_counter with the expected_counter.
 print("Output Assertion")
