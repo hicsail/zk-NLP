@@ -18,7 +18,8 @@ set_field(int(prime))
 file_data=generate_text(int(size))
 string_target=generate_target(file_data, "begins")
 
-print("Text: ", file_data, "\n")
+print("Test (First 10 Strings): ",file_data[0:10], "length:", len(file_data))
+# print("Text: ", file_data, "\n")
 print("Target: ", string_target, "\n")
 # Transform the text file to search into miniwizpl format
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
@@ -48,13 +49,19 @@ def run_dfa(dfa, text_input):
     latest_state=reduce(next_state_fun, text_input, zero_state)
     return latest_state
 
+# build DFA
+print("Creating DFA")
 dfa = dfa_from_string(string_target)
 print("\n", "DFA: ",dfa, "\n")
 
 # define the ZK statement
+print("TRaversing DFA")
 latest_state = run_dfa(dfa, file_string)
+print("Output Assertion")
 assert0(latest_state - accept_state)
+print("Running Poseidon Hash")
 run_poseidon_hash(file_string)
 # compile the ZK statement to an EMP file
+print("Generating Output")
 print_ir0(target_dir + "/" + f"begins_{prime_name}_{size}")
 

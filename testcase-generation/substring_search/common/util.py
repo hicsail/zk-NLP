@@ -75,11 +75,13 @@ def generate_text(scale=0):
     print("\n")
     fake = Faker(['en_US'])
     file_data=fake.text(15000000*(2**scale))
-    print("Before cleaning text: ", file_data, "\n")
+    # print("Before cleaning text: ", file_data, "\n")
     regex = re.compile('[,\.!?]')
     file_data=regex.sub('', file_data)
-    print("Removing [,\.!?]: ", file_data, "\n")
-    return file_data.split()[:1000000*(2**scale)]
+    # print("Removing [,\.!?]: ", file_data, "\n")
+    final_data = file_data.split()[:1000000*(2**scale)]
+    # print("Removing [,\.!?]: ", file_data, "\n")
+    return final_data
 
 def generate_target(txt, type):
     if type=="after_all":

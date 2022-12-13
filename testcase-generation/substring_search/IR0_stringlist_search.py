@@ -18,7 +18,8 @@ set_field(int(prime))
 file_data=generate_text(int(size))
 string_target=generate_target(file_data, "stringlist")
 
-print("Text: ", file_data, "\n")
+print("Test (First 10 Strings): ",file_data[0:10], "length:", len(file_data))
+# print("Text: ", file_data, "\n")
 print("Target: ", string_target, "\n")
 # Transform the text file to search into miniwizpl format
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
@@ -73,8 +74,8 @@ def dfa_from_string(stringlist):
             finished = True
     return next_state
 
-
-
+# build DFA
+print("Creating DFA")
 dfa = dfa_from_string(string_target)
 
 
@@ -127,10 +128,13 @@ def public_foreach(ls, fn, init):
 '''
 
 # define the ZK statement
+print("TRaversing DFA")
 outputs = run_dfa(dfa, file_string)
 # TODO: instead of comparing the run_dfa result, we will need to compare the actual_counter with the expected_counter.
-print('output', outputs)
+print("Output Assertion")
 assert0(outputs - accept)
+print("Running Poseidon Hash")
 run_poseidon_hash(file_string)
 # compile the ZK statement
+print("Generating Output")
 print_ir0(target_dir + "/" + f"stringlist_{prime_name}_{size}")
