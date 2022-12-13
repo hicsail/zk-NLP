@@ -20,7 +20,7 @@ string_a, string_target=generate_target(file_data, "after")
 
 print("Test (First 10 Strings): ",file_data[0:10], "length:", len(file_data))
 # print("Text: ", file_data, "\n")
-print("Start: ", string_a, "\n", "Target: ", string_target, "\n")
+# print("Start: ", string_a, "\n", "Target: ", string_target, "\n")
 # Transform the text file to search into miniwizpl format
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
@@ -71,6 +71,6 @@ print("Output Assertion")
 assert0(latest_state - accept_state)
 print("Running Poseidon Hash")
 run_poseidon_hash(file_string)
-# compile the ZK statement to an EMP file
+# compile the ZK statement
 print("Generating Output")
 print_ir0(target_dir + "/" + f"after_{prime_name}_{size}")

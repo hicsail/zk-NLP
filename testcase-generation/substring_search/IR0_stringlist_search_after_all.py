@@ -20,7 +20,7 @@ string_a, string_target=generate_target(file_data, "after_all")
 
 print("Test (First 10 Strings): ",file_data[0:10], "length:", len(file_data))
 # print("Text: ", file_data, "\n")
-print("Target: ", string_target)
+# print("Target: ", string_target)
 # Transform the text file to search into miniwizpl format
 file_string = SecretList([word_to_integer(_str) for _str in file_data])
 
