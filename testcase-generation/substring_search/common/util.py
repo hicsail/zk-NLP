@@ -79,9 +79,7 @@ def generate_text(scale=0):
     regex = re.compile('[,\.!?]')
     file_data=regex.sub('', file_data)
     # print("Removing [,\.!?]: ", file_data, "\n")
-    #final_data = file_data.split()[:1000000*(2**scale)]
     final_data = file_data.split()[:10*(2**scale)]
-    # print("Removing [,\.!?]: ", file_data, "\n")
     return final_data
 
 def generate_target(txt, type):
