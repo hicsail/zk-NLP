@@ -54,8 +54,8 @@ if __name__ == "__main__":
             fname = f'{target}/{name}_{prime}_{size}'
             test_ex = f'wtk-firealarm {fname}.rel {fname}.ins {fname}.wit'
 
-            print('* Testing:', test_ex)
-            retcode = subprocess.call(test_ex, shell=True)
+            #print('* Testing:', test_ex)
+            #retcode = subprocess.call(test_ex, shell=True)
             
             if retcode != 0:
                 print(script + " returned nonzero:", retcode, file=sys.stderr)
