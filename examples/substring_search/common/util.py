@@ -74,13 +74,12 @@ def is_in_found_states_todelete(initial_state, found_states):
 def generate_text(scale=0):
     print("\n")
     fake = Faker(['en_US'])
-    file_data=fake.text(15000000*(2**scale))
+    file_data=fake.text(1500*(2**scale))
     # print("Before cleaning text: ", file_data, "\n")
     regex = re.compile('[,\.!?]')
     file_data=regex.sub('', file_data)
     # print("Removing [,\.!?]: ", file_data, "\n")
-    final_data = file_data.split()[:1000000*(2**scale)]
-    # print("Removing [,\.!?]: ", file_data, "\n")
+    final_data = file_data.split()[:10*(2**scale)]
     return final_data
 
 def generate_target(txt, type):
