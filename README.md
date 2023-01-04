@@ -61,7 +61,13 @@ make
 make install
 ```
 
-After the installation is done, move back to the parent directory to run experimentations:
+After the installation, copy the wtk-fire-alarm binary to bin directory:
+
+```
+cp /usr/src/app/wiztoolkit/target/wtk-firealarm /usr/bin/wtk-firealarm
+```
+
+Then, move back to the root directory.
 
 ```
 cd ..
