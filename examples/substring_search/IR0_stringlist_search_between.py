@@ -54,7 +54,7 @@ def run_dfa(dfa, text_input):
         curr_state=initial_state
         for (dfa_state, dfa_str), next_state in dfa.items():
 
-            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
+            if len(sys.argv)>2 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
                 print(
                     "curr state: ", val_of(curr_state),
                     "dfa state: ", dfa_state,"\n",
@@ -68,7 +68,7 @@ def run_dfa(dfa, text_input):
                          error_state,
                          curr_state))
                          
-            if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
+            if len(sys.argv)>2 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
                 print("Updated state: ", val_of(curr_state))                     
 
         ''' 
@@ -85,7 +85,7 @@ def run_dfa(dfa, text_input):
         # Secret_str_between.cond_push(is_in_found_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
         return curr_state
 
-    if len(sys.argv)==3 and sys.argv[2] =="debug":
+    if len(sys.argv)>2 and sys.argv[2] =="debug":
         latest_state=reduce_unroll(next_state_fun, text_input, zero_state)
     else:
         latest_state=reduce(next_state_fun, text_input, zero_state)
@@ -106,12 +106,10 @@ assert0((latest_state - accept_state)*(latest_state - appendedAll_state))
 
 run_poseidon_hash(file_string)
 
-if len(sys.argv)==3 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
+if len(sys.argv)>2 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
     print("\n", "Latest State: ",val_of(latest_state), "\n")
-    print("\n", "Result:   ",Secret_str_between.current_val, "\n")
     expected=[word_to_integer(x) for x in string_target]
     expected.insert(0, word_to_integer(string_a))
-    print("\n", "Expected: ",expected, "\n")
 
 else:
     # compile the ZK statement to an EMP file
