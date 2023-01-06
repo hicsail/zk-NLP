@@ -1,16 +1,21 @@
 {
   "target_note": "Base directory where tests are created",
-  "target": "../tests",
+  "target": "./tests",
 
   "ccc_note": "The location of the CCC file to use during generation" ,
   "ccc": "./ccc.txt",
 
   "test-families" : {
-    "after_all": {
-      "primes": ["p1"],
-      "size_note": "2**N (Increases the size of a corpus text)",
-      "sizes": [0,1,2,3,4,5,6]
-    },
+      "string_search": {
+        "primes": ["p1"],
+        "size_note": "2**N (Increases the size of a corpus text)",
+        "sizes": [0]
+      },
+      "after_all": {
+        "primes": ["p1"],
+        "size_note": "2**N (Increases the size of a corpus text)",
+        "sizes": [0]
+      },
       "after": {
         "primes": ["p1"],
         "size_note": "The length of a corpus text does not affect complexity",
@@ -24,22 +29,17 @@
       "between": {
         "primes": ["p1"],
         "size_note": "2**N (Increases the size of a corpus text)",
-        "sizes": [0,1,2,3,4,5,6,7]
+        "sizes": [0]
       },
       "point_to": {
         "primes": ["p1"],
         "size_note": "2**N (Increases the size of a corpus text)",
-        "sizes": [0,1,2,3,4,5,6,7]
+        "sizes": [0]
       },
-      "stringlist": {
+      "stringlist_search": {
         "primes": ["p1"],
         "size_note": "2**N (Increases the size of a corpus text)",
-        "sizes": [0,1,2,3,4,5,6,7]
-      },
-      "string": {
-        "primes": ["p1"],
-        "size_note": "2**N (Increases the size of a corpus text)",
-        "sizes": [0,1,2,3,4,5,6,7]
+        "sizes": [0]
       }
   }
 }
