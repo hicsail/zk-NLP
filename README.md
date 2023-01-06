@@ -76,7 +76,7 @@ cd ..
 ```
 
 
-## 🏋️‍♀️ Run your pythoon script inside the container
+## 🏋️‍♀️ Run your python script inside the container
 
 You can run your python script in docker shell and compile by miniwizpl in the following command. 
 It entails the following four tags:
