@@ -51,8 +51,10 @@ If you see something like the following in your command line, you are successful
 
 Inside the container, clone wiztoolkit repo and move into wiztoolkit:
 
+(*) You might need to set up ssh key - Follow <a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent?platform=linux"> the instruction </a>
+
 ```
-git clone https://github.mit.edu/sieve-all/wiztoolkit.git
+git clone git@github.mit.edu:sieve-all/wiztoolkit.git
 cd wiztoolkit
 ```
 
