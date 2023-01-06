@@ -88,7 +88,7 @@ It entails the following four tags:
                        -t <Optional: Target Directory>
 ```
 
-<strong> -f (Required) </strong> : Directory of your Python script to run
+<strong> -f (Required) </strong> : Name of your Python script to run (such as "between" and "after")
 
 <strong> -o (Optional) </strong> : Choose a mode to run your python script: 
   <ul>
@@ -97,27 +97,61 @@ It entails the following four tags:
     <li> If the second argument is empty, it will assume "debug" operation
   </ul>
 
-<br>
-
-When you want to compile into IR0, you can run:
+For example, copy and paste the command into your terminal:
 
 ```
-/bin/bash ./run_IR0.sh -f between -o debug
+   /bin/bash ./run_IR0.sh -f between -o debug
 ```
 
-This means that you are running <strong> stringlist_search_between.py </strong> in the <strong> substring_search </strong> in <strong> debug mode </strong> with <strong>IR0</strong> .<br>
+This runs <a href="https://github.com/hicsail/SIEVE/blob/main/examples/substring_search/IR0_stringlist_search_between.py">    IR0_stringlist_search_between.py</a> in debug mode.<br>
 
-<strong> -s (Optional) </strong> : Choose a scale of test complexity (e.g., 0 and 1)
-
+<strong> -s (Optional) </strong> : Choose a scale of test complexity (e.g., 0 and 1, default = 0)
 <ul>
-This 
+
+  This value will be used as a parameter by generate_text function
+
+  https://github.com/hicsail/SIEVE/blob/425e0a1e8a163241fc509bffcac28c1e3e6f8962/examples/substring_search/common/util.py#L74
+
 </ul>
 
+
+<strong> -t (Optional) </strong> : Choose a directory to save interim outputs (.rel, .ins, .wit files)
+
+
+## 🎲 Tuning Testing Scale
+
+You may choose a scale of test cases (i.e., difficulty of tests) in generate_text() function (default to 0 = original length of text)
+
+https://github.com/hicsail/SIEVE/blob/a3c52beb324c2908f695b1422f1fca22fea92a2d/examples/substring_search/stringlist_search_after_all.py#L9
+
+
+----
+
+## Generating Documentation Re: miniwizpl
+
+Documentation can be generated with `pdoc3`:
+
+```
+pip install pdoc3
+pdoc --http localhost:8080 miniwizpl
+```
+
+## Changes from original code stacks
+<ul>
+<li> Changed #include statement in mini_wizpl_top.cpp in miniwizpl/boilerplate, from "ram-zk/zk-mem.h" to "emp-zk/emp-zk/extensions/ram-zk/zk-mem.h" 
+, so that test file can find the path properly</li>
+<li> Added "-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" into g++ command instruction </li>
+
+<li> Sudo prefix is removed from install.py to fit Dockerfile's style </li>
+<li> Added "prefix to mnist.pt directory in examples/neural_networks/mnist_wizpl.py, so that the system can find the file inside container </li>
+
+<li> OR operation added to class AST in miniwizpl/expr.py, in order to implement stringlist_search_between </li>
 </ul>
 
 
-2) Manual Execution for EMP-ZK tool (Deprecated)
-<ul>
+
+## <strong> Manual Execution for EMP-ZK tool (Deprecated) </strong>
+
 In case you want to experiment manually, run inside docker shell:
 
 ```
@@ -155,35 +189,3 @@ The first command line argument indicates whether or not to run the executable a
 The second command line argument represents the communication port. 
 For a successful proof, the above command should run and return 
 a non-zero exit code. For a failed proof, the above should report a failed assertion.
-</ul>
-
-
-## 🎲 Tuning Testing Scale
-
-You may choose a scale of test cases (i.e., difficulty of tests) in generate_text() function (default to 0 = original length of text)
-
-https://github.com/hicsail/SIEVE/blob/a3c52beb324c2908f695b1422f1fca22fea92a2d/examples/substring_search/stringlist_search_after_all.py#L9
-
-
-----
-
-## Generating Documentation Re: miniwizpl
-
-Documentation can be generated with `pdoc3`:
-
-```
-pip install pdoc3
-pdoc --http localhost:8080 miniwizpl
-```
-
-## Changes from original code stacks
-<ul>
-<li> Changed #include statement in mini_wizpl_top.cpp in miniwizpl/boilerplate, from "ram-zk/zk-mem.h" to "emp-zk/emp-zk/extensions/ram-zk/zk-mem.h" 
-, so that test file can find the path properly</li>
-<li> Added "-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" into g++ command instruction </li>
-
-<li> Sudo prefix is removed from install.py to fit Dockerfile's style </li>
-<li> Added "prefix to mnist.pt directory in examples/neural_networks/mnist_wizpl.py, so that the system can find the file inside container </li>
-
-<li> OR operation added to class AST in miniwizpl/expr.py, in order to implement stringlist_search_between </li>
-</ul>
