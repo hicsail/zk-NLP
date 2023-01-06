@@ -1,11 +1,6 @@
 # SIEVE
 
-SIEVE project aims to provide an E2E pipeline to implement Zero-Knowledge Proof.
-
-It consists of two components, miniWizPL and emp-zk tool kit.
-
-miniWizPL is a Python library that compiles zero-knowledge statements in Python Script into C++ code with EMP took kit.
-This E2E module runs the compiled C++ code and asserts whether or not prover's claim is valid.
+SIEVE project provides an E2E pipeline to implement Zero-Knowledge Proof.
 
 ----
 
@@ -17,21 +12,26 @@ Clone this repo:
 git clone https://github.com/hicsail/SIEVE.git
 ```
 
-Please move into the root directory
+Move into the root directory of the project
 
 ```
 cd SIEVE
 ```
 
-Then, inside the local repo root directory run to build an image and a container:
+Inside the root directory, run build image:
 
 ```
 docker-compose up -d --build
 ```
 
+Now you have a brand new container running on your machine
+
+
 ## 🖥️ Getting started
 
-You have to do above operations only once, and from next time you can run the following command in your terminal to start Docker Shell:
+<strong> 1) Enter Docker Shell</strong> 
+
+Since you have a running container, you can subsequently run the following command in your terminal to start Docker Shell:
 
 ```
 docker exec -it <containerID> bash
@@ -46,6 +46,8 @@ If you see something like the following in your command line, you are successful
 <ul>
 <img width="300" alt="image" src="https://user-images.githubusercontent.com/62607343/203413803-19021cb9-07ba-4376-ade0-dbdc6c8506c5.png">
 </ul>
+
+<strong> 2) Install wiztoolkit</strong> 
 
 Inside the container, clone wiztoolkit repo and move into wiztoolkit:
 
@@ -74,47 +76,47 @@ cd ..
 ```
 
 
-## 🏋️‍♀️ Experiment your code
+## 🏋️‍♀️ Run your pythoon script inside the container
 
-There are two avenues to chose from for you to experiment your python scripts inside the container:
-
-<strong> 1) Easy Way </strong>
-<ul>
-
-You can run your python script and compile by miniwizpl in the following command:
+You can run your python script in docker shell and compile by miniwizpl in the following command. 
+It entails the following four tags:
 
 ```
-/bin/bash ./run_emp.sh -f <Directory of your Python script to run> -o <Optional: test or debug>
+/bin/bash ./run_emp.sh -f <Name of your Python script to run> 
+                       -o <Optional: test or debug> 
+                       -s <Optional: Scale of Testing Complexity> 
+                       -t <Optional: Target Directory>
 ```
 
 <strong> -f (Required) </strong> : Directory of your Python script to run
 
 <strong> -o (Optional) </strong> : Choose a mode to run your python script: 
   <ul>
-    <li> "debug" prints the intermediate results of DFA transitions (It does not compile with miniwizpl).
     <li> "test" produces a synthetic test case, including an input text and target substrings. 
-    <li> If the second argument is empty, it will use the user defined target text in "dfa_test_input.txt" and you have to set target inside your python script to run: 
+    <li> "debug" uses your own text corpus input in <a href="https://github.com/hicsail/SIEVE/blob/main/examples/dfa_test_input.txt"> dfa_test_input.txt</a>
+    <li> If the second argument is empty, it will assume "debug" operation
   </ul>
-  
-  https://github.com/hicsail/SIEVE/blob/200b8dc6076e8024352815e4753204b658544a43/examples/substring_search/stringlist_search_after_all.py#L13
+
 <br>
-When you want to compile into EMP, you can run:
+
+When you want to compile into IR0, you can run:
 
 ```
-/bin/bash ./run_emp.sh -f substring_search/stringlist_search_between.py -o debug
-```
-
-Or when you want to compile into IR0, you can run:
-
-```
-/bin/bash ./run_IR0.sh -f substring_search/IR0_stringlist_search_between.py -o debug
+/bin/bash ./run_IR0.sh -f between -o debug
 ```
 
 This means that you are running <strong> stringlist_search_between.py </strong> in the <strong> substring_search </strong> in <strong> debug mode </strong> with <strong>IR0</strong> .<br>
 
+<strong> -s (Optional) </strong> : Choose a scale of test complexity (e.g., 0 and 1)
+
+<ul>
+This 
 </ul>
 
-<strong> 2) Manual Execution </strong>
+</ul>
+
+
+2) Manual Execution for EMP-ZK tool (Deprecated)
 <ul>
 In case you want to experiment manually, run inside docker shell:
 
