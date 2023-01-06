@@ -3,26 +3,40 @@ from miniwizpl import *
 from miniwizpl.expr import *
 from common.util import *
 
-#TODO FIXME : ADD CCC.text check
-set_field(2**61-1)
+
+
+''' Importing ENV Var & Checking if prime meets our requirement'''
+assert len(sys.argv) == 6, "Invalid arguments"
+_, target_dir, prime, prime_name, size, operation = sys.argv
+file_name="point_to"
+set_field(int(prime))
+
+try:
+    assert check_prime()== True
+except:
+    print("no equivalent prime (2305843009213693951) in ccc.txt")
+    sys.exit(1)
+
+
 
 ''' Prepping target text and substrings'''
-if (len(sys.argv)>2 and (sys.argv[2] =="debug"or sys.argv[2] =="test")):
-    file_data=generate_text(int(sys.argv[3]))
-    string_a, string_target=generate_target(file_data, "point_to")
+if operation =="test":
+    corpus=generate_text(int(size))
+    string_a, string_target=generate_target(corpus, file_name)
+    print("Test (First 10 Strings): ",corpus[0:10])
+    print("Actual text length:", len(corpus))
 
 else:
-    string_target =  ['not']
-    string_a = 'in'
-    with open(sys.argv[1], 'r') as f:
-        file_data = f.read()
-    file_data = file_data.split()
+    string_target =  ['one']
+    string_a = 'two'
+    with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
+        corpus = f.read()
+    corpus = corpus.split()
+    print("Text: ", corpus, "\n")
 
-print("Text: ", file_data, "\n")
 print("Target: ", string_target, "\n", "End: ", string_a, "\n",)
 # Transform the text file to search into miniwizpl format
-file_string = SecretList([word_to_integer(_str) for _str in file_data])
-
+file_string = SecretList([word_to_integer(_str) for _str in corpus])
 
 zero_state = 0
 append_states=[i for i in range(1,len(string_target))]
@@ -39,6 +53,8 @@ else:
 Secret_str_before = SecretStack([])
 str_before = []
 
+
+
 def dfa_from_string(last, target):
     next_state = {}
     assert(len(target)>0)
@@ -54,14 +70,15 @@ def dfa_from_string(last, target):
         next_state[(appendedAll_state, word_to_integer(last))]=accept_state
         return next_state
 
-# run a dfa
+
+
 def run_dfa(dfa, text_input):
     def next_state_fun(string, initial_state):
         curr_state=initial_state
+        
         for (dfa_state, dfa_str), next_state in dfa.items():
 
-            if len(sys.argv)>2 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
-                print(
+            print(
                         "curr state: ", val_of(curr_state),
                         "dfa state: ", dfa_state,"\n",
                         "input string: ", val_of(string),
@@ -74,8 +91,7 @@ def run_dfa(dfa, text_input):
                          error_state, 
                          curr_state))
 
-            if len(sys.argv)>2 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
-                print("Updated state: ", val_of(curr_state))
+            print("Updated state: ", val_of(curr_state))
 
         ''' 
             1) If alreayd in error state, then always error state
@@ -92,30 +108,34 @@ def run_dfa(dfa, text_input):
         # Secret_str_before.cond_push(is_in_found_states(curr_state, append_states)|(curr_state == appendedAll_state), string)
 
         return curr_state
-    if len(sys.argv)==3 and sys.argv[2] =="debug":
-        latest_state=reduce_unroll(next_state_fun, text_input, zero_state)
-    else:
-        latest_state=reduce(next_state_fun, text_input, zero_state)
+    latest_state=reduce(next_state_fun, text_input, zero_state)
     ''' 
         Pop the last element if no string_b found and if you're read the last substring of the target between strings
     '''
     # Secret_str_before.cond_pop(latest_state==appendedAll_state)
     return latest_state
 
-# build DFA
+
+
+'''Build and traverse a DFA'''
 dfa = dfa_from_string(string_a, string_target)
-print("\n", "DFA: ",dfa, "\n")
-
-# define the ZK statement
+# print("\n", "DFA: ",dfa, "\n")
+print("Traversing DFA")
 latest_state = run_dfa(dfa, file_string)
+print("Output Assertion")
 assert0((latest_state - accept_state)*(latest_state - appendedAll_state))
-
+print("Running Poseidon Hash")
 run_poseidon_hash(file_string)
+print("\n", "Latest State: ",val_of(latest_state), "\n")
 
-if len(sys.argv)>2 and (sys.argv[2] =="debug" or sys.argv[2] =="debug/own") :
-    print("\n", "Latest State: ",val_of(latest_state), "\n")
-    expected=[word_to_integer(x) for x in string_target]
-    
-else:
-    # compile the ZK statement to an EMP file
-    print_ir0(sys.argv[4]+'/miniwizpl_test_ir0')
+if operation =="debug":
+    # print("\n", "Result:   ",Secret_str_after.current_val, "\n")
+    # expected=[word_to_integer(x) for x in string_target]
+    # print("\n", "Expected: ",expected, "\n")
+    if val_of(latest_state)==accept_state:
+        print("DFA successfully reached the accept state \n")
+    else:
+        print("DFA did not reached the accept state \n")
+
+print("Generating Output \n")
+print_ir0(target_dir + "/" + f"{file_name}_{prime_name}_{size}")

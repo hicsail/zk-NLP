@@ -131,7 +131,7 @@ def generate_target(txt, type):
         return [string_a + ' '+string_b]
 
 def check_prime():
-  txt_dir='./testcase-generation/ccc.txt' #Reative to where you run the generate_statements
+  txt_dir='./ccc.txt' #Reative to where you run the generate_statements
   target='@field (equals (2305843009213693951))'
   with open(txt_dir) as f:
       txt = f.read().splitlines() 

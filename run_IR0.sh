@@ -1,65 +1,108 @@
 # # #!/bin/sh
 
+
+# Taking tags from the command line
+
 while getopts f:c:o:s:t: flag
 do
     case "${flag}" in
         f) file=${OPTARG};;
         o) operation=${OPTARG};;
         s) size=${OPTARG};;
-        t) tests=${OPTARG};;
+        t) target=${OPTARG};;
     esac
 done
 
-[ -e $tests/miniwizpl_test_ir0.ins  ] && rm $tests//miniwizpl_test_ir0.ins
-[ -e $tests/miniwizpl_test_ir0.rel  ] && rm $tests//miniwizpl_test_ir0.rel
-[ -e $tests/miniwizpl_test_ir0.rel  ] && rm $tests//miniwizpl_test_ir0.wit
+
+
+# Checking if a file name is properly specified
 
 if [ -z "$file" ]
     then
         echo "Please specify an object code"
-    else
-        cp /code/$file /usr/src/app/examples/$file
+        exit 1
+fi
+
+
+
+# Setting missing parameters if any
+
+if [ -z "$target"]
+    then
+        target="./tests"
+        echo "test directory is set to './tests' "
+fi
+
+if [ -z "$size"]
+    then
+        size=0
+        echo "test size is set to 0 "
+fi
+
+
+
+# Configuring names and directory
+
+if [ "$file" = "string_search" ]
+    then
+        dir="/usr/src/app/examples/substring_search/IR0_"
+        orig="/code/substring_search/IR0_"
+        cp $orig$file.py $dir$file.py
         
-        echo "Running $file .... $operation";
-
-        if [ "$operation" = "test" ]
-            then 
-                echo "Running synthetic test case"
-                if python3 /usr/src/app/examples/$file "dummy" "test" $size $tests
-                    then
-                        wtk-firealarm $tests//miniwizpl_test_ir0.rel $tests//miniwizpl_test_ir0.wit ./tests/miniwizpl_test_ir0.ins
-                    else
-                        echo "Error in the python script - abort"
-                fi
-
+    else
+        if [ "$file" = "stringlist_search" ]
+            then
+                dir="/usr/src/app/examples/substring_search/IR0_"
+                orig="/code/substring_search/IR0_"
+                cp $orig$file.py $dir$file.py
             else
-                if [ "$operation" = "debug" ]
-                    then 
-                        echo "Running in debug mode"
-                        if python3 /usr/src/app/examples/$file "dummy" "debug" $size $tests
-                            then
-                                echo 'Check the output above'
-                            else
-                                echo "Error in the python script - abort"
-                        fi
+                dir="/usr/src/app/examples/substring_search/IR0_stringlist_search_"
+                orig="/code/substring_search/IR0_stringlist_search_"
+                cp $orig$file.py $dir$file.py
+        fi
+fi
+
+prime=2305843009213693951
+prime_fam="p1"
+
+underscore="_"
+name=$target/$file$underscore$prime_fam$underscore$size
+rel=$name.rel
+wit=$name.wit
+ins=$name.ins
+
+[ -e rel  ] && rm rel
+[ -e wit  ] && rm wit
+[ -e ins  ] && rm ins
+
+
+
+# Actual Execution
+
+echo "Running $file .... $operation test size:$size";
+
+if [ "$operation" = "test" ]
+    then 
+        echo "Running synthetic test case"
+        if python3 $dir$file.py $target $prime $prime_fam $size "test"
+            then
+                if wtk-firealarm $rel $wit $ins
+                    then
+                        echo "wtk-firealarm successfully completed"
                     else
-                        cp /code/dfa_test_input.txt /usr/src/app/examples/dfa_test_input.txt
-                        if [ "$operation" = "debug/own" ]
-                            then 
-                                echo "Running with your own text input in debug mode"
-                                if python3 /usr/src/app/examples/$file /usr/src/app/examples/dfa_test_input.txt "debug/own" "dummy" $tests
-                                    then
-                                        echo 'Check the output above'
-                                fi
-                            else
-                                echo "Running with your own text input"
-                                if python3 /usr/src/app/examples/$file /usr/src/app/examples/dfa_test_input.txt "dummy" "dummy" $tests
-                                    then
-                                        wtk-firealarm ./tests/miniwizpl_test_ir0.rel ./tests/miniwizpl_test_ir0.wit ./tests/miniwizpl_test_ir0.ins
-                                    else
-                                        echo "Error in the python script - abort"
-                                fi
-                        fi
+                        echo "Error during wtk-firealarm"
                 fi
+            else
+                echo "Error in the python script - abort"
+        fi
+
+    else
+        echo "Running with your own text input in debug mode"
+        cp /code/dfa_test_input.txt /usr/src/app/examples/dfa_test_input.txt
+        if python3 $dir$file.py $target $prime $prime_fam $size "debug"
+            then
+                echo 'Check the output above'
+            else
+                echo "Error in the python script - abort"
         fi
 fi
