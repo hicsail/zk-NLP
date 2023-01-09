@@ -102,6 +102,12 @@ if [ "$operation" = "test" ]
         if python3 $dir$file.py $target $prime $prime_fam $size "debug"
             then
                 echo 'Check the output above'
+                if wtk-firealarm $rel $wit $ins
+                    then
+                        echo "wtk-firealarm successfully completed"
+                    else
+                        echo "Error during wtk-firealarm"
+                fi
             else
                 echo "Error in the python script - abort"
         fi
