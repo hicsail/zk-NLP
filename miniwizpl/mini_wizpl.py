@@ -121,5 +121,7 @@ def set_field(b):
     params['arithmetic_field'] = b
 
 def assert0(v):
-    global assertions
-    assertions.append(Prim('assert0', [v], val_of(v) == 0))
+    params['all_statements'].append(Prim('assert0', [v], val_of(v) == 0))
+
+def reveal_array(v):
+    params['all_statements'].append(Prim('reveal_array', [v], val_of(v)))

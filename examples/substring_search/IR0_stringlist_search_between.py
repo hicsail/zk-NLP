@@ -98,14 +98,14 @@ def run_dfa(dfa, text_input):
         ''' 
             Add substring if in one of found states or accept state and reading the last word in the text
         '''
-        # Secret_str_between.cond_push(is_in_found_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
+        Secret_str_between.cond_push(is_in_found_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
         return curr_state
     latest_state=reduce(next_state_fun, text_input, zero_state)
 
     ''' 
         Pop the last element if no string_b found and if you're read the last substring of the target between strings
     '''
-    # Secret_str_between.cond_pop(latest_state==appendedAll_state)
+    Secret_str_between.cond_pop(latest_state==appendedAll_state)
     return latest_state
 
 
@@ -122,6 +122,9 @@ run_poseidon_hash(file_string)
 print("\n", "Latest State: ",val_of(latest_state), "\n")
 
 if operation =="debug":
+    # print("\n", "Result:   ",Secret_str_between.current_val, "\n")
+    # expected=[word_to_integer(x) for x in string_target]
+    # print("\n", "Expected: ",expected, "\n")
     if val_of(latest_state)==accept_state:
         print("DFA successfully reached the accept state \n")
     else:

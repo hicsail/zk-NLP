@@ -122,7 +122,7 @@ def generate_target(txt, type):
         string_target=string_target[0]
         return string_target
 
-    elif type=="stringlist":
+    elif type=="stringlist_search":
         string_a=random.sample(txt[:-1],1)  # Avoiding the last substring to be picked as a first target
         string_a=string_a[0]
         idx_a=txt.index(string_a)

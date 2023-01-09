@@ -260,19 +260,6 @@ def print_exp(e):
 
             #emit(f'  cout << "P" << party << " stack PUSH, new top: " << {x1}_top.reveal<int>(PUBLIC) << " condition: " << {x2}.reveal<bool>(PUBLIC) << "\\n";')
             return None
-        # TODO: work in progress
-        elif e.op == 'stack_cond_pop':
-            e1, e2 = e.args
-            x1 = print_exp(e1)
-            x2 = print_exp(e2)
-            r = gensym('stack_val')
-            a = gensym('cond_addr')
-
-            # conditional, address might be out of range!
-            emit(f'  Integer {a} = mux({x2}, {x1}_top, Integer(64, 0, ALICE));')
-            emit(f'  {x1}_top = mux({x2}, {x1}_top - Integer(64, 1, ALICE), {x1}_top);')
-            emit(f'  Integer {r} = mux({x2}, {x1}->read({a}), Integer(64, 0, ALICE));')
-            return r
         elif e.op == 'assign':
             e1, e2 = e.args
             assert isinstance(e1, SymVar)
@@ -334,8 +321,6 @@ def emit_bigint(r, e):
 
 
 def print_defs(defs):
-    global bitwidth
-
     for d in defs:
         name = d.name
         x = d.val
@@ -351,33 +336,46 @@ def print_defs(defs):
         elif isinstance(d, (SecretList)):
             n1 = len(d.arr)
             p = f"""
-  static long int {name}_init[] = {print_list(x)};
+  static int {name}_init[] = {print_list(x)};
   vector<Integer> {name};
   for (int i = 0; i < {n1}; ++i)
-    {name}.push_back(Integer(64, {name}_init[i], ALICE));
+    {name}.push_back(Integer(32, {name}_init[i], ALICE));
 """
             emit(p)
         elif isinstance(d, (SecretIndexList)):
             n1 = len(d.arr)
             print_witness(x)
+#             p = f"""
+#   static int {name}_init[] = {print_list(x)};
+#   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
+#   for (int i = 0; i < {n1}; ++i)
+#     {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, {name}_init[i], ALICE));
+# """
             p = f"""
   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
   for (int i = 0; i < {n1}; ++i) {{
     is >> tmp;
-    {name}->write(Integer(index_sz, i, PUBLIC), Integer(64, tmp, ALICE));
+    {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, tmp, ALICE));
   }}
 """
             emit(p)
         elif isinstance(d, (SecretStack)):
             n1 = len(d.arr)
             print_witness(x)
+#             p = f"""
+#   static int {name}_init[] = {print_list(x)};
+#   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
+#   for (int i = 0; i < {n1}; ++i)
+#     {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, {name}_init[i], ALICE));
+#   Integer {name}_top = Integer(32, {n1-1}, ALICE);
+# """
             p = f"""
   ZKRAM<BoolIO<NetIO>> *{name} = new ZKRAM<BoolIO<NetIO>>(party, index_sz, step_sz, val_sz);
   for (int i = 0; i < {n1}; ++i) {{
     is >> tmp;
-    {name}->write(Integer(index_sz, i, PUBLIC), Integer(64, tmp, ALICE));
+    {name}->write(Integer(index_sz, i, PUBLIC), Integer(32, tmp, ALICE));
   }}
-  Integer {name}_top = Integer(64, {n1-1}, ALICE);
+  Integer {name}_top = Integer(32, {n1-1}, ALICE);
 """
             emit(p)
         elif isinstance(d, (SecretTensor, SecretArray)):
@@ -465,6 +463,7 @@ def print_emp(filename):
 
     with open(os.path.dirname(__file__) + '/boilerplate/mini_wizpl_top.cpp', 'r') as f1:
         top_boilerplate = f1.read()
+
     emit(top_boilerplate)
 
     emit('  cout << "starting defs\\n";')

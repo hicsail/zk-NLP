@@ -8,7 +8,7 @@ from common.util import *
 ''' Importing ENV Var & Checking if prime meets our requirement'''
 assert len(sys.argv) == 6, "Invalid arguments"
 _, target_dir, prime, prime_name, size, operation = sys.argv
-file_name="stringlist"
+file_name="stringlist_search"
 set_field(int(prime))
 
 try:

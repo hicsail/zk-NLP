@@ -1,7 +1,11 @@
 params = {
     'bitwidth': 64,
     'arithmetic_field': 2**31-1,
-    'all_statements': []
+    'scaling_factor': 2**7,
+    'all_statements': [],
+    'produce_warnings': True,
+    'ram_num_allocs': 0,
+    'ram_total_alloc_size': 0,
 }
 
 bitwidth = 64
