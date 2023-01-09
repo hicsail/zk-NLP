@@ -1,11 +1,6 @@
 # SIEVE
 
-SIEVE project aims to provide an E2E pipeline to implement Zero-Knowledge Proof.
-
-It consists of two components, miniWizPL and emp-zk tool kit.
-
-miniWizPL is a Python library that compiles zero-knowledge statements in Python Script into C++ code with EMP took kit.
-This E2E module runs the compiled C++ code and asserts whether or not prover's claim is valid.
+SIEVE project provides an E2E pipeline to implement Zero-Knowledge Proof.
 
 ----
 
@@ -17,21 +12,26 @@ Clone this repo:
 git clone https://github.com/hicsail/SIEVE.git
 ```
 
-Please move into the root directory
+Move into the root directory of the project
 
 ```
 cd SIEVE
 ```
 
-Then, inside the local repo root directory run to build an image and a container:
+Inside the root directory, run build image:
 
 ```
 docker-compose up -d --build
 ```
 
+Now you have a brand new container running on your machine
+
+
 ## 🖥️ Getting started
 
-You have to do above operations only once, and from next time you can run the following command in your terminal to start Docker Shell:
+<strong> 1) Enter Docker Shell</strong> 
+
+Since you have a running container, you can subsequently run the following command in your terminal to start Docker Shell:
 
 ```
 docker exec -it <containerID> bash
@@ -47,10 +47,14 @@ If you see something like the following in your command line, you are successful
 <img width="300" alt="image" src="https://user-images.githubusercontent.com/62607343/203413803-19021cb9-07ba-4376-ade0-dbdc6c8506c5.png">
 </ul>
 
+<strong> 2) Install wiztoolkit</strong> 
+
 Inside the container, clone wiztoolkit repo and move into wiztoolkit:
 
+(*) You might need to set up ssh key - Follow <a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent?platform=linux"> the instruction </a>
+
 ```
-git clone https://github.mit.edu/sieve-all/wiztoolkit.git
+git clone git@github.mit.edu:sieve-all/wiztoolkit.git
 cd wiztoolkit
 ```
 
@@ -61,55 +65,95 @@ make
 make install
 ```
 
-After the installation is done, move back to the parent directory to run experimentations:
+After the installation, copy the wtk-fire-alarm binary to bin directory:
+
+```
+cp /usr/src/app/wiztoolkit/target/wtk-firealarm /usr/bin/wtk-firealarm
+```
+
+Then, move back to the root directory.
 
 ```
 cd ..
 ```
 
 
-## 🏋️‍♀️ Experiment your code
+## 🏋️‍♀️ Run your python script inside the container
 
-There are two avenues to chose from for you to experiment your python scripts inside the container:
-
-<strong> 1) Easy Way </strong>
-<ul>
-
-You can run your python script and compile by miniwizpl in the following command:
+You can run your python script in docker shell and compile by miniwizpl in the following command. 
+It entails the following four tags:
 
 ```
-/bin/bash ./run_emp.sh -f <Directory of your Python script to run> -o <Optional: test or debug>
+/bin/bash ./run_emp.sh -f <Name of your Python script to run> 
+                       -o <Optional: test or debug> 
+                       -s <Optional: Scale of Testing Complexity> 
+                       -t <Optional: Target Directory>
 ```
 
-<strong> -f (Required) </strong> : Directory of your Python script to run
+<strong> -f (Required) </strong> : Name of your Python script to run (such as "between" and "after")
 
 <strong> -o (Optional) </strong> : Choose a mode to run your python script: 
   <ul>
-    <li> "debug" prints the intermediate results of DFA transitions (It does not compile with miniwizpl).
     <li> "test" produces a synthetic test case, including an input text and target substrings. 
-    <li> If the second argument is empty, it will use the user defined target text in "dfa_test_input.txt" and you have to set target inside your python script to run: 
+    <li> "debug" uses your own text corpus input in <a href="https://github.com/hicsail/SIEVE/blob/main/examples/dfa_test_input.txt"> dfa_test_input.txt</a>
+    <li> If the second argument is empty, it will assume "debug" operation
   </ul>
-  
-  https://github.com/hicsail/SIEVE/blob/200b8dc6076e8024352815e4753204b658544a43/examples/substring_search/stringlist_search_after_all.py#L13
-<br>
-When you want to compile into EMP, you can run:
+
+For example, copy and paste the command into your terminal:
 
 ```
-/bin/bash ./run_emp.sh -f substring_search/stringlist_search_between.py -o debug
+   /bin/bash ./run_IR0.sh -f between -o debug
 ```
 
-Or when you want to compile into IR0, you can run:
+This runs <a href="https://github.com/hicsail/SIEVE/blob/main/examples/substring_search/IR0_stringlist_search_between.py">    IR0_stringlist_search_between.py</a> in debug mode.<br>
 
-```
-/bin/bash ./run_IR0.sh -f substring_search/IR0_stringlist_search_between.py -o debug
-```
+<strong> -s (Optional) </strong> : Choose a scale of test complexity (e.g., 0 and 1, default = 0)
+<ul>
 
-This means that you are running <strong> stringlist_search_between.py </strong> in the <strong> substring_search </strong> in <strong> debug mode </strong> with <strong>IR0</strong> .<br>
+  This value will be used as a parameter by generate_text function
+
+  https://github.com/hicsail/SIEVE/blob/425e0a1e8a163241fc509bffcac28c1e3e6f8962/examples/substring_search/common/util.py#L74
 
 </ul>
 
-<strong> 2) Manual Execution </strong>
+
+<strong> -t (Optional) </strong> : Choose a directory to save interim outputs (.rel, .ins, .wit files)
+
+
+## 🎲 Tuning Testing Scale
+
+You may choose a scale of test cases (i.e., difficulty of tests) in generate_text() function (default to 0 = original length of text)
+
+https://github.com/hicsail/SIEVE/blob/a3c52beb324c2908f695b1422f1fca22fea92a2d/examples/substring_search/stringlist_search_after_all.py#L9
+
+
+----
+
+## Generating Documentation Re: miniwizpl
+
+Documentation can be generated with `pdoc3`:
+
+```
+pip install pdoc3
+pdoc --http localhost:8080 miniwizpl
+```
+
+## Changes from original code stacks
 <ul>
+<li> Changed #include statement in mini_wizpl_top.cpp in miniwizpl/boilerplate, from "ram-zk/zk-mem.h" to "emp-zk/emp-zk/extensions/ram-zk/zk-mem.h" 
+, so that test file can find the path properly</li>
+<li> Added "-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" into g++ command instruction </li>
+
+<li> Sudo prefix is removed from install.py to fit Dockerfile's style </li>
+<li> Added "prefix to mnist.pt directory in examples/neural_networks/mnist_wizpl.py, so that the system can find the file inside container </li>
+
+<li> OR operation added to class AST in miniwizpl/expr.py, in order to implement stringlist_search_between </li>
+</ul>
+
+
+
+## <strong> Manual Execution for EMP-ZK tool (Deprecated) </strong>
+
 In case you want to experiment manually, run inside docker shell:
 
 ```
@@ -147,35 +191,3 @@ The first command line argument indicates whether or not to run the executable a
 The second command line argument represents the communication port. 
 For a successful proof, the above command should run and return 
 a non-zero exit code. For a failed proof, the above should report a failed assertion.
-</ul>
-
-
-## 🎲 Tuning Testing Scale
-
-You may choose a scale of test cases (i.e., difficulty of tests) in generate_text() function (default to 0 = original length of text)
-
-https://github.com/hicsail/SIEVE/blob/a3c52beb324c2908f695b1422f1fca22fea92a2d/examples/substring_search/stringlist_search_after_all.py#L9
-
-
-----
-
-## Generating Documentation Re: miniwizpl
-
-Documentation can be generated with `pdoc3`:
-
-```
-pip install pdoc3
-pdoc --http localhost:8080 miniwizpl
-```
-
-## Changes from original code stacks
-<ul>
-<li> Changed #include statement in mini_wizpl_top.cpp in miniwizpl/boilerplate, from "ram-zk/zk-mem.h" to "emp-zk/emp-zk/extensions/ram-zk/zk-mem.h" 
-, so that test file can find the path properly</li>
-<li> Added "-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" into g++ command instruction </li>
-
-<li> Sudo prefix is removed from install.py to fit Dockerfile's style </li>
-<li> Added "prefix to mnist.pt directory in examples/neural_networks/mnist_wizpl.py, so that the system can find the file inside container </li>
-
-<li> OR operation added to class AST in miniwizpl/expr.py, in order to implement stringlist_search_between </li>
-</ul>

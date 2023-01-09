@@ -75,8 +75,6 @@ ins=$name.ins
 [ -e wit  ] && rm wit
 [ -e ins  ] && rm ins
 
-
-
 # Actual Execution
 
 echo "Running $file .... $operation test size:$size";
