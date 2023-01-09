@@ -6,7 +6,7 @@ from .globals import *
 
 def val_of(x):
     if isinstance(x, AST):
-        if x.val == None:
+        if x.val is None:
             return 0      ######## TODO: FIX THIS HACK
         else:
             return x.val
@@ -15,8 +15,6 @@ def val_of(x):
 
 class AST:
     def __matmul__(self, other):
-        print(self)
-        print(other)
         return Prim('matmul', [self, other], val_of(self) @ val_of(other))
 
     def __rmatmul__(self, other):

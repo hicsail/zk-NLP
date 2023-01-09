@@ -115,9 +115,9 @@ run_poseidon_hash(file_string)
 print("\n", "Latest State: ",val_of(latest_state), "\n")
 
 if operation =="debug":
-    print("\n", "Result:   ",Secret_str_after_all.current_val, "\n")
-    expected=[word_to_integer(x) for x in string_target]
-    print("\n", "Expected: ",expected, "\n")
+    # print("\n", "Result:   ",Secret_str_after_all.current_val, "\n")
+    # expected=[word_to_integer(x) for x in string_target]
+    # print("\n", "Expected: ",expected, "\n")
     if val_of(latest_state)==accept_state:
         print("DFA successfully reached the accept state \n")
     else:

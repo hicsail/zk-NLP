@@ -6,6 +6,7 @@ import os
 from .globals import *
 from .expr import *
 from .data_types import *
+from .utils import *
 import sys
 import galois
 
@@ -19,6 +20,7 @@ IR_MODE = 1
 WRITE_TO_WIT = 1
 WRITE_TO_REL = 1
 all_pubvals = {}
+var_env = {}
 
 @dataclass
 class WireVal(AST):
@@ -35,6 +37,16 @@ class WireVal(AST):
     __repr__ = __str__
 
 
+@dataclass
+class WireArray:
+    wires: any
+    val: any
+    scale: int
+
+def warn(s):
+    if params['produce_warnings']:
+        print('Warning:', s)
+
 def next_wire():
     global current_wire
     r = current_wire
@@ -49,6 +61,23 @@ def emit(s=''):
     
     # global emp_output_string
     # emp_output_string += s + '\n'
+
+def add_array_to_witness(arr):
+    s = params['scaling_factor']
+    encoded = encode_array(arr, s)
+    wires = np.vectorize(add_to_witness, otypes=[str])(encoded)
+    return WireArray(wires, encoded, s)
+
+def add_array_constant(arr):
+    def add_elt(elt):
+        w = next_wire()
+        emit(f'  {w} <- < {elt} >; // array const')
+        return w
+
+    s = params['scaling_factor']
+    encoded = encode_array(arr, s)
+    wires = np.vectorize(add_elt, otypes=[str])(encoded)
+    return WireArray(wires, encoded, s)
 
 def add_to_witness(obj, comment=None):
     wit_fun = '@private()' if IR_MODE == 0 else '@short_witness'
@@ -107,6 +136,10 @@ def subst(x, v, e):
 function_unrollings = defaultdict(int)
 exp_cache = {}
 
+def encode_array(arr, s):
+    p = params['arithmetic_field']
+    enc_arr = np.array((arr * s).astype(int), dtype=object) % p
+    return enc_arr
 
 def print_exp_ir1(e):
     if id(e) in exp_cache:
@@ -128,8 +161,56 @@ def print_exp_ir1_(e):
     global WRITE_TO_REL
     global WRITE_TO_WIT
 
-    if isinstance(e, (SecretArray, SecretTensor, SecretInt, SecretGF, SymVar)):
+    if isinstance(e, (SecretInt, SecretGF)):
         return add_to_witness(e)
+
+    elif isinstance(e, SymVar):
+        return var_env[e.name]
+
+    elif isinstance(e, SecretTensor):
+        return add_array_to_witness(val_of(e).detach().numpy())
+
+    elif isinstance(e, SecretArray):
+        return add_array_to_witness(val_of(e))
+
+    elif isinstance(e, SecretStack):
+        emit('  // begin init stack')
+        wvs = [add_to_witness(v) for v in val_of(e)]
+        r = next_wire()
+        rn = r.replace('$', '')
+
+        emit()
+        emit(f'  @function(init_ram_{rn}, @out 1:1, @in 0:1)')
+        emit(f'    @plugin(ram_arith_v0, init, {e.max_size});')
+        emit()
+
+        emit(f'  {r} <- @call(init_ram_{rn}, <0>);')
+        emit()
+        emit(f'  @call(write_ram, {r}, <0>, {len(wvs) + 1}); // stack top')
+        for i, w in enumerate(wvs):
+            emit(f'  @call(write_ram, {r}, <{i+1}>, {w});')
+        emit('  // end init stack')
+        emit()
+        return r
+
+    elif isinstance(e, SecretIndexList):
+        emit('  // begin init ram')
+        wvs = [add_to_witness(v) for v in val_of(e)]
+        r = next_wire()
+        rn = r.replace('$', '')
+
+        emit()
+        emit(f'  @function(init_ram_{rn}, @out 1:1, @in 0:1)')
+        emit(f'    @plugin(ram_arith_v0, init, {len(wvs)});')
+        emit()
+
+        emit(f'  {r} <- @call(init_ram_{rn}, <0>);')
+        emit()
+        for i, w in enumerate(wvs):
+            emit(f'  @call(write_ram, {r}, <{i}>, {w});')
+        emit('  // end init ram')
+        emit()
+        return r
 
     elif isinstance(e, WireVal):
         # just return the wire name
@@ -155,6 +236,12 @@ def print_exp_ir1_(e):
             all_pubvals[int(e)] = r
             return r
 
+    elif str(type(e)) == "<class 'torch.Tensor'>":
+        return add_array_constant(e.detach().numpy())
+
+    elif str(type(e)) == "<class 'numpy.ndarray'>":
+        return add_array_constant(e)
+
     elif isinstance(e, Prim):
         if e.op in int_ops_ir1:
             e1, e2 = e.args
@@ -169,7 +256,7 @@ def print_exp_ir1_(e):
             field = params['arithmetic_field']
             a, p = e.args
             if p != field:
-                print(f'Warning: attempting mod {p} in field {field}')
+                warn(f'attempting mod {p} in field {field}')
             return print_exp_ir1(a)
         elif e.op == 'rec':
             name, bound, args, func = e.args
@@ -237,10 +324,17 @@ def print_exp_ir1_(e):
             elif IR_MODE == 0:
                 a_wire_name = print_exp_ir1(init)
                 a_wire_val = WireVal(a_wire_name, int, val_of(init))
+                old_statements = params['all_statements']
+
                 for x_val in val_of(xs):
+                    params['all_statements'] = []
                     new_a_val = f(SecretInt(x_val), a_wire_val)
+                    for a in params['all_statements']:
+                        print_exp_ir1(a)
                     a_wire_name = print_exp_ir1(new_a_val)
                     a_wire_val = WireVal(a_wire_name, int, val_of(new_a_val))
+
+                params['all_statements'] = old_statements
                 return a_wire_name
 
             else:
@@ -318,14 +412,35 @@ def print_exp_ir1_(e):
             e1, e2 = e.args
             x1 = print_exp_ir1(e1)
             x2 = print_exp_ir1(e2)
-            negated_x2 = next_wire()
             c = params['arithmetic_field'] - 1
-            emit(f'  {negated_x2} <- @mulc({x2}, < {c} >);')
 
+            def negate_wire(w):
+                negated_w = next_wire()
+                emit(f'  {negated_w} <- @mulc({w}, < {c} >);')
+                return negated_w
+
+            def add_wires(w1, w2):
+                r = next_wire()
+                emit(f'  {r} <- @add({w1}, {w2});')
+                return r
+
+            if isinstance(x1, WireArray) and isinstance(x2, WireArray):
+                assert x1.scale == x2.scale
+
+                negated_x2_w = np.vectorize(negate_wire, otypes=[str])(x2.wires)
+                output_w = np.vectorize(add_wires, otypes=[str])(x1.wires, negated_x2_w)
+                return WireArray(output_w, x1.val - x2.val, x1.scale)
+            else:
+                r = next_wire()
+                negated_x2 = negate_wire(x2)
+                emit(f'  {r} <- @add({x1}, {negated_x2});')
+                return r
+        elif e.op == 'lt':
+            e1, e2 = e.args
+            x1 = print_exp_ir1(e1)
+            x2 = print_exp_ir1(e2)
             r = next_wire()
-
-            emit(f'  {r} <- @add({x1}, {negated_x2});')
-            return r
+            emit(f'  {r} <- @call(lt, {x1}, {x2});')
         elif e.op == 'and':
             e1, e2 = e.args
             x1 = print_exp_ir1(e1)
@@ -333,7 +448,119 @@ def print_exp_ir1_(e):
             r = next_wire()
             emit(f'  {r} <- @mul({x1}, {x2});')
             return r
-        elif e.op == 'not':
+        elif e.op == 'or':
+            e1, e2 = e.args
+            x1 = print_exp_ir1(e1)
+            x2 = print_exp_ir1(e2)
+            # approach: (x1+x2) - (x1*x2)
+            c = params['arithmetic_field'] - 1
+            tmp1 = next_wire()
+            tmp2 = next_wire()
+            neg_tmp2 = next_wire()
+            r = next_wire()
+            emit(f'  {tmp1} <- @add({x1}, {x2});')
+            emit(f'  {tmp2} <- @mul({x1}, {x2});')
+            emit(f'  {neg_tmp2} <- @addc({tmp2}, < {c} >);')
+            emit(f'  {r} <- @add({tmp1}, {neg_tmp2});')
+            return r
+        elif e.op == 'log_softmax':
+            assert len(e.args) == 1
+            # TODO: implement
+            warn('log_softmax unimplemented')
+            return print_exp_ir1(e.args[0])
+        elif e.op == 'relu':
+            assert len(e.args) == 1
+            x1 = print_exp_ir1(e.args[0])
+            p = params['arithmetic_field']
+
+            def eval_relu(x):
+                if x > p//2:
+                    return int(0)
+                else:
+                    return int(x // params['scaling_factor'])
+
+            def mk_relu(w):
+                r = next_wire()
+                emit(f'  {r} <- @call(relu, {w});')
+                return r
+
+            output_w = np.vectorize(mk_relu, otypes=[str])(x1.wires)
+            new_vals = np.vectorize(eval_relu, otypes=[object])(x1.val)
+            new_scale = x1.scale // params['scaling_factor']
+
+            return WireArray(output_w, new_vals, new_scale)
+        elif e.op == 'matplus':
+            p = params['arithmetic_field']
+
+            def scale_array(ws, scale):
+                if ws.scale == scale:
+                    return ws
+                else:
+                    assert scale > ws.scale
+                    s = params['scaling_factor']
+                    ds = scale // ws.scale
+                    assert ds < p
+
+                    def scale_wire(w):
+                        new_w = next_wire()
+                        emit(f'  {new_w} <- @mulc({w}, < {ds} >);')
+                        return new_w
+
+                    new_vs = (ws.val * ds) % p
+                    new_ws = np.vectorize(scale_wire, otypes=[str])(ws.wires)
+                    return WireArray(new_ws, new_vs, scale)
+
+            e1, e2 = e.args
+            x1 = print_exp_ir1(e1)
+            x2 = print_exp_ir1(e2)
+            scale = max(x1.scale, x2.scale)
+
+            x1s = scale_array(x1, scale)
+            x2s = scale_array(x2, scale)
+            assert isinstance(x1, WireArray)
+            assert isinstance(x2, WireArray)
+
+            output_vals = (x1s.val + x2s.val) % p
+
+            def add_wires(w1, w2):
+                r = next_wire()
+                emit(f'  {r} <- @add({w1}, {w2});')
+                return r
+
+            output_wires = np.vectorize(add_wires, otypes=[str])(x1s.wires, x2s.wires)
+            return WireArray(output_wires, output_vals, scale)
+        elif e.op == 'matmul':
+            e1, e2 = e.args
+            p = params['arithmetic_field']
+            w1 = print_exp_ir1(e1)
+            w2 = print_exp_ir1(e2)
+
+            assert len(w1.val.shape) == 2
+            assert len(w2.val.shape) == 2
+
+            a, b1 = w1.val.shape
+            b2, c = w2.val.shape
+            assert b1 == b2
+
+            C = np.zeros((a, c), dtype = object)
+            W = np.zeros((a, c), dtype = object)
+            for row in range(a):
+                for col in range(c):
+                    for elt in range(b1):
+                        m = (w1.val[row, elt] * w2.val[elt, col]) % p
+                        C[row, col] = (C[row, col] + m) % p
+                        m = next_wire()
+                        emit(f'  {m} <- @mul({w1.wires[row, elt]}, {w2.wires[elt, col]}); // {row}, {elt} * {elt}, {col}')
+
+                        if W[row, col] == 0:
+                            W[row, col] = m
+                        else:
+                            r = next_wire()
+                            emit(f'  {r} <- @add({W[row, col]}, {m});')
+                            W[row, col] = r
+
+            return WireArray(W, C, w1.scale * w2.scale)
+        elif e.op == 'not' or e.op == 'neg':
             assert len(e.args) == 1
             e1 = e.args[0]
             x1 = print_exp_ir1(e1)
@@ -348,7 +575,7 @@ def print_exp_ir1_(e):
             field = params['arithmetic_field']
 
             if field != p:
-                print(f'Warning: attempting exponentiation mod {p} in field {field}')
+                warn(f'attempting exponentiation mod {p} in field {field}')
 
             def exp_by_squaring(x, n):
                 assert n > 0
@@ -367,12 +594,250 @@ def print_exp_ir1_(e):
         elif e.op == 'assert0':
             assert len(e.args) == 1
             x1 = print_exp_ir1(e.args[0])
-            emit(f'  @assert_zero({x1});')
+            if isinstance(x1, WireArray):
+                np.vectorize(lambda w: emit(f'  @assert_zero({w});'), otypes=[None])(x1.wires)
+            else:
+                emit(f'  @assert_zero({x1});')
             return None
+        elif e.op == 'reveal_array':
+            assert len(e.args) == 1
+            x1 = print_exp_ir1(e.args[0])
+            assert isinstance(x1, WireArray), e.args[0]
+            p = params['arithmetic_field']
+            c = p - 1
+            total_scale = x1.scale
+
+            def dec_one(x):
+                assert x <= p
+                if x <= (p-1)/2:
+                    return x/total_scale
+                else:
+                    return (x-p)/total_scale
+
+            for w, v in list(zip(x1.wires.ravel(), x1.val.ravel())):
+                m = next_wire()
+                vp = (v * c) % p
+                vd = dec_one(v)
+                emit(f'  {m} <- @addc({w}, < {vp} >); // reveal {v} = {vd}')
+                emit(f'  @assert_zero({m});')
+
+            return None
+        elif e.op == 'assign':
+            var, val = e.args
+            if var.name in var_env:
+                raise Exception(f'repeated assignment to variable {var}')
+            r = print_exp_ir1(val)
+            var_env[var.name] = r
+            return None
+        elif e.op == 'listref':
+            e1, e2 = e.args
+            v1 = print_exp_ir1(e1)
+            v2 = print_exp_ir1(e2)
+
+            r = next_wire()
+            emit(f'  {r} <- @call(read_ram, {v1}, {v2});')
+            return r
+        elif e.op == 'listset':
+            e1, e2, e3 = e.args
+            v1 = print_exp_ir1(e1)
+            v2 = print_exp_ir1(e2)
+            v3 = print_exp_ir1(e3)
+
+            emit(f'  @call(write_ram, {v1}, {v2}, {v3});')
+        elif e.op == 'listindex':
+            xs, val, start, length = e.args
+            v_xs = print_exp_ir1(xs)
+            v_val = print_exp_ir1(val)
+            v_start = print_exp_ir1(start)
+            v_length = print_exp_ir1(length)
+            r = next_wire()
+            emit(f'  {r} <- @call(list_idx, {v_xs}, {v_val}, {v_start}, {v_length});')
+            return r
+        elif e.op == 'stack_cond_push':
+            stk, cond, val = e.args
+            v_stk = print_exp_ir1(stk)
+            v_cond = print_exp_ir1(cond)
+            v_val = print_exp_ir1(val)
+            emit(f'  @call(stack_cond_push, {v_stk}, {v_cond}, {v_val});')
+            return None
+        elif e.op == 'stack_push':
+            stk, val = e.args
+            v_stk = print_exp_ir1(stk)
+            v_val = print_exp_ir1(val)
+            emit(f'  @call(stack_push, {v_stk}, {v_val});')
+            return None
+        elif e.op == 'stack_cond_pop':
+            stk, cond = e.args
+            v_stk = print_exp_ir1(stk)
+            v_cond = print_exp_ir1(cond)
+            r = next_wire()
+            emit(f'  {r} <- @call(stack_cond_pop, {v_stk}, {v_cond});')
+            return r
+        elif e.op == 'stack_pop':
+            assert len(e.args) == 1
+            stk = e.args[0]
+            v_stk = print_exp_ir1(stk)
+            r = next_wire()
+            emit(f'  {r} <- @call(stack_pop, {v_stk});')
+            return r
         else:
             raise Exception(f'unknown operator: {e.op}')
     else:
-        raise Exception(f'unknown expression type: {e}')
+        raise Exception(f'unknown expression type ({type(e)}): {e}')
+
+def emit_relu(bits_per_fe):
+    global current_wire
+    current_wire = 2
+
+    emit('  @function(relu, @out: 0:1, @in: 0:1)')
+    # convert the input field element into bits
+    bit_wires = [next_wire() for _ in range(bits_per_fe)]
+    emit(f'    1: {bit_wires[0]} ... {bit_wires[-1]} <- @convert(0: $1);')
+
+    # check if it's negative
+    non_neg = bit_wires[0]
+    for i in range(1, bits_per_fe//2):
+        non_neg_next = next_wire()
+        emit(f'    {non_neg_next} <- @add({non_neg}, {bit_wires[i]});')
+        non_neg = non_neg_next
+
+    # shift top half to the right to re-scale
+    bits_to_shift = bitsof(params['scaling_factor'])
+
+    # create the output wires
+    output_wires = [next_wire() for _ in range(bits_per_fe)]
+
+    # top half, and first `bits_to_shift` bits: zeros
+    for i in range(bits_per_fe//2 + bits_to_shift):
+        emit(f'    {output_wires[i]} <- <0>;')
+
+    # bottom half: shit by `bits_to_shift` and AND with `non_neg`
+    for i in range(bits_per_fe//2 + bits_to_shift, len(output_wires)):
+        emit(f'    {output_wires[i]} <- @mul({bit_wires[i-bits_to_shift]}, {non_neg});')
+
+    # convert back to field element and return
+    emit(f'    0: $0 <- @convert(1: {output_wires[0]} ... {output_wires[-1]});')
+
+    emit(f'  @end')
+    emit()
+
+
+def emit_stack_ops():
+    global current_wire
+
+    # --------------------------------------------------
+    # PUSH
+    # --------------------------------------------------
+    current_wire = 2
+    emit(f'  @function(stack_push, @in: 2:1, 0:1)')
+    old_top = next_wire()
+    new_top = next_wire()
+    emit(f'    {old_top} <- @call(read, $0, <0>);')
+    emit(f'    {new_top} <- @addc({old_top}, <1>);')
+    emit(f'    @call(write, $0, {new_top});')
+    emit(f'    @call(write, {new_top}, $1);')
+    emit(f'  @end')
+
+    # --------------------------------------------------
+    # COND_PUSH
+    # --------------------------------------------------
+    current_wire = 3
+    emit(f'  @function(stack_cond_push, @in: 2:1, 0:1, 0:1)')
+
+    # get the current top
+    current_top = next_wire()
+    emit(f'    {current_top} <- @call(read, $0, <0>); // current top idx')
+
+    # construct the new top: (condition AND top+1) OR (NOT condition AND top)
+    tmp1 = next_wire()
+    negated_cond = next_wire()
+    c = params['arithmetic_field'] - 1
+    emit(f'    {tmp1} <- @mulc($1, < {c} >);')
+    emit(f'    {negated_cond} <- @addc({tmp1}, < {1} >); // negated condition')
+
+    tmp2 = next_wire()
+    tmp3 = next_wire()
+    tmp4 = next_wire()
+    new_top = next_wire()
+    emit(f'    {tmp2} <- @addc({current_top}, <1>);')
+    emit(f'    {tmp3} <- @mul($1, {tmp2});')
+    emit(f'    {tmp4} <- @mul({negated_cond}, {current_top});')
+    emit(f'    {new_top} <- @add({tmp3}, {tmp4}); // new top idx')
+    emit(f'    @call(write, $0, <0>, {new_top});')
+
+    # read old_val from the new top
+    old_val = next_wire()
+    emit(f'    {old_val} <- @call(read, $0, {new_top});')
+
+    # write to the new top: (condition AND val) OR (NOT condition AND old_val)
+    tmp5 = next_wire()
+    tmp6 = next_wire()
+    to_write = next_wire()
+    emit(f'    {tmp5} <- @mul($1, $2);')
+    emit(f'    {tmp6} <- @mul({negated_cond}, {old_val});')
+    emit(f'    {to_write} <- @add({tmp5}, {tmp6}); // new top value')
+
+    # write the new top to position 0
+    emit(f'    @call(write, $0, {new_top}, {to_write});')
+    emit(f'  @end')
+
+    # --------------------------------------------------
+    # POP
+    # --------------------------------------------------
+    current_wire = 2
+    emit(f'  @function(stack_pop, @out: 0:1, @in: 2:1)')
+    # get the current top
+    current_top = next_wire()
+    emit(f'    {current_top} <- @call(read, $1, <0>); // current top idx')
+
+    # update the top
+    c = params['arithmetic_field'] - 1
+    new_top = next_wire()
+    emit(f'    {new_top} <- @addc({current_top}, < {c} >);')
+    emit(f'    @call(write, $1, <0>, {new_top}); // update top')
+
+    # read return val from the old top
+    emit(f'    $0 <- @call(read, $1, {current_top});')
+    emit(f'  @end')
+
+    # --------------------------------------------------
+    # COND_POP
+    # --------------------------------------------------
+    current_wire = 2
+    emit(f'  @function(stack_cond_pop, @out: 0:1, @in: 2:1, 0:1)')
+    # get the current top
+    current_top = next_wire()
+    emit(f'    {current_top} <- @call(read, $1, <0>); // current top idx')
+
+    # construct the new top: (condition AND top-1) OR (NOT condition AND top)
+    tmp1 = next_wire()
+    negated_cond = next_wire()
+    c = params['arithmetic_field'] - 1
+    emit(f'    {tmp1} <- @mulc($2, < {c} >);')
+    emit(f'    {negated_cond} <- @addc({tmp1}, < {1} >); // negated condition')
+
+    tmp2 = next_wire()
+    tmp3 = next_wire()
+    tmp4 = next_wire()
+    new_top = next_wire()
+    emit(f'    {tmp2} <- @addc({current_top}, < {c} >);')
+    emit(f'    {tmp3} <- @mul($2, {tmp2});')
+    emit(f'    {tmp4} <- @mul({negated_cond}, {current_top});')
+    emit(f'    {new_top} <- @add({tmp3}, {tmp4}); // new top idx')
+    emit(f'    @call(write, $1, <0>, {new_top});')
+
+    # read old_val from the old top
+    old_val = next_wire()
+    emit(f'    {old_val} <- @call(read, $1, {current_top});')
+
+    # write the new top to position 0
+    emit(f'    @call(write, $1, {new_top}, {to_write});')
+
+    # return the value: condition AND old_val
+    emit(f'    $0 <- @mul($2, {old_val});')
+    emit(f'  @end')
+    emit()
+
 
 def print_ir0(filename):
     global IR_MODE
@@ -386,6 +851,8 @@ def print_ir1(filename):
     global all_defs
     global output_file
     global current_wire
+    global var_env
+    var_env = {}
     current_wire = 0
 
     field = params['arithmetic_field']
@@ -396,39 +863,67 @@ def print_ir1(filename):
         output_file = f
 
         if IR_MODE == 0:
-            emit(f"""version 2.0.0-beta;
-public_input;
-@type field {field};
-@begin
-@end
-""")
+            emit(f'version 2.0.0-beta;')
+            emit(f'public_input;')
+            emit(f'@type field {field};')
+            emit(f'@begin')
+            emit(f'@end')
+            emit()
+
         else:
-            emit(f"""version 1.0.0;
-field characteristic {field} degree 1;
-instance
-@begin
-@end
-""")
+            emit(f'version 1.0.0;')
+            emit(f'field characteristic {field} degree 1;')
+            emit(f'instance')
+            emit(f'@begin')
+            emit(f'@end')
+            emit()
 
 
     # RELATION OUTPUT
     with open(filename + '.rel', 'w') as f:
         output_file = f
+        bits_per_fe = bitsof(field)
 
         if IR_MODE == 0:
-            emit(f"""version 2.0.0-beta;
-circuit;
-@type field {field};
-@begin""")
-        else:
-            emit(f"""version 1.0.0;
-field characteristic {field} degree 1;
-relation
-gate_set: arithmetic;
-features: @function, @for, @switch;
-@begin""")
+            emit(f'version 2.0.0-beta;')
+            emit(f'circuit;')
+            emit(f'@type field {field};')
+            emit(f'@type field 2;')
+            emit(f'@convert(@out: 0:1, @in: 1:{bits_per_fe});')
+            emit(f'@convert(@out: 1:{bits_per_fe}, @in: 0:1);')
 
-        for a in assertions:
+            # if we're using ram, init the types
+            if params['ram_num_allocs'] > 0:
+                s = '@plugin(ram_arith_v0, ram, 0, {0}, {1}, {2});'
+                emit(s.format(params['ram_num_allocs'],
+                              params['ram_total_alloc_size'],
+                              params['ram_total_alloc_size'])) # TODO: should be live allocation
+
+            emit(f'@begin')
+
+            # if we're using ram, define read/write
+            if params['ram_num_allocs'] > 0:
+                emit('  @function(read_ram, @out 0:1, @in 2:1, 0:1)')
+                emit('    @plugin(ram_arith_v0, read);')
+                emit('  @function(write_ram, @in 2:1, 0:1, 0:1)')
+                emit('    @plugin(ram_arith_v0, write);')
+                emit()
+
+            # relu for neural networks
+            emit_relu(bits_per_fe)
+
+            # stack operations
+            emit_stack_ops()
+
+        else:
+            emit(f'version 1.0.0;')
+            emit(f'field characteristic {field} degree 1;')
+            emit(f'relation')
+            emit(f'gate_set: arithmetic;')
+            emit(f'features: @function, @for, @switch;')
+            emit(f'@begin')
+
+        for a in params['all_statements']:
             print_exp_ir1(a)
 
         emit('@end')
@@ -439,18 +934,18 @@ features: @function, @for, @switch;
         emp_output_string = ""
 
         if IR_MODE == 0:
-            emit(f"""version 2.0.0-beta;
-private_input;
-@type field {field};
-@begin""")
+            emit(f'version 2.0.0-beta;')
+            emit(f'private_input;')
+            emit(f'@type field {field};')
+            emit(f'@begin')
         else:
-            emit(f"""version 1.0.0;
-field characteristic {field} degree 1;
-short_witness
-@begin""")
+            emit(f'version 1.0.0;')
+            emit(f'field characteristic {field} degree 1;')
+            emit(f'short_witness')
+            emit(f'@begin')
 
         for x in witness_list:
-            emit(f'< {x.val} >;')
+            emit(f'< {val_of(x)} >;')
 
         emit("@end")
 

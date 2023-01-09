@@ -31,14 +31,14 @@ def my_log_softmax(x, dim=1):
     #print('Softmax Override successful')
     if isinstance(x, AST) or isinstance(dim, AST):
         # TODO: support additional dimensions
-        return Prim('log_softmax', [x], old_softmax(val_of(x)))
+        return Prim('log_softmax', [x], old_softmax(val_of(x), dim))
     else:
         return old_softmax(x, dim)
 
 F.log_softmax = my_log_softmax
 
 old_cat = torch.cat
-def my_cat(to_cat, dim):
+def my_cat(to_cat, dim=1):
     # print('Concatenate Override successful')
     assert isinstance(to_cat, tuple)
     assert len(to_cat) == 2
