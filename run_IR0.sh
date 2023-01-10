@@ -41,6 +41,14 @@ fi
 
 
 
+# Copying the latest util.py into the container
+
+local="/code/substring_search/common/util.py"
+container="/usr/src/app/examples/substring_search/common/util.py"
+cp $local $container
+
+
+
 # Configuring names and directory
 
 if [ "$file" = "string_search" ]
@@ -74,6 +82,8 @@ ins=$name.ins
 [ -e rel  ] && rm rel
 [ -e wit  ] && rm wit
 [ -e ins  ] && rm ins
+
+
 
 # Actual Execution
 

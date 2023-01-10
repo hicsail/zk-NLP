@@ -32,6 +32,12 @@ def is_in_found_states(initial_state, found_states):
 
 
 def generate_text(scale=0):
+    if scale<0:
+        raise ValueError("Scale should be non-negative integer")
+    
+    if not isinstance(scale, int):
+        raise TypeError("Scale should be integer")
+
     print("\n")
     fake = Faker(['en_US'])
     file_data=fake.text(1500*(2**scale))
