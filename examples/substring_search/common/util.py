@@ -14,34 +14,6 @@ def word_to_integer(word):
     hash = hash >> 8*28+1
     return hash
 
-def integer_to_word(integer):
-    word=""
-    bit = (1<<8)-1
-    while integer>0:
-        bit_char = integer&bit
-        integer=integer>>8
-        char=chr(bit_char)
-        word+=char
-    return word
-
-def isLaststring(word, text):
-    lastString=word_to_integer(text[-1])
-    return   lastString== val_of(word)
-
-def isNotlaststring(word, text):
-    lastString=word_to_integer(text[-1])
-    return   lastString!= val_of(word)
-
-def flip_interim_found_state(curr_state, found_states):
-    x=len(found_states)
-    res=""
-    for i in range(1,x+1):
-        res += f"mux(curr_state=={-i}, {i},"
-    res += "curr_state"
-    for i in range(1,x+1):
-        res += ")"
-    # print(res, '\n')
-    return eval(res,{'curr_state':curr_state, 'mux':mux, 'val_of':val_of})
 
 def is_in_found_states(initial_state, found_states):
     if len(found_states)==0:
@@ -58,6 +30,7 @@ def is_in_found_states(initial_state, found_states):
 
     return eval(res,{'initial_state':initial_state})
 
+
 def generate_text(scale=0):
     print("\n")
     fake = Faker(['en_US'])
@@ -68,6 +41,7 @@ def generate_text(scale=0):
     # print("Removing [,\.!?]: ", file_data, "\n")
     final_data = file_data.split()[:10*(2**scale)]
     return final_data
+
 
 def generate_target(txt, type):
     if type=="after_all":
@@ -117,6 +91,7 @@ def generate_target(txt, type):
         string_b= txt[idx_b]
         return [string_a + ' '+string_b]
 
+
 def check_prime():
   txt_dir='./ccc.txt' #Reative to where you run the generate_statements
   target='@field (equals (2305843009213693951))'
@@ -127,6 +102,7 @@ def check_prime():
     if t.find(target)!=-1:
       return True
   return False
+
 
 def run_poseidon_hash(file_string):
     # prove validity of the input text by Poseidon Hash
@@ -146,3 +122,53 @@ def run_poseidon_hash(file_string):
         poseidon_digest = poseidon_new.run_hash(g)
         #print('digest:', val_of(poseidon_digest))
     assert0(poseidon_digest - val_of(poseidon_digest))
+
+
+
+'''
+The following functions are no longer used
+'''
+
+
+
+# def integer_to_word(integer):
+#     word=""
+#     bit = (1<<8)-1
+#     while integer>0:
+#         bit_char = integer&bit
+#         integer=integer>>8
+#         char=chr(bit_char)
+#         word+=char
+#     return word
+
+# def isLaststring(word, text):
+#     lastString=word_to_integer(text[-1])
+#     return   lastString== val_of(word)
+
+# def isNotlaststring(word, text):
+#     lastString=word_to_integer(text[-1])
+#     return   lastString!= val_of(word)
+
+
+# def flip_interim_found_state(curr_state, found_states):
+#     x=len(found_states)
+#     res=""
+#     for i in range(1,x+1):
+#         res += f"mux(curr_state=={-i}, {i},"
+#     res += "curr_state"
+#     for i in range(1,x+1):
+#         res += ")"
+#     # print(res, '\n')
+#     return eval(res,{'curr_state':curr_state, 'mux':mux, 'val_of':val_of})
+
+# def is_in_found_states_todelete(initial_state, found_states):
+#     res="("
+#     for val in found_states:
+#         res += "(val_of(initial_state)=="
+#         res += f"{val}"
+#         res += ")|"
+#     res=res[0:-1]
+#     res += ")"
+#     print(res, '\n')
+
+#     return eval(res,{'initial_state':initial_state, 'val_of':val_of})
