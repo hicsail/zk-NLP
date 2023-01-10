@@ -22,7 +22,7 @@ except:
 ''' Prepping target text and substrings'''
 if operation =="test":
     corpus=generate_text(int(size))
-    string_a, string_target, string_b =generate_target(corpus, file_name)
+    string_a, string_target, string_b =generate_target(corpus, file_name, scale=0)
     print("Test (First 10 Strings): ",corpus[0:10])
     print("Actual text length:", len(corpus))
 
@@ -72,12 +72,12 @@ def run_dfa(dfa, text_input):
         curr_state=initial_state
         for (dfa_state, dfa_str), next_state in dfa.items():
 
-            print(
-                    "curr state: ", val_of(curr_state),
-                    "dfa state: ", dfa_state,"\n",
-                    "input string: ", val_of(string),
-                    "dfa string: ", dfa_str,"\n",
-                    "next_state", next_state,"\n")
+            # print(
+            #         "curr state: ", val_of(curr_state),
+            #         "dfa state: ", dfa_state,"\n",
+            #         "input string: ", val_of(string),
+            #         "dfa string: ", dfa_str,"\n",
+            #         "next_state", next_state,"\n")
 
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
@@ -85,7 +85,7 @@ def run_dfa(dfa, text_input):
                          error_state,
                          curr_state))
                          
-            print("Updated state: ", val_of(curr_state))                     
+            # print("Updated state: ", val_of(curr_state))                     
 
         ''' 
             Regardless of changes above, if
@@ -121,14 +121,13 @@ print("Running Poseidon Hash")
 run_poseidon_hash(file_string)
 print("\n", "Latest State: ",val_of(latest_state), "\n")
 
-if operation =="debug":
-    # print("\n", "Result:   ",Secret_str_between.current_val, "\n")
-    # expected=[word_to_integer(x) for x in string_target]
-    # print("\n", "Expected: ",expected, "\n")
-    if val_of(latest_state)==accept_state:
-        print("DFA successfully reached the accept state \n")
-    else:
-        print("DFA did not reached the accept state \n")
+# print("\n", "Result:   ",Secret_str_between.current_val, "\n")
+# expected=[word_to_integer(x) for x in string_target]
+# print("\n", "Expected: ",expected, "\n")
+if val_of(latest_state)==accept_state or val_of(latest_state)==appendedAll_state:
+    print("DFA successfully reached the accept state \n")
+else:
+    print("DFA did not reached the accept state \n")
 
 print("Generating Output \n")
 print_ir0(target_dir + "/" + f"{file_name}_{prime_name}_{size}")

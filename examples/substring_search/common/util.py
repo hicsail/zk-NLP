@@ -49,12 +49,13 @@ def generate_text(scale=0):
     return final_data
 
 
-def generate_target(txt, type):
+def generate_target(txt, type, scale=0):
     if type=="after_all":
-        string_a=random.sample(txt[:-1], 1) # Avoiding the last substring to be picked as target
-        string_a=string_a[0]
-        idx_a=txt.index(string_a)
-        string_target=txt[idx_a+1:]
+        if scale>len(txt)-2:
+            print(f'The length of text is {len(txt)}, so scale is set to {len(txt)-2}')
+            scale=len(txt)-2
+        string_a=txt[scale]
+        string_target=txt[scale+1:]
         return string_a, string_target
 
     elif type=="after":
@@ -62,26 +63,30 @@ def generate_target(txt, type):
         string_a=string_a[0]
         idx_a=txt.index(string_a)
         string_target=txt[idx_a+1]
-        return string_a, string_target      
+        return string_a, string_target
 
     elif type=="begins":
         return txt[0]
 
     elif type=="between":
-        string_a=random.sample(txt[:-2], 1) # Avoiding the last substring to be picked as target
-        string_a=string_a[0]
-        idx_a=txt.index(string_a)
-        string_b=random.sample(txt[idx_a+2:], 1)
-        string_b=string_b[0]
-        idx_b=txt[idx_a+2:].index(string_b)+idx_a+2
-        string_target=txt[idx_a+1:idx_b]
+        if scale>len(txt)-3:
+            print(f'The length of text is {len(txt)}, so scale is set to {len(txt)-3}')
+            scale=len(txt)-3
+        string_a=txt[scale]
+        string_b=txt[-1]
+        string_target=txt[scale+1:-1]
         return string_a, string_target, string_b
 
     elif type=="point_to":
-        string_a=random.sample(txt[1:], 1) # Avoiding the first substring to be picked as target
-        string_a=string_a[0]
-        idx_a=txt.index(string_a)
-        string_target=txt[:idx_a]
+        # string_a=random.sample(txt[1:], 1) # Avoiding the first substring to be picked as target
+        if scale>len(txt)-2:
+            print(f'The length of text is {len(txt)}, so scale is set to {len(txt)-2}')
+            scale=len(txt)-2
+        # string_a=string_a[0]
+        scale=scale+1
+        string_a=txt[-scale]
+        # idx_a=txt.index(string_a)
+        string_target=txt[:-scale]
         return string_a, string_target
     
     elif type=="string_search":

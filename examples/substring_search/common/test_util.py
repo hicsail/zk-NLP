@@ -28,7 +28,21 @@ class TestUtil(unittest.TestCase):
         
         # Test with non integer scale
         self.assertRaises(TypeError, util.generate_text, scale='string')
+
+
+class TestUtil(unittest.TestCase):
+    def test_is_in_found_states(self):
+        initial_state = 5
+        found_states = [3, 4, 5, 6]
+        self.assertTrue(util.is_in_found_states(initial_state, found_states))
         
+        initial_state = 7
+        self.assertFalse(util.is_in_found_states(initial_state, found_states))
+        
+        found_states = []
+        self.assertFalse(util.is_in_found_states(initial_state, found_states))
+
+
 if __name__ == '__main__':
     unittest.main()
     
