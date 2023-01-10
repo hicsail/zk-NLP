@@ -44,32 +44,19 @@ def flip_interim_found_state(curr_state, found_states):
     return eval(res,{'curr_state':curr_state, 'mux':mux, 'val_of':val_of})
 
 def is_in_found_states(initial_state, found_states):
-    res="("
-    for val in found_states:
-        res += "(initial_state=="
-        res += f"{val}"
-        res += ")|"
-    res=res[0:-1]
-    res += ")"
-    # print(res, '\n')
+    if len(found_states)==0:
+      return False
+    else:
+      res="("
+      for val in found_states:
+          res += "(initial_state=="
+          res += f"{val}"
+          res += ")|"
+      res=res[0:-1]
+      res += ")"
+      # print(res, '\n')
 
     return eval(res,{'initial_state':initial_state})
-
-'''
-    We will delete the following module
-'''
-
-def is_in_found_states_todelete(initial_state, found_states):
-    res="("
-    for val in found_states:
-        res += "(val_of(initial_state)=="
-        res += f"{val}"
-        res += ")|"
-    res=res[0:-1]
-    res += ")"
-    print(res, '\n')
-
-    return eval(res,{'initial_state':initial_state, 'val_of':val_of})
 
 def generate_text(scale=0):
     print("\n")
