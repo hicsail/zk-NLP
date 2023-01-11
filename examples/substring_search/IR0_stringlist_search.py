@@ -22,7 +22,7 @@ except:
 ''' Prepping target text and substrings'''
 if operation =="test":
     corpus=generate_text(int(size))
-    string_target=generate_target(corpus, file_name)
+    string_target=generate_target(corpus, file_name, scale=0)
     print("Test (First 10 Strings): ",corpus[0:10])
     print("Actual text length:", len(corpus))
 
@@ -120,12 +120,12 @@ def run_dfa(dfa, string):
 
         for (dfa_state, dfa_word), next_state in dfa.items():
             
-            print(
-                "curr state: ", val_of(curr_state),
-                "dfa state: ", dfa_state,"\n",
-                "input string: ", val_of(word),
-                "dfa string: ", dfa_word,"\n",
-                "next_state", next_state,"\n")
+            # print(
+            #     "curr state: ", val_of(curr_state),
+            #     "dfa state: ", dfa_state,"\n",
+            #     "input string: ", val_of(word),
+            #     "dfa string: ", dfa_word,"\n",
+            #     "next_state", next_state,"\n")
             # transform all tuples to numbers
             dfa_state = stateCal(dfa_state)
             next_state = stateCal(next_state)
@@ -133,7 +133,7 @@ def run_dfa(dfa, string):
                          next_state,
                          curr_state)  # output here is a number, not a tuple
 
-            print("Updated state: ", val_of(curr_state))
+            # print("Updated state: ", val_of(curr_state))
 
             # TODO: check if output has any accept state for a single string: need to use the reverse version of
             #  stateCal()

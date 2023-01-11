@@ -27,13 +27,13 @@ fi
 
 # Setting missing parameters if any
 
-if [ -z "$target"]
+if [ -z "$target" ]
     then
         target="./tests"
         echo "test directory is set to './tests' "
 fi
 
-if [ -z "$size"]
+if [ -z "$size" ]
     then
         size=0
         echo "test size is set to 0 "
