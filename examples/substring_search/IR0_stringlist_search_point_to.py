@@ -22,7 +22,7 @@ except:
 ''' Prepping target text and substrings'''
 if operation =="test":
     corpus=generate_text(int(size))
-    string_a, string_target=generate_target(corpus, file_name, scale=0)
+    string_a, string_target=generate_target(corpus, file_name, length=10)
     print("Test (First 10 Strings): ",corpus[0:10])
     print("Actual text length:", len(corpus))
 
@@ -131,8 +131,9 @@ print("\n", "Latest State: ",val_of(latest_state), "\n")
 
 print("\n", "Result:   ", val_of(Secret_str_before), "\n")
 expected=[word_to_integer(x) for x in string_target]
-print("\n", "Expected: ",expected, "\n")
-if val_of(latest_state)==accept_state:
+print("\n", "Expected: ",expected, "\n", "# This debugger does not work if either/both string_a/b is absent \n") 
+
+if val_of(latest_state)==accept_state or val_of(latest_state)==appendedAll_state:
     print("DFA successfully reached the accept state \n")
 else:
     print("DFA did not reached the accept state \n")

@@ -22,7 +22,7 @@ except:
 ''' Prepping target text and substrings'''
 if operation =="test":
     corpus=generate_text(int(size))
-    string_a, string_target=generate_target(corpus, file_name, scale=0)
+    string_a, string_target=generate_target(corpus, file_name, length=10)
     print("Test (First 10 Strings): ",corpus[0:10])
     print("Actual text length:", len(corpus))
 

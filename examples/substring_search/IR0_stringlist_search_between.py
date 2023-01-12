@@ -22,14 +22,14 @@ except:
 ''' Prepping target text and substrings'''
 if operation =="test":
     corpus=generate_text(int(size))
-    string_a, string_target, string_b =generate_target(corpus, file_name, scale=0)
+    string_a, string_target, string_b =generate_target(corpus, file_name, length=10)
     print("Test (First 10 Strings): ",corpus[0:10])
     print("Actual text length:", len(corpus))
 
 else:
-    string_a = 'one'
-    string_target =  ['two']
-    string_b = 'three'
+    string_a = 'fourteen'
+    string_target =  ['fifteen']
+    string_b = ''
     with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
         corpus = f.read()
     corpus = corpus.split()
@@ -124,7 +124,7 @@ print("\n", "Latest State: ",val_of(latest_state), "\n")
 print("\n", "Result:   ", val_of(Secret_str_between), "\n")
 expected=[word_to_integer(x) for x in string_target]
 expected.insert(0,word_to_integer(string_a)) # between algo returns a substring including string_a
-print("\n", "Expected: ",expected, "\n")
+print("\n", "Expected: ",expected, "\n", "# This debugger does not work if either/both string_a/b is absent \n") 
 
 if val_of(latest_state)==accept_state or val_of(latest_state)==appendedAll_state:
     print("DFA successfully reached the accept state \n")
