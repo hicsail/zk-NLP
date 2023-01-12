@@ -1,5 +1,5 @@
 params = {
-    'bitwidth': 64,
+    'bitwidth': 32,
     'arithmetic_field': 2**31-1,
     'scaling_factor': 2**7,
     'all_statements': [],
@@ -8,8 +8,7 @@ params = {
     'ram_total_alloc_size': 0,
 }
 
-bitwidth = 64
-
+bitwidth = 32
 arithmetic_field = 97
 all_pubvals = {}
 all_defs = []

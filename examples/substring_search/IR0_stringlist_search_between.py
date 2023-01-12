@@ -121,9 +121,11 @@ print("Running Poseidon Hash")
 run_poseidon_hash(file_string)
 print("\n", "Latest State: ",val_of(latest_state), "\n")
 
-# print("\n", "Result:   ",Secret_str_between.current_val, "\n")
-# expected=[word_to_integer(x) for x in string_target]
-# print("\n", "Expected: ",expected, "\n")
+print("\n", "Result:   ", val_of(Secret_str_between), "\n")
+expected=[word_to_integer(x) for x in string_target]
+expected.insert(0,word_to_integer(string_a)) # between algo returns a substring including string_a
+print("\n", "Expected: ",expected, "\n")
+
 if val_of(latest_state)==accept_state or val_of(latest_state)==appendedAll_state:
     print("DFA successfully reached the accept state \n")
 else:

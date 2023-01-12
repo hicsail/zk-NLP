@@ -128,14 +128,14 @@ print("Running Poseidon Hash")
 run_poseidon_hash(file_string)
 print("\n", "Latest State: ",val_of(latest_state), "\n")
 
-if operation =="debug":
-    # print("\n", "Result:   ",Secret_str_before.arr, "\n")
-    # expected=[word_to_integer(x) for x in string_target]
-    # print("\n", "Expected: ",expected, "\n")
-    if val_of(latest_state)==accept_state:
-        print("DFA successfully reached the accept state \n")
-    else:
-        print("DFA did not reached the accept state \n")
+
+print("\n", "Result:   ", val_of(Secret_str_before), "\n")
+expected=[word_to_integer(x) for x in string_target]
+print("\n", "Expected: ",expected, "\n")
+if val_of(latest_state)==accept_state:
+    print("DFA successfully reached the accept state \n")
+else:
+    print("DFA did not reached the accept state \n")
 
 print("Generating Output \n")
 print_ir0(target_dir + "/" + f"{file_name}_{prime_name}_{size}")
