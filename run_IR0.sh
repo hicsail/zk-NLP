@@ -79,9 +79,9 @@ rel=$name.rel
 wit=$name.wit
 ins=$name.ins
 
-[ -e rel  ] && rm rel
-[ -e wit  ] && rm wit
-[ -e ins  ] && rm ins
+[ -e $rel  ] && rm $rel
+[ -e $wit  ] && rm $wit
+[ -e $ins  ] && rm $ins
 
 
 
