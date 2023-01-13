@@ -39,6 +39,12 @@ class TestGenerateText(unittest.TestCase):
         self.assertRaises(TypeError, util.generate_text, scale='string')
 
 
+        # Test with file_name=="string_search"
+        file_name="string_search"
+        output = util.generate_text(scale=0, file_name=file_name)
+        self.assertIsInstance(output, str)
+        self.assertEqual(len(output.split()), 10)
+
 if __name__ == '__main__':
     unittest.main()
 

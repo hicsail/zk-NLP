@@ -11,6 +11,7 @@ from hash import Poseidon
 
 
 def word_to_integer(word_to_convert):
+
     '''
         This function takes a string input called "word_to_convert" 
         and uses the SHA-256 hash algorithm to generate a unique 256-bit hash 
@@ -21,6 +22,7 @@ def word_to_integer(word_to_convert):
         Then it returns this modified integer as the output.
     
     '''
+
     hash = hashlib.sha256(word_to_convert.encode('utf-8')).digest()
     hash = int.from_bytes(hash, 'big')
     hash = hash >> 8*28+1
@@ -29,6 +31,7 @@ def word_to_integer(word_to_convert):
 
 
 def is_in_found_states(initial_state, found_states):
+
     '''
         This function generates a conditional statement used in cond_push of SecretStack
         Since the size of found_states varies, it requires to concatenate iteratively
@@ -51,7 +54,8 @@ def is_in_found_states(initial_state, found_states):
 
 
 
-def generate_text(scale=0):
+def generate_text(scale=0, file_name=None):
+    
     '''
         This function takes an optional parameter "scale" to generate fake text of a certain length using the Faker library. 
         It then cleans regular expressions and returns the first 10 words of the cleaned text, 
@@ -65,15 +69,17 @@ def generate_text(scale=0):
         raise TypeError("Scale should be integer")
 
     print("\n")
+    
     fake = Faker(['en_US'])
     file_data=fake.text(1500*(2**scale))
-    # print("Before cleaning text: ", file_data, "\n")
     regex = re.compile('[,\.!?]')
     file_data=regex.sub('', file_data)
-    # print("Removing [,\.!?]: ", file_data, "\n")
-    final_data = file_data.split()[:10*(2**scale)]
+    file_data = file_data.split()[:10*(2**scale)]
 
-    return final_data
+    if file_name=="string_search": # string_search requires a text input
+        file_data=" ".join([str(item) for item in file_data])
+
+    return file_data
 
 
 

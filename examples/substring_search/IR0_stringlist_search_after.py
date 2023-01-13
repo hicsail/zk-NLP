@@ -4,48 +4,7 @@ from miniwizpl.expr import *
 from common.util import *
 
 
-
-''' Importing ENV Var & Checking if prime meets our requirement'''
-assert len(sys.argv) == 6, "Invalid arguments"
-_, target_dir, prime, prime_name, size, operation = sys.argv
-file_name="after"
-set_field(int(prime))
-
-try:
-    assert check_prime()== True
-except:
-    print("no equivalent prime (2305843009213693951) in ccc.txt")
-    sys.exit(1)
-
-
-
-''' Prepping target text and substrings'''
-if operation =="test":
-    corpus=generate_text(int(size))
-    string_a, string_target=generate_target(corpus, file_name)
-    print("Test (First 10 Strings): ",corpus[0:10])
-    print("Actual text length:", len(corpus))
-
-else:
-    string_a = 'one'
-    string_target =  'two'
-    with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
-        corpus = f.read()
-    corpus = corpus.split()
-    print("Text: ", corpus, "\n")
-
-print("Start: ", string_a, "\n", "Target: ", string_target, "\n")
-# Transform the text file to search into miniwizpl format
-file_string = SecretList([word_to_integer(_str) for _str in corpus])
-
-zero_state = 0
-found_state=1 
-accept_state=100
-error_state=101
-
-
-
-def dfa_from_string(first, target):
+def dfa_from_string(first, target, zero_state, found_state, accept_state):
     next_state = {}
     next_state[(zero_state, word_to_integer(first))]=found_state
     next_state[(found_state, word_to_integer(target))]=accept_state
@@ -53,16 +12,16 @@ def dfa_from_string(first, target):
 
 
 
-def run_dfa(dfa, text_input):
+def run_dfa(dfa, text_input, zero_state, accept_state, error_state):
     def next_state_fun(string, initial_state):
         curr_state=initial_state
         for (dfa_state, dfa_str), next_state in dfa.items():
 
-            print(
-                    "curr state: ", val_of(curr_state),
-                    "dfa state: ", dfa_state,"\n",
-                    "input string: ", val_of(string),
-                    "dfa string: ", dfa_str,"\n")
+            # print(
+            #         "curr state: ", val_of(curr_state),
+            #         "dfa state: ", dfa_state,"\n",
+            #         "input string: ", val_of(string),
+            #         "dfa string: ", dfa_str,"\n")
 
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
@@ -70,7 +29,7 @@ def run_dfa(dfa, text_input):
                          error_state,
                          curr_state))
             
-            print("Updated state: ", val_of(curr_state))
+            # print("Updated state: ", val_of(curr_state))
         
         ''' 
             Regardless of changes above, if
@@ -87,25 +46,72 @@ def run_dfa(dfa, text_input):
 
 
 
-'''Build and traverse a DFA'''
-dfa = dfa_from_string(string_a, string_target)
-# print("\n", "DFA: ",dfa, "\n")
-print("Traversing DFA")
-latest_state = run_dfa(dfa, file_string)
-print("Output Assertion")
-assert0(latest_state - accept_state)
-print("Running Poseidon Hash")
-run_poseidon_hash(file_string)
-print("\n", "Latest State: ",val_of(latest_state), "\n")
+def main(target_dir, prime, prime_name, size, operation):
 
-if operation =="debug":
-    # print("\n", "Result:   ",Secret_str_after.current_val, "\n")
-    # expected=[word_to_integer(x) for x in string_target]
-    # print("\n", "Expected: ",expected, "\n")
+    # Importing ENV Var & Checking if prime meets our requirement
+
+    assert len(sys.argv) == 6, "Invalid arguments"
+    _, target_dir, prime, prime_name, size, operation = sys.argv
+    file_name="after"
+    set_field(int(prime))
+
+    try:
+        assert check_prime()== True
+    except:
+        print("no equivalent prime (2305843009213693951) in ccc.txt")
+        sys.exit(1)
+
+
+    #Prepping target text and substrings
+
+    if operation =="test":
+        corpus=generate_text(int(size))
+        string_a, string_target=generate_target(corpus, file_name)
+        print("Test (First 10 Strings): ",corpus[0:10])
+        print("Actual text length:", len(corpus))
+
+    else:
+        string_a = 'one'
+        string_target =  'two'
+        with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
+            corpus = f.read()
+        corpus = corpus.split()
+        print("Text: ", corpus, "\n")
+
+    print("Start: ", string_a, "\n", "Target: ", string_target, "\n")
+
+
+    # Transform the text file to search into miniwizpl format
+
+    file_string = SecretList([word_to_integer(_str) for _str in corpus])
+
+    zero_state = 0
+    found_state=1 
+    accept_state=100
+    error_state=101
+
+
+    # Build and traverse a DFA
+
+    dfa = dfa_from_string(string_a, string_target, zero_state, found_state, accept_state)
+    # print("\n", "DFA: ",dfa, "\n")
+    print("Traversing DFA")
+    latest_state = run_dfa(dfa, file_string, zero_state, accept_state, error_state)
+    print("Output Assertion")
+    assert0(latest_state - accept_state)
+    print("Running Poseidon Hash")
+    run_poseidon_hash(file_string)
+    print("\n", "Latest State: ",val_of(latest_state), "\n")
+
+    
     if val_of(latest_state)==accept_state:
         print("DFA successfully reached the accept state \n")
     else:
         print("DFA did not reached the accept state \n")
 
-print("Generating Output \n")
-print_ir0(target_dir + "/" + f"{file_name}_{prime_name}_{size}")
+    print("Generating Output \n")
+    print_ir0(target_dir + "/" + f"{file_name}_{prime_name}_{size}")
+
+
+if __name__ == '__main__':
+    main(*sys.argv[1:])
