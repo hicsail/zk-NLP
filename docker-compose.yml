@@ -1,7 +1,7 @@
 version: '3'
 services:
-  sieve_new:
-    container_name: sieve_testharness
+  sieve_ir:
+    container_name: sieve
     platform: linux/amd64
     build: ./
     volumes:

@@ -123,36 +123,49 @@ class SecretStack(AST):
     def __init__(self, arr):
         global all_defs
         all_defs.append(self)
-        self.arr = arr
-        self.val = arr
+        self.val = arr.copy()
+        self.original_val = arr.copy()
         self.name = gensym('stack')
         self.max_size = len(arr)
 
-    # TODO: need to fix values for these
     def push(self, item):
         """Unconditional push."""
         self.max_size += 1
+        self.val.append(val_of(item))
+        self.max_size = max(self.max_size, len(self.val))
 
         params['all_statements'].append(Prim('stack_push', [self, item], None))
 
     def cond_push(self, condition, item):
         """Conditional push."""
-        self.max_size += 1
+
+        if val_of(condition):
+            self.val.append(val_of(item))
+            self.max_size = max(self.max_size, len(self.val))
+
         params['all_statements'].append(Prim('stack_cond_push', [self, condition, item], None))
 
     def pop(self):
         """Unconditional pop."""
         xn = gensym('stack_val')
-        x = SymVar(xn, int, None)
-        params['all_statements'].append(Prim('assign', [x, Prim('stack_pop', [self], None)], None))
+        v = self.val.pop()
+        x = SymVar(xn, int, v)
+
+        params['all_statements'].append(Prim('assign', [x, Prim('stack_pop', [self], v)], None))
         return x
 
     def cond_pop(self, condition):
         """Conditional pop."""
         xn = gensym('stack_val')
-        x = SymVar(xn, int, None)
+
+        if val_of(condition):
+            v = self.val.pop()
+        else:
+            v = None
+
+        x = SymVar(xn, int, v)
         params['all_statements'].append(Prim('assign', [x, Prim('stack_cond_pop',
-                                                                [self, condition], None)],
+                                                                [self, condition], v)],
                                              None))
         return x
 

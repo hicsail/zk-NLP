@@ -94,7 +94,6 @@ class AST:
     def if_else(self, ifval, elseval):
         return Prim('mux', [self, ifval, elseval], None)
 
-
     def __or__(self, other):
         return Prim('or', [self, other], val_of(self) | val_of(other))
     def __ror__(self, other):

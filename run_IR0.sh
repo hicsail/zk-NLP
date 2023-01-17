@@ -27,17 +27,25 @@ fi
 
 # Setting missing parameters if any
 
-if [ -z "$target"]
+if [ -z "$target" ]
     then
         target="./tests"
         echo "test directory is set to './tests' "
 fi
 
-if [ -z "$size"]
+if [ -z "$size" ]
     then
         size=0
         echo "test size is set to 0 "
 fi
+
+
+
+# Copying the latest util.py into the container
+
+local="/code/substring_search/common/util.py"
+container="/usr/src/app/examples/substring_search/common/util.py"
+cp $local $container
 
 
 
@@ -71,9 +79,11 @@ rel=$name.rel
 wit=$name.wit
 ins=$name.ins
 
-[ -e rel  ] && rm rel
-[ -e wit  ] && rm wit
-[ -e ins  ] && rm ins
+[ -e $rel  ] && rm $rel
+[ -e $wit  ] && rm $wit
+[ -e $ins  ] && rm $ins
+
+
 
 # Actual Execution
 
