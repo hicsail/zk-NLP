@@ -51,21 +51,22 @@ cp $local $container
 
 # Configuring names and directory
 
+
 if [ "$file" = "string_search" ]
     then
-        dir="/usr/src/app/examples/substring_search/IR0_"
-        orig="/code/substring_search/IR0_"
+        dir="/usr/src/app/examples/substring_search/IR0/IR0_"
+        orig="/code/substring_search/IR0/IR0_"
         cp $orig$file.py $dir$file.py
         
     else
         if [ "$file" = "stringlist_search" ]
             then
-                dir="/usr/src/app/examples/substring_search/IR0_"
-                orig="/code/substring_search/IR0_"
+                dir="/usr/src/app/examples/substring_search/IR0/IR0_"
+                orig="/code/substring_search/IR0/IR0_"
                 cp $orig$file.py $dir$file.py
             else
-                dir="/usr/src/app/examples/substring_search/IR0_stringlist_search_"
-                orig="/code/substring_search/IR0_stringlist_search_"
+                dir="/usr/src/app/examples/substring_search/IR0/IR0_stringlist_search_"
+                orig="/code/substring_search/IR0/IR0_stringlist_search_"
                 cp $orig$file.py $dir$file.py
         fi
 fi

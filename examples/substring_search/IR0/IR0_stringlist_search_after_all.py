@@ -1,7 +1,8 @@
 import sys
 from miniwizpl import *
 from miniwizpl.expr import *
-from common.util import *
+sys.path.append("/usr/src/app/examples/substring_search/common")
+from util import *
 
 
 def dfa_from_string(first, target, zero_state, found_states, accept_state):
