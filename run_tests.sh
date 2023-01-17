@@ -8,8 +8,8 @@ file='util.py'
 cp $local$dir$file $container$dir$file
 
 
-# Copying the latest unit test files.py into the unittests directory in container
-dir="unittests/"
+# Copying the latest test files.py into the tests directory in container
+dir="tests/"
 cp -r $local$dir $container
 
 

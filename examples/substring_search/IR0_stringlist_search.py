@@ -70,13 +70,13 @@ def dfa_from_string(stringlist, accept_state):
 
 
 
-def run_dfa(dfa, string, zero_state, accept):
+def run_dfa(dfa, string, zero_state, accept, error_state):
     def next_state_fun(word, initial_state):
         '''
             I changed this part, otherwise when two sub texts are not contonious,
             the DFA never moves from the zero state 
         '''
-        curr_state = initial_state  
+        curr_state = zero_state  
 
         for (dfa_state, dfa_word), next_state in dfa.items():
             
@@ -89,9 +89,16 @@ def run_dfa(dfa, string, zero_state, accept):
             # transform all tuples to numbers
             dfa_state = stateCal(dfa_state)
             next_state = stateCal(next_state)
+
             curr_state = mux((initial_state == dfa_state) & (word == dfa_word),
-                         next_state,
-                         curr_state)  # output here is a number, not a tuple
+                         next_state, 
+                         curr_state)
+                         
+            # curr_state = mux((initial_state == dfa_state) & (word == dfa_word),
+            #              next_state,
+            #              mux((initial_state == dfa_state) & (word != dfa_word) & (initial_state!=zero_state),
+            #              error_state, 
+            #              curr_state))  # output here is a number, not a tuple
 
             # print("Updated state: ", val_of(curr_state))
 
@@ -149,6 +156,7 @@ def main(target_dir, prime, prime_name, size, operation):
     accept = stateCal(accept)
     zero_state = tuple([0] * len(string_target))
     zero_state = stateCal(zero_state)
+    error_state = 1000
 
     # TODO: a reverse version of stateCal() to transform a number back to a state tuple.
     # TODO: actual_counter = [0,0,0,...]
@@ -160,7 +168,7 @@ def main(target_dir, prime, prime_name, size, operation):
     dfa = dfa_from_string(string_target, accept_state)
     # print("\n", "DFA: ",dfa, "\n")
     print("Traversing DFA")
-    latest_state = run_dfa(dfa, file_string, zero_state, accept)
+    latest_state = run_dfa(dfa, file_string, zero_state, accept, error_state)
     print("Output Assertion")
     assert0(latest_state - accept)
     print("Running Poseidon Hash")

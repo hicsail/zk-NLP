@@ -88,6 +88,7 @@ def generate_target(txt, type, length=1, n_string=1):
     if isinstance(txt, str):
         txt = txt.split()
     
+    
     if type=="after_all":
 
         if length>len(txt)-1:
