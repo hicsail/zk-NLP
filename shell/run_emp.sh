@@ -1,8 +1,14 @@
 # # #!/bin/sh
 
+
+# Removing existing intermediate representations
+
 [ -e miniwizpl_test ] && rm miniwizpl_test
 [ -e miniwizpl_test.cpp  ] && rm miniwizpl_test.cpp 
 
+
+
+# Taking tags from the command line
 
 while getopts f:c:o: flag
 do
@@ -12,52 +18,60 @@ do
     esac
 done
 
+
+
+# Checking if a file name is properly specified
+
 if [ -z "$file" ]
     then
         echo "Please specify an object code"
-    else
-        cp /code/$file /usr/src/app/examples/$file
+        exit 1
+fi
 
-        echo "Running $file .... $operation";
 
-        if [ "$operation" = "test" ]
-            then 
-                echo "Running synthetic test case"
-                if python3 /usr/src/app/examples/$file "test"
-                    then
-                        source ./compile.sh
-                    else
-                        echo "Error in the python script - abort"
-                fi
 
+# Copying the latest util.py into the container
+
+local="/code/substring_search/common/util.py"
+container="/usr/src/app/examples/substring_search/common/util.py"
+cp $local $container
+
+
+
+# Configuring names and directory, and copying a designated statement file
+
+dir="/usr/src/app/examples/substring_search/EMP/"
+orig="/code/substring_search/EMP/"
+cp $orig$file.py $dir$file.py
+
+
+# Actual Execution
+
+echo "Running $file .... $operation";
+
+if [ "$operation" = "test" ]
+
+    then 
+
+        echo "Running synthetic test case"
+
+        if python3 $dir$file.py "test"
+            then
+                source ./compile.sh
             else
-                if [ "$operation" = "debug" ]
-                    then 
-                        echo "Running in debug mode"
-                        if python3 /usr/src/app/examples/$file /usr/src/app/examples/dfa_test_input.txt "debug"
-                            then
-                                echo 'Check the lines above'
-                            else
-                                echo "Error in the python script - abort"
-                        fi
-                    else
-                        cp /code/dfa_test_input.txt /usr/src/app/examples/dfa_test_input.txt
-                        if [ "$operation" = "debug/own" ]
-                            then 
-                                echo "Running with your own text input in debug mode"
-                                if python3 /usr/src/app/examples/$file /usr/src/app/examples/dfa_test_input.txt "debug/own"
-                                    then
-                                        echo 'Check the output above'
-                                fi
-                            else
-                                echo "Running with your own text input"
-                                if python3 /usr/src/app/examples/$file /usr/src/app/examples/dfa_test_input.txt
-                                    then
-                                        source ./compile.sh
-                                    else
-                                        echo "Error in the python script - abort"
-                                fi
-                        fi
-                fi
+                echo "Error in the python script - abort"
         fi
+
+    else
+
+        echo "Running with your own text input in debug mode"
+        cp /code/dfa_test_input.txt /usr/src/app/examples/dfa_test_input.txt
+
+        if python3 $dir$file.py "debug"
+            then
+                source ./compile.sh
+            else
+                echo "Error in the python script - abort"
+        fi
+
 fi

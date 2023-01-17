@@ -102,7 +102,7 @@ It entails the following four tags:
 For example, copy and paste the command into your terminal:
 
 ```
-   /bin/bash ./run_IR0.sh -f between -o debug
+   /bin/bash ./shell/run_IR0.sh -f between -o debug
 ```
 
 This runs <a href="https://github.com/hicsail/SIEVE/blob/main/examples/substring_search/IR0_stringlist_search_between.py">    IR0_stringlist_search_between.py</a> in debug mode.<br>

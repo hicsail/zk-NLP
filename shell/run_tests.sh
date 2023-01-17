@@ -3,90 +3,97 @@ container="/usr/src/app/examples/substring_search/"
 
 
 # Copying the latest util.py into the common directory in container
-dir="common/"
+
+utildir="common/"
 file='util.py'
-cp $local$dir$file $container$dir$file
+cp $local$utildir$file $container$utildir$file
 
 
 # Copying the latest test files.py into the tests directory in container
-dir="tests/"
-cp -r $local$dir $container
+
+testdir="tests/"
+cp -r $local$testdir $container
 
 
 # Executing each uint test file
+
 file='test_util.py'
 echo "testing with $file .... ";
-python3 $container$dir$file
+python3 $container$testdir$file
 
 file='test_util_generate_text.py'
 echo "testing with $file .... ";
-python3 $container$dir$file
+python3 $container$testdir$file
 
 file='test_util_generate_target.py'
 echo "testing with $file .... ";
-python3 $container$dir$file
+python3 $container$testdir$file
 
 
-# Executing E2E test
+# Executing E2E tests for IR0 statements
 
-file='test_statement_after_all.py'
-orig="/code/substring_search/IR0_stringlist_search_after_all.py"
-dest="/usr/src/app/examples/substring_search/IR0_stringlist_search_after_all.py"
-
-cp $orig $dest
-echo "testing with $file .... ";
-python3 $container$dir$file
+origin=$local"IR0/"
+dest=$container"/IR0/"
 
 
-file='test_statement_after.py'
-orig="/code/substring_search/IR0_stringlist_search_after.py"
-dest="/usr/src/app/examples/substring_search/IR0_stringlist_search_after.py"
+## after all
+test_file='test_statement_after_all.py'
+statement='after_all.py'
 
-cp $orig $dest
-echo "testing with $file .... ";
-python3 $container$dir$file
-
-
-file='test_statement_begins.py'
-orig="/code/substring_search/IR0_stringlist_search_begins.py"
-dest="/usr/src/app/examples/substring_search/IR0_stringlist_search_begins.py"
-
-cp $orig $dest
-echo "testing with $file .... ";
-python3 $container$dir$file
+cp $origin$statement $dest$statement
+echo "testing with $test_file .... ";
+python3 $container$testdir$test_file
 
 
-file='test_statement_between.py'
-orig="/code/substring_search/IR0_stringlist_search_between.py"
-dest="/usr/src/app/examples/substring_search/IR0_stringlist_search_between.py"
+# after
+test_file='test_statement_after.py'
+statement='after.py'
 
-cp $orig $dest
-echo "testing with $file .... ";
-python3 $container$dir$file
-
-
-file='test_statement_point_to.py'
-orig="/code/substring_search/IR0_stringlist_search_point_to.py"
-dest="/usr/src/app/examples/substring_search/IR0_stringlist_search_point_to.py"
-
-cp $orig $dest
-echo "testing with $file .... ";
-python3 $container$dir$file
+cp $origin$statement $dest$statement
+echo "testing with $test_file .... ";
+python3 $container$testdir$test_file
 
 
-file='test_statement_string_search.py'
-orig="/code/substring_search/IR0_string_search.py"
-dest="/usr/src/app/examples/substring_search/IR0_string_search.py"
+# begins
+test_file='test_statement_begins.py'
+statement='begins.py'
 
-cp $orig $dest
-echo "testing with $file .... ";
-python3 $container$dir$file
+cp $origin$statement $dest$statement
+echo "testing with $test_file .... ";
+python3 $container$testdir$test_file
 
 
-file='test_statement_stringlist_search.py'
-orig="/code/substring_search/IR0_stringlist_search.py"
-dest="/usr/src/app/examples/substring_search/IR0_stringlist_search.py"
+# between
+test_file='test_statement_between.py'
+statement='between.py'
 
-cp $orig $dest
-echo "testing with $file .... ";
-python3 $container$dir$file
+cp $origin$statement $dest$statement
+echo "testing with $test_file .... ";
+python3 $container$testdir$test_file
+
+
+# point_to
+test_file='test_statement_point_to.py'
+statement='point_to.py'
+
+cp $origin$statement $dest$statement
+echo "testing with $test_file .... ";
+python3 $container$testdir$test_file
+
+
+# string_search
+test_file='test_statement_string_search.py'
+statement='string_search.py'
+
+cp $origin$statement $dest$statement
+echo "testing with $test_file .... ";
+python3 $container$testdir$test_file
+
+
+# stringlist_search
+test_file='test_statement_stringlist_search.py'
+statement='stringlist_search.py'
+
+cp $origin$statement $dest$statement
+echo "testing with $test_file .... ";
+python3 $container$testdir$test_file

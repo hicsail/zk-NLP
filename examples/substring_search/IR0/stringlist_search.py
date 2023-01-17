@@ -169,7 +169,7 @@ def main(target_dir, prime, prime_name, size, operation):
     dfa = dfa_from_string(string_target, accept_state)
     # print("\n", "DFA: ",dfa, "\n")
     print("Traversing DFA")
-    latest_state = run_dfa(dfa, file_string, zero_state, accept, error_state)
+    latest_state = run_dfa(dfa, file_string, zero_state, accept)
     print("Output Assertion")
     assert0(latest_state - accept)
     print("Running Poseidon Hash")

@@ -4,8 +4,8 @@ from unittest.mock import patch
 from miniwizpl import *
 from miniwizpl.expr import *
 
-sys.path.append("/usr/src/app/examples/substring_search")
-import IR0_stringlist_search_begins as statement
+sys.path.append("/usr/src/app/examples/substring_search/IR0")
+import begins as statement
 
 sys.path.append("/usr/src/app/examples/substring_search/common")
 import util

@@ -4,8 +4,8 @@ from unittest.mock import patch
 from miniwizpl import *
 from miniwizpl.expr import *
 
-sys.path.append("/usr/src/app/examples/substring_search")
-import IR0_string_search as statement
+sys.path.append("/usr/src/app/examples/substring_search/IR0")
+import string_search as statement
 
 class TestStatement(unittest.TestCase):
     
