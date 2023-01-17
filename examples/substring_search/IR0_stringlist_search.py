@@ -70,13 +70,13 @@ def dfa_from_string(stringlist, accept_state):
 
 
 
-def run_dfa(dfa, string, zero_state, accept, error_state):
+def run_dfa(dfa, string, zero_state, accept):
     def next_state_fun(word, initial_state):
         '''
             I changed this part, otherwise when two sub texts are not contonious,
             the DFA never moves from the zero state 
         '''
-        curr_state = zero_state  
+        curr_state = initial_state  
 
         for (dfa_state, dfa_word), next_state in dfa.items():
             
