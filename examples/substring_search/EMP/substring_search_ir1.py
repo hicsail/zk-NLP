@@ -3,8 +3,7 @@ import random
 import sys
 import functools
 from miniwizpl import *
-
-sys.path.append("../poseidon_hash")
+sys.path.append("/usr/src/app/examples/poseidon_hash")
 from parameters import *
 from hash import Poseidon
 

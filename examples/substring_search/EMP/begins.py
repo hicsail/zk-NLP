@@ -1,7 +1,8 @@
 import sys
 from miniwizpl import *
 from miniwizpl.expr import *
-from common.util import *
+sys.path.append("/usr/src/app/examples/substring_search/common")
+from util import *
 
 if (len(sys.argv)>1 and sys.argv[1] =="test") or (len(sys.argv)>2 and sys.argv[2] =="debug"):
     file_data=generate_text()
