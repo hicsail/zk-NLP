@@ -13,7 +13,6 @@ import galois
 sys.setrecursionlimit(10000)
 
 output_file = None
-emp_output_string = ""
 current_wire = 0
 witness_list = []
 IR_MODE = 1
@@ -59,9 +58,6 @@ def emit(s=''):
         output_file.write(s)
         output_file.write('\n')
     
-    # global emp_output_string
-    # emp_output_string += s + '\n'
-
 def add_array_to_witness(arr):
     s = params['scaling_factor']
     encoded = encode_array(arr, s)
@@ -859,7 +855,7 @@ def print_ir1(filename):
     #print('field size:', field)
 
     # INSTANCE OUTPUT
-    with open(filename + '.ins', 'w') as f:
+    with open(filename + '.type0.ins', 'w') as f:
         output_file = f
 
         if IR_MODE == 0:
@@ -878,6 +874,26 @@ def print_ir1(filename):
             emit(f'@end')
             emit()
 
+    if 'boolean' in params['options']:
+        # INSTANCE OUTPUT (boolean)
+        with open(filename + '.type1.ins', 'w') as f:
+            output_file = f
+
+            if IR_MODE == 0:
+                emit(f'version 2.0.0-beta;')
+                emit(f'public_input;')
+                emit(f'@type field 2;')
+                emit(f'@begin')
+                emit(f'@end')
+                emit()
+
+            else:
+                emit(f'version 1.0.0;')
+                emit(f'field characteristic 2 degree 1;')
+                emit(f'instance')
+                emit(f'@begin')
+                emit(f'@end')
+                emit()
 
     # RELATION OUTPUT
     with open(filename + '.rel', 'w') as f:
@@ -888,9 +904,10 @@ def print_ir1(filename):
             emit(f'version 2.0.0-beta;')
             emit(f'circuit;')
             emit(f'@type field {field};')
-            emit(f'@type field 2;')
-            emit(f'@convert(@out: 0:1, @in: 1:{bits_per_fe});')
-            emit(f'@convert(@out: 1:{bits_per_fe}, @in: 0:1);')
+            if 'boolean' in params['options']:
+                emit(f'@type field 2;')
+                emit(f'@convert(@out: 0:1, @in: 1:{bits_per_fe});')
+                emit(f'@convert(@out: 1:{bits_per_fe}, @in: 0:1);')
 
             # if we're using ram, init the types
             if params['ram_num_allocs'] > 0:
@@ -910,10 +927,12 @@ def print_ir1(filename):
                 emit()
 
             # relu for neural networks
-            emit_relu(bits_per_fe)
+            if 'relu' in params['options']:
+                emit_relu(bits_per_fe)
 
             # stack operations
-            emit_stack_ops()
+            if 'stack' in params['options']:
+                emit_stack_ops()
 
         else:
             emit(f'version 1.0.0;')
@@ -929,9 +948,8 @@ def print_ir1(filename):
         emit('@end')
 
     # WITNESS OUTPUT
-    with open(filename + '.wit', 'w') as f:
+    with open(filename + '.type0.wit', 'w') as f:
         output_file = f
-        emp_output_string = ""
 
         if IR_MODE == 0:
             emit(f'version 2.0.0-beta;')
@@ -949,4 +967,21 @@ def print_ir1(filename):
 
         emit("@end")
 
+    if 'boolean' in params['options']:
+        # WITNESS OUTPUT (boolean field)
+        with open(filename + '.type1.wit', 'w') as f:
+            output_file = f
+
+            if IR_MODE == 0:
+                emit(f'version 2.0.0-beta;')
+                emit(f'private_input;')
+                emit(f'@type field 2;')
+                emit(f'@begin')
+            else:
+                emit(f'version 1.0.0;')
+                emit(f'field characteristic 2 degree 1;')
+                emit(f'short_witness')
+                emit(f'@begin')
+
+                emit("@end")
 

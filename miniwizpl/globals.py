@@ -6,6 +6,7 @@ params = {
     'produce_warnings': True,
     'ram_num_allocs': 0,
     'ram_total_alloc_size': 0,
+    'options': set(),
 }
 
 bitwidth = 32

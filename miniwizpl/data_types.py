@@ -127,6 +127,7 @@ class SecretStack(AST):
         self.original_val = arr.copy()
         self.name = gensym('stack')
         self.max_size = len(arr)
+        params['options'].add('stack')
 
     def push(self, item):
         """Unconditional push."""
