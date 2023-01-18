@@ -20,6 +20,7 @@ WRITE_TO_WIT = 1
 WRITE_TO_REL = 1
 all_pubvals = {}
 var_env = {}
+ram_type = None
 
 @dataclass
 class WireVal(AST):
@@ -176,15 +177,15 @@ def print_exp_ir1_(e):
         rn = r.replace('$', '')
 
         emit()
-        emit(f'  @function(init_ram_{rn}, @out 1:1, @in 0:1)')
-        emit(f'    @plugin(ram_arith_v0, init, {e.max_size});')
+        emit(f'  @function(init_ram_{rn}, @out: {ram_type}:1, @in: 0:1)')
+        emit(f'    @plugin(ram_arith_v0, init, {e.max_size+1});')
         emit()
 
-        emit(f'  {r} <- @call(init_ram_{rn}, <0>);')
+        emit(f'  {r} <- @call(init_ram_{rn}, {print_exp_ir1(0)});')
         emit()
-        emit(f'  @call(write_ram, {r}, <0>, {len(wvs) + 1}); // stack top')
+        emit(f'  @call(write_ram, {r}, {print_exp_ir1(0)}, {print_exp_ir1(len(wvs) + 1)}); // stack top')
         for i, w in enumerate(wvs):
-            emit(f'  @call(write_ram, {r}, <{i+1}>, {w});')
+            emit(f'  @call(write_ram, {r}, {print_exp_ir1(i+1)}, {w});')
         emit('  // end init stack')
         emit()
         return r
@@ -196,14 +197,14 @@ def print_exp_ir1_(e):
         rn = r.replace('$', '')
 
         emit()
-        emit(f'  @function(init_ram_{rn}, @out 1:1, @in 0:1)')
+        emit(f'  @function(init_ram_{rn}, @out: {ram_type}:1, @in: 0:1)')
         emit(f'    @plugin(ram_arith_v0, init, {len(wvs)});')
         emit()
 
-        emit(f'  {r} <- @call(init_ram_{rn}, <0>);')
+        emit(f'  {r} <- @call(init_ram_{rn}, {print_exp_ir1(0)});')
         emit()
         for i, w in enumerate(wvs):
-            emit(f'  @call(write_ram, {r}, <{i}>, {w});')
+            emit(f'  @call(write_ram, {r}, {print_exp_ir1(i)}, {w});')
         emit('  // end init ram')
         emit()
         return r
@@ -721,116 +722,122 @@ def emit_relu(bits_per_fe):
 def emit_stack_ops():
     global current_wire
 
+    def const(c):
+        global current_wire
+        r = current_wire
+        current_wire += 1
+        w = '$' + str(r)
+        emit(f'    {w} <- < {c} >;')
+        return w
+
+
     # --------------------------------------------------
     # PUSH
     # --------------------------------------------------
     current_wire = 2
-    emit(f'  @function(stack_push, @in: 2:1, 0:1)')
+    emit(f'  @function(stack_push, @in: {ram_type}:1, 0:1)')
     old_top = next_wire()
     new_top = next_wire()
-    emit(f'    {old_top} <- @call(read, $0, <0>);')
+    emit(f'    {old_top} <- @call(read_ram, $0, {const(0)});')
     emit(f'    {new_top} <- @addc({old_top}, <1>);')
-    emit(f'    @call(write, $0, {new_top});')
-    emit(f'    @call(write, {new_top}, $1);')
+    emit(f'    @call(write_ram, $0, {const(0)}, {new_top});')
+    emit(f'    @call(write_ram, $0, {new_top}, $0);')
     emit(f'  @end')
 
     # --------------------------------------------------
     # COND_PUSH
     # --------------------------------------------------
     current_wire = 3
-    emit(f'  @function(stack_cond_push, @in: 2:1, 0:1, 0:1)')
+    emit(f'  @function(stack_cond_push, @in: {ram_type}:1, 0:1, 0:1)')
 
     # get the current top
     current_top = next_wire()
-    emit(f'    {current_top} <- @call(read, $0, <0>); // current top idx')
+    emit(f'    {current_top} <- @call(read_ram, $0, {const(0)}); // current top idx')
 
     # construct the new top: (condition AND top+1) OR (NOT condition AND top)
     tmp1 = next_wire()
     negated_cond = next_wire()
     c = params['arithmetic_field'] - 1
-    emit(f'    {tmp1} <- @mulc($1, < {c} >);')
-    emit(f'    {negated_cond} <- @addc({tmp1}, < {1} >); // negated condition')
+    emit(f'    {tmp1} <- @mulc($0, <{c}>);')
+    emit(f'    {negated_cond} <- @addc({tmp1}, <1>); // negated condition')
 
     tmp2 = next_wire()
     tmp3 = next_wire()
     tmp4 = next_wire()
     new_top = next_wire()
     emit(f'    {tmp2} <- @addc({current_top}, <1>);')
-    emit(f'    {tmp3} <- @mul($1, {tmp2});')
+    emit(f'    {tmp3} <- @mul($0, {tmp2});')
     emit(f'    {tmp4} <- @mul({negated_cond}, {current_top});')
     emit(f'    {new_top} <- @add({tmp3}, {tmp4}); // new top idx')
-    emit(f'    @call(write, $0, <0>, {new_top});')
+    emit(f'    @call(write_ram, $0, {const(0)}, {new_top});')
 
     # read old_val from the new top
     old_val = next_wire()
-    emit(f'    {old_val} <- @call(read, $0, {new_top});')
+    emit(f'    {old_val} <- @call(read_ram, $0, {new_top});')
 
     # write to the new top: (condition AND val) OR (NOT condition AND old_val)
     tmp5 = next_wire()
     tmp6 = next_wire()
     to_write = next_wire()
-    emit(f'    {tmp5} <- @mul($1, $2);')
+    emit(f'    {tmp5} <- @mul($0, $1);')
     emit(f'    {tmp6} <- @mul({negated_cond}, {old_val});')
     emit(f'    {to_write} <- @add({tmp5}, {tmp6}); // new top value')
 
-    # write the new top to position 0
-    emit(f'    @call(write, $0, {new_top}, {to_write});')
+    # write the new value to the top position
+    emit(f'    @call(write_ram, $0, {new_top}, {to_write});')
     emit(f'  @end')
 
     # --------------------------------------------------
     # POP
     # --------------------------------------------------
     current_wire = 2
-    emit(f'  @function(stack_pop, @out: 0:1, @in: 2:1)')
+    emit(f'  @function(stack_pop, @out: 0:1, @in: {ram_type}:1)')
     # get the current top
     current_top = next_wire()
-    emit(f'    {current_top} <- @call(read, $1, <0>); // current top idx')
+    emit(f'    {current_top} <- @call(read_ram, $0, {const(0)}); // current top idx')
 
     # update the top
     c = params['arithmetic_field'] - 1
     new_top = next_wire()
-    emit(f'    {new_top} <- @addc({current_top}, < {c} >);')
-    emit(f'    @call(write, $1, <0>, {new_top}); // update top')
+    emit(f'    {new_top} <- @addc({current_top}, <{c}>);')
+    emit(f'    @call(write_ram, $0, {const(0)}, {new_top}); // update top')
 
     # read return val from the old top
-    emit(f'    $0 <- @call(read, $1, {current_top});')
+    emit(f'    $0 <- @call(read_ram, $0, {current_top});')
     emit(f'  @end')
 
     # --------------------------------------------------
     # COND_POP
     # --------------------------------------------------
     current_wire = 2
-    emit(f'  @function(stack_cond_pop, @out: 0:1, @in: 2:1, 0:1)')
+    emit(f'  @function(stack_cond_pop, @out: 0:1, @in: {ram_type}:1, 0:1)')
     # get the current top
     current_top = next_wire()
-    emit(f'    {current_top} <- @call(read, $1, <0>); // current top idx')
+    emit(f'    {current_top} <- @call(read_ram, $0, {const(0)}); // current top idx')
 
     # construct the new top: (condition AND top-1) OR (NOT condition AND top)
     tmp1 = next_wire()
     negated_cond = next_wire()
     c = params['arithmetic_field'] - 1
-    emit(f'    {tmp1} <- @mulc($2, < {c} >);')
-    emit(f'    {negated_cond} <- @addc({tmp1}, < {1} >); // negated condition')
+    emit(f'    {tmp1} <- @mulc($1, <{c}>);')
+    emit(f'    {negated_cond} <- @addc({tmp1}, <1>); // negated condition')
 
     tmp2 = next_wire()
     tmp3 = next_wire()
     tmp4 = next_wire()
     new_top = next_wire()
-    emit(f'    {tmp2} <- @addc({current_top}, < {c} >);')
-    emit(f'    {tmp3} <- @mul($2, {tmp2});')
+    emit(f'    {tmp2} <- @addc({current_top}, <{c}>);')
+    emit(f'    {tmp3} <- @mul($1, {tmp2});')
     emit(f'    {tmp4} <- @mul({negated_cond}, {current_top});')
     emit(f'    {new_top} <- @add({tmp3}, {tmp4}); // new top idx')
-    emit(f'    @call(write, $1, <0>, {new_top});')
+    emit(f'    @call(write_ram, $0, {const(0)}, {new_top});')
 
     # read old_val from the old top
     old_val = next_wire()
-    emit(f'    {old_val} <- @call(read, $1, {current_top});')
-
-    # write the new top to position 0
-    emit(f'    @call(write, $1, {new_top}, {to_write});')
+    emit(f'    {old_val} <- @call(read_ram, $0, {current_top});')
 
     # return the value: condition AND old_val
-    emit(f'    $0 <- @mul($2, {old_val});')
+    emit(f'    $0 <- @mul($1, {old_val});')
     emit(f'  @end')
     emit()
 
@@ -848,8 +855,10 @@ def print_ir1(filename):
     global output_file
     global current_wire
     global var_env
+    global ram_type
     var_env = {}
     current_wire = 0
+    current_type = 0
 
     field = params['arithmetic_field']
     #print('field size:', field)
@@ -903,15 +912,29 @@ def print_ir1(filename):
         if IR_MODE == 0:
             emit(f'version 2.0.0-beta;')
             emit(f'circuit;')
+
+            ram_used = params['ram_num_allocs'] > 0 or 'stack' in params['options']
+
+            # if we're using ram, declare it
+            if ram_used:
+                emit(f'@plugin ram_arith_v0;')
+
             emit(f'@type field {field};')
+            current_type += 1
+
             if 'boolean' in params['options']:
                 emit(f'@type field 2;')
+                current_type += 1
+
                 emit(f'@convert(@out: 0:1, @in: 1:{bits_per_fe});')
                 emit(f'@convert(@out: 1:{bits_per_fe}, @in: 0:1);')
 
             # if we're using ram, init the types
-            if params['ram_num_allocs'] > 0:
-                s = '@plugin(ram_arith_v0, ram, 0, {0}, {1}, {2});'
+            if ram_used:
+                ram_type = current_type
+                s = '@type @plugin(ram_arith_v0, ram, 0, {0}, {1}, {2});'
+                current_type += 1
+                
                 emit(s.format(params['ram_num_allocs'],
                               params['ram_total_alloc_size'],
                               params['ram_total_alloc_size'])) # TODO: should be live allocation
@@ -919,10 +942,10 @@ def print_ir1(filename):
             emit(f'@begin')
 
             # if we're using ram, define read/write
-            if params['ram_num_allocs'] > 0:
-                emit('  @function(read_ram, @out 0:1, @in 2:1, 0:1)')
+            if ram_used:
+                emit(f'  @function(read_ram, @out: 0:1, @in: {ram_type}:1, 0:1)')
                 emit('    @plugin(ram_arith_v0, read);')
-                emit('  @function(write_ram, @in 2:1, 0:1, 0:1)')
+                emit(f'  @function(write_ram, @in: {ram_type}:1, 0:1, 0:1)')
                 emit('    @plugin(ram_arith_v0, write);')
                 emit()
 

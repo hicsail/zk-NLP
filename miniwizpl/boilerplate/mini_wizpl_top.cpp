@@ -8,7 +8,7 @@ using namespace std;
 
 int port, party;
 const int threads = 1;
-const int index_sz = 20, step_sz = 25, val_sz = 64;
+const int index_sz = 20, step_sz = 25;
 
 QSMatrix<Float> relu(const QSMatrix<Float>& mat) {
   unsigned rows = mat.get_rows();
@@ -100,14 +100,6 @@ bool compare_qs_matrices(const QSMatrix<float>& a, const QSMatrix<float>& b) {
 
 Integer mux(Bit s, Integer a, Integer b) {
   return b.select(s, a);
-}
-
-bool assert0EMP(Integer a) {
-  return a.equal(Integer(64, 0, PUBLIC)).reveal<bool>(PUBLIC);
-}
-
-bool assert0EMP(Bit a) {
-  return !(a.reveal<bool>(PUBLIC));
 }
 
 // *************************************************************************

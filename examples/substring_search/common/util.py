@@ -83,13 +83,25 @@ def generate_text(scale=0, file_name=None):
 
 
 
-def generate_target(txt, type, length=1, n_string=1):
+def generate_target(txt, file_name, length=1, n_string=1):
+
+    '''
+        This function takes an optional parameter "length" and "n_string" to to pick target texts and respective pivot words, depending on statement type. 
+        
+        length represents the length of substring for such algorithms as between, after all, point to.
+        When the length is 2 in between algorithm for the corpus lenth of 4, this function will pick string_a either at index 0 or 1, so it can accomodate substring length of 2 after it.
+        Those numbers shall be positive integer and shall not exceed the length of the corpus text, and there is correction method in case value exceeding the boundary is chosen.
+
+        n_string represents the number of strings to look for in stringlist_search algorithm. 
+        Those numbers shall be positive integer, and there is correction method in case negative value is chosen.
+
+    '''
 
     if isinstance(txt, str):
         txt = txt.split()
     
     
-    if type=="after_all":
+    if file_name=="after_all":
 
         if length>len(txt)-1:
             length=len(txt)-1
@@ -105,7 +117,7 @@ def generate_target(txt, type, length=1, n_string=1):
         return string_a, string_target
 
 
-    elif type=="after":
+    elif file_name=="after":
 
         string_a=random.sample(txt[:-1], 1) # Avoiding the last substring to be picked as target
         string_a=string_a[0]
@@ -115,12 +127,12 @@ def generate_target(txt, type, length=1, n_string=1):
         return string_a, string_target
 
 
-    elif type=="begins":
+    elif file_name=="begins":
 
         return txt[0]
 
 
-    elif type=="between":
+    elif file_name=="between":
 
         if length>len(txt)-1:
             length=len(txt)-1
@@ -149,7 +161,7 @@ def generate_target(txt, type, length=1, n_string=1):
         return string_a, string_target, string_b
 
 
-    elif type=="point_to":
+    elif file_name=="point_to":
 
         if length>len(txt):
             length=len(txt)
@@ -176,7 +188,7 @@ def generate_target(txt, type, length=1, n_string=1):
         return string_a, string_target
     
 
-    elif type=="string_search":
+    elif file_name=="string_search":
 
         string_target=random.sample(txt, 1)
         string_target=string_target[0]
@@ -184,7 +196,7 @@ def generate_target(txt, type, length=1, n_string=1):
         return string_target
 
 
-    elif type=="stringlist_search":
+    elif file_name=="stringlist_search":
 
         if length>len(txt):
             length=len(txt)
@@ -216,6 +228,9 @@ def generate_target(txt, type, length=1, n_string=1):
 
 
 def check_prime():
+  '''
+    Checking function to validate ccc file is configured properly
+  '''
   txt_dir='./ccc.txt' #Reative to where you run the generate_statements
   target='@field (equals (2305843009213693951))'
   with open(txt_dir) as f:
@@ -247,6 +262,53 @@ def run_poseidon_hash(file_string):
         #print('digest:', val_of(poseidon_digest))
     assert0(poseidon_digest - val_of(poseidon_digest))
 
+
+def create_exepected_result(file_name, corpus, string_target, string_a, string_b=None):
+
+    '''
+        between and point_to require a unique preparation to create an expected list of strings.
+        The list is compared with the content in a Secret Stack in the reconcile_secretstack function.
+    '''
+
+    expected=[word_to_integer(x) for x in string_target]
+    corpus_int=[word_to_integer(_str) for _str in corpus]
+
+    if file_name=='between':
+
+        assert(string_b!=None)
+        int_a = word_to_integer(string_a)
+        int_b = word_to_integer(string_b)
+
+        if int_a in corpus_int:
+            
+            expected.insert(0, int_a) # between algo returns a substring including string_a if it exists
+            idx_a=corpus_int.index(int_a)
+            
+            if int_b not in corpus_int[idx_a+1:]: # Checking if string_b exists after string_a
+                expected = expected[:-1] # between algo excludes the last string if string_b does not exist
+
+    if file_name=='point_to':
+        int_a = word_to_integer(string_a)
+
+        if int_a not in corpus_int:
+            expected = corpus_int[:-1] # point_to algo returns everything except the last string if string_a does not exist
+        
+    return expected
+
+
+def reconcile_secretstack(expected, secretstack):
+
+    '''
+        between and point_to require a unique preparation to create an expected list of strings.
+        The list is compared with the content in a Secret Stack in the reconcile_secretstack function.
+    '''
+
+    for idx in range(-1,-len(expected)-1,-1):
+        curr_str=secretstack.pop()
+        assert0(expected[idx] - curr_str)
+        print("SecretStack element", val_of(curr_str))
+        print("Expected List element", expected[idx])
+        print('size of secret stack', secretstack.max_size)
 
 
 '''

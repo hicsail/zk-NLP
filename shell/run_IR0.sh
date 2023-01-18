@@ -62,8 +62,8 @@ prime_fam="p1"
 underscore="_"
 name=$target/$file$underscore$prime_fam$underscore$size
 rel=$name.rel
-wit=$name.wit
-ins=$name.ins
+wit=$name.type0.wit
+ins=$name.type0.ins
 
 [ -e $rel  ] && rm $rel
 [ -e $wit  ] && rm $wit

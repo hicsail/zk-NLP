@@ -82,8 +82,8 @@ def main(target_dir, prime, prime_name, size, operation):
         print("Actual text length:", len(corpus))
 
     else:
-        string_a = 'thirteen'
-        string_target =  ['fourteen', 'fifteen']
+        string_a = 'three'
+        string_target =  ['four', 'five']
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()
         corpus = corpus.split()
@@ -122,6 +122,10 @@ def main(target_dir, prime, prime_name, size, operation):
     print("\n", "Result:   ", val_of(Secret_str_after_all), "\n")
     expected=[word_to_integer(x) for x in string_target]
     print("\n", "Expected: ",expected, "\n")
+
+    # Reconciling the content of the secret stack
+    reconcile_secretstack(expected, Secret_str_after_all)
+       
     if val_of(latest_state)==accept_state:
         print("DFA successfully reached the accept state \n")
     else:

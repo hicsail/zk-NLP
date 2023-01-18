@@ -60,7 +60,7 @@ def run_dfa(dfa, text_input, zero_state, found_states, appendedAll_state, accept
         return curr_state
     latest_state=reduce(next_state_fun, text_input, zero_state)
     ''' 
-        Pop the last element if no string_b found and if you're read the last substring of the target between strings
+        Pop the last element if no string_a found and if you're reading the last substring of the target strings
     '''
     Secret_str_before.cond_pop(latest_state==appendedAll_state)
     return latest_state
@@ -130,10 +130,17 @@ def main(target_dir, prime, prime_name, size, operation):
     run_poseidon_hash(file_string)
     print("\n", "Latest State: ",val_of(latest_state), "\n")
 
-
     print("\n", "Result:   ", val_of(Secret_str_before), "\n")
-    expected=[word_to_integer(x) for x in string_target]
-    print("\n", "Expected: ",expected, "\n", "# This debugger does not work if either/both string_a/b is absent \n") 
+
+
+    # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
+
+    expected=create_exepected_result(file_name, corpus, string_target, string_a)
+    print("\n", "Expected: ",expected, "\n") 
+
+    # Reconciling the content of the secret stack
+    
+    reconcile_secretstack(expected, Secret_str_before)
 
     if val_of(latest_state)==accept_state or val_of(latest_state)==appendedAll_state:
         print("DFA successfully reached the accept state \n")

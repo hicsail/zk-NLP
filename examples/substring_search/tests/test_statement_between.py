@@ -39,6 +39,11 @@ class TestStatement(unittest.TestCase):
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_between)
         self.assertEqual(val_of(latest_state), accept_state)
 
+        # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
+
+        expected=util.create_exepected_result('between', corpus, string_target, string_a, string_b)
+        self.assertEqual(val_of(Secret_str_between), expected)
+
 
     def test_intermediate(self):
 
@@ -66,6 +71,11 @@ class TestStatement(unittest.TestCase):
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_between)
         self.assertEqual(val_of(latest_state), accept_state)
 
+        # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
+
+        expected=util.create_exepected_result('between', corpus, string_target, string_a, string_b)
+        self.assertEqual(val_of(Secret_str_between), expected)
+
 
     def test_advanced(self):
         
@@ -92,6 +102,11 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_a, string_target, string_b, zero_state, found_states, appendedAll_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_between)
         self.assertEqual(val_of(latest_state), appendedAll_state)
+        
+        # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
+
+        expected=util.create_exepected_result('between', corpus, string_target, string_a, string_b)
+        self.assertEqual(val_of(Secret_str_between), expected)
 
 
     def test_fail(self):
@@ -121,6 +136,11 @@ class TestStatement(unittest.TestCase):
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_between)
         self.assertNotEqual(val_of(latest_state), accept_state)
         self.assertNotEqual(val_of(latest_state), appendedAll_state)
+        
+        # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
+        
+        expected=util.create_exepected_result('between', corpus, string_target, string_a, string_b)
+        self.assertNotEqual(val_of(Secret_str_between), expected)
 
 
 if __name__ == '__main__':
