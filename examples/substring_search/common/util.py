@@ -270,8 +270,9 @@ def create_exepected_result(file_name, corpus, string_target, string_a, string_b
         The list is compared with the content in a Secret Stack in the reconcile_secretstack function.
     '''
 
-    expected=[word_to_integer(x) for x in string_target]
+    expected=[word_to_integer(x) for x in string_target] 
     corpus_int=[word_to_integer(_str) for _str in corpus]
+
 
     if file_name=='between':
 
@@ -287,12 +288,18 @@ def create_exepected_result(file_name, corpus, string_target, string_a, string_b
             if int_b not in corpus_int[idx_a+1:]: # Checking if string_b exists after string_a
                 expected = expected[:-1] # between algo excludes the last string if string_b does not exist
 
+
     if file_name=='point_to':
         int_a = word_to_integer(string_a)
 
         if int_a not in corpus_int:
             expected = corpus_int[:-1] # point_to algo returns everything except the last string if string_a does not exist
         
+
+    if file_name=='after_all':
+        pass # after_all statement returns this original expected list
+
+
     return expected
 
 
@@ -303,58 +310,18 @@ def reconcile_secretstack(expected, secretstack):
         The list is compared with the content in a Secret Stack in the reconcile_secretstack function.
     '''
 
-    for idx in range(-1,-len(expected)-1,-1):
-        curr_str=secretstack.pop()
-        assert0(expected[idx] - curr_str)
+    test_flag = True # Used only for testing
+
+    for idx in range(0,len(expected)):
+        
+        curr_str=secretstack.cond_pop(len(secretstack.val) > 0)
+        expected_val = expected[-idx-1]
+        assert0(expected_val - curr_str)
         print("SecretStack element", val_of(curr_str))
-        print("Expected List element", expected[idx])
-        print('size of secret stack', secretstack.max_size)
+        print("Expected List element", expected_val)
 
-
-'''
-The following functions are no longer used
-'''
-
-
-
-# def integer_to_word(integer):
-#     word=""
-#     bit = (1<<8)-1
-#     while integer>0:
-#         bit_char = integer&bit
-#         integer=integer>>8
-#         char=chr(bit_char)
-#         word+=char
-#     return word
-
-# def isLaststring(word, text):
-#     lastString=word_to_integer(text[-1])
-#     return   lastString== val_of(word)
-
-# def isNotlaststring(word, text):
-#     lastString=word_to_integer(text[-1])
-#     return   lastString!= val_of(word)
-
-
-# def flip_interim_found_state(curr_state, found_states):
-#     x=len(found_states)
-#     res=""
-#     for i in range(1,x+1):
-#         res += f"mux(curr_state=={-i}, {i},"
-#     res += "curr_state"
-#     for i in range(1,x+1):
-#         res += ")"
-#     # print(res, '\n')
-#     return eval(res,{'curr_state':curr_state, 'mux':mux, 'val_of':val_of})
-
-# def is_in_found_states_todelete(initial_state, found_states):
-#     res="("
-#     for val in found_states:
-#         res += "(val_of(initial_state)=="
-#         res += f"{val}"
-#         res += ")|"
-#     res=res[0:-1]
-#     res += ")"
-#     print(res, '\n')
-
-#     return eval(res,{'initial_state':initial_state, 'val_of':val_of})
+        # The following control flow is just for the sake of testing
+        if expected_val - val_of(curr_str)!=0:
+            test_flag=False
+    
+    return test_flag

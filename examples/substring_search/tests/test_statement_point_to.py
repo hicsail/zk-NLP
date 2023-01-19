@@ -34,14 +34,16 @@ class TestStatement(unittest.TestCase):
 
         Secret_str_before = SecretStack([])
 
+        # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
         self.assertEqual(val_of(latest_state), accept_state)
 
         # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
-
-        expected=util.create_exepected_result('point_to', corpus, string_target, string_a)
-        self.assertEqual(val_of(Secret_str_before), expected)
+        file_name="point_to"
+        expected=util.create_exepected_result(file_name, corpus, string_target, string_a)
+        test_flag = util.reconcile_secretstack(expected, Secret_str_before)
+        self.assertTrue(test_flag)
 
 
     def test_intermediate(self):
@@ -66,14 +68,16 @@ class TestStatement(unittest.TestCase):
 
         Secret_str_before = SecretStack([])
 
+        # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
         self.assertEqual(val_of(latest_state), appendedAll_state)
 
         # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
-
-        expected=util.create_exepected_result('point_to', corpus, string_target, string_a)
-        self.assertEqual(val_of(Secret_str_before), expected)
+        file_name="point_to"
+        expected=util.create_exepected_result(file_name, corpus, string_target, string_a)
+        test_flag = util.reconcile_secretstack(expected, Secret_str_before)
+        self.assertTrue(test_flag)
 
 
     def test_fail(self):
@@ -98,14 +102,16 @@ class TestStatement(unittest.TestCase):
 
         Secret_str_before = SecretStack([])
 
+        # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
         self.assertNotEqual(val_of(latest_state), accept_state)
 
         # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
-
-        expected=util.create_exepected_result('point_to', corpus, string_target, string_a)
-        self.assertNotEqual(val_of(Secret_str_before), expected)
+        file_name="point_to"
+        expected=util.create_exepected_result(file_name, corpus, string_target, string_a)
+        test_flag = util.reconcile_secretstack(expected, Secret_str_before)
+        self.assertFalse(test_flag)
 
 
     def test_fail_intermediate(self):
@@ -130,14 +136,17 @@ class TestStatement(unittest.TestCase):
 
         Secret_str_before = SecretStack([])
 
+        # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
         self.assertNotEqual(val_of(latest_state), accept_state)
 
         # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
+        file_name="point_to"
+        expected=util.create_exepected_result(file_name, corpus, string_target, string_a)
+        test_flag = util.reconcile_secretstack(expected, Secret_str_before)
+        self.assertFalse(test_flag)
 
-        expected=util.create_exepected_result('point_to', corpus, string_target, string_a)
-        self.assertNotEqual(val_of(Secret_str_before), expected)
 
 
     def test_fail_intermediate(self):
@@ -162,14 +171,16 @@ class TestStatement(unittest.TestCase):
 
         Secret_str_before = SecretStack([])
 
+        # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
         self.assertNotEqual(val_of(latest_state), accept_state)
 
         # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
-
-        expected=util.create_exepected_result('point_to', corpus, string_target, string_a)
-        self.assertNotEqual(val_of(Secret_str_before), expected)
+        file_name="point_to"
+        expected=util.create_exepected_result(file_name, corpus, string_target, string_a)
+        test_flag = util.reconcile_secretstack(expected, Secret_str_before)
+        self.assertFalse(test_flag)
 
 
 if __name__ == '__main__':

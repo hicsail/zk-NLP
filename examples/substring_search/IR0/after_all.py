@@ -120,7 +120,7 @@ def main(target_dir, prime, prime_name, size, operation):
     print("\n", "Latest State: ",val_of(latest_state), "\n")
 
     print("\n", "Result:   ", val_of(Secret_str_after_all), "\n")
-    expected=[word_to_integer(x) for x in string_target]
+    expected=create_exepected_result(file_name, corpus, string_target, string_a)
     print("\n", "Expected: ",expected, "\n")
 
     # Reconciling the content of the secret stack

@@ -36,38 +36,104 @@ def stateCal(s):
     return result
 
 
-def dfa_from_string(stringlist, accept_state):
-    length = len(stringlist)
-    pointer = [0] * length
-    next_state = {}
-    wordlist = set(' '.join(stringlist).split())
+def dfa_from_string(target_list, accept_state):
 
-    states = [pointer]  # keep track of all states
-    count = 0
+    '''
+      - target_list: A list of sub texts to look for
+
+      - state/init_state/prev_state/curr_state: Pointer representing an index of one of sub texts to look at
+      
+      - states: A list of states
+      
+      - states_pos: pointer of states list
+      
+      - DFA: Resulting DFA
+    
+    '''
+
+    init_state = [0] * len(target_list) # init_state = [0, 0, 0, 0]
+    DFA = {} # DFA to return
+    target_set = set(' '.join(target_list).split()) # target_set = {'socket', 'import', 'sys', 'hello', 'numpy', 'world'}
+
+    states = [init_state]  # keep track of all states # initially states = [[0, 0, 0, 0]] for four sets of sub texts
+    piv_pos = 0
     finished = False  # not all accepted
 
+    '''
+        1) The parent loop keeps iteration till the states list stops growing 
+           This is when the DFA is built and state [255, ..., 255] is reached
+          
+          a) For every iteration of the parent loop, pivot state is picked, from which the subsequent new states get derived
+          b) Whether or not the states list is growing is determined by b) n_states, which is initiated at the beginning and compared with len(states) at the end of the loop (Step 5)
+
+        2) The outer loop goes over all words in target_set
+
+        3) The inner loop goes over all sub texts in target_list
+
+        4) IF statements in the inner loop:
+          a) Checks whether or not the string at the current index of sub text matches the word in the target_set 
+          b) Checks whether or not visiting the last element of the sub text
+              - if true, accept (no more work for this sub text)
+              - else, move the index to next substring of the sub text
+
+        5) If a new state is created (not equal to the pivot_state), it will be added to states list and 
+
+        6) If there was no increment to states, i.e., DFA is built , it ends the outermost loop
+
+        To reiterate, the parent loop keeps iterating till all the sub texts reach accept states. Correspondingly, piv_pos keeps getting incremented till then
+        
+    '''
+    # 1) Parent loop
     while not finished:
-        state = states[count]
-        counter = len(states)
-        for word in wordlist:
-            pointer = state.copy()
-            for i in range(length):  # 0,1,2
-                if state[i] != accept_state:
-                    if word == stringlist[i].split()[state[i]]:
-                        if islast(state[i], stringlist[i]):
-                            pointer[i] = accept_state
+        pivot_state = states[piv_pos] # a) Picking a pivot state to derive from
+        n_states = len(states) # b) This value is compared at 6) if the states list grew in this iteration or not (If not, the DFA is built and the function ends)
+
+        # 2) outer loop over all words in the target set = {'socket', 'import', 'sys', 'hello', 'numpy', 'world'}
+        for word in target_set:  
+            curr_state = pivot_state.copy() # By copying pivot_state, the next curr_state can derive from the latest
+            
+            # 3) inner loop over the list of sub texts
+            for tgt_idx in range(len(target_list)):
+                if pivot_state[tgt_idx] != accept_state:
+
+                    '''
+                      4) Series of IF statements
+                      
+                        4-a) If the current index of the subtext it's looking at is same word as the word in the target set
+
+                             ==>> 4-b) If currently visiting the last string of the current sub text
+
+                                         ==>> the current state of the current sub text will move into accept_state
+                                 
+                                      Else (If not currently visiting the end string)
+
+                                         ==>> the state/pointer of the current sub text will be incremented
+                        
+                             Else (If different word from the current):
+                        
+                                ==>> The curr_state corresponding to the sub text will be set 0
+                                     Meaning, if the previous state of this index was already 1, but the current word does not match, the sub text should be considered unmatch
+                    '''
+
+                    if word == target_list[tgt_idx].split()[pivot_state[tgt_idx]]: # 4-a) Check word match
+                        if islast(pivot_state[tgt_idx], target_list[tgt_idx]): # 4-b) Check if visiting last words of a sub text (e.g., 'socket' of 'import socket')
+                            curr_state[tgt_idx] = accept_state
                         else:
-                            pointer[i] += 1
-                    else:
-                        pointer[i] = 0
-            if not equals(pointer, state):
-                states.append(pointer)
-                next_state[tuple(state), word_to_integer(word)] = tuple(pointer)
-        if counter < len(states):
-            count += 1
-        else:
+                            curr_state[tgt_idx] += 1
+                    else: 
+                        curr_state[tgt_idx] = 0
+
+            # 5) Check if a new state is created
+            if not equals(curr_state, pivot_state):
+                states.append(curr_state)
+                DFA[tuple(pivot_state), word_to_integer(word)] = tuple(curr_state)
+                
+        # 6) Check if an appropriate DFA is built
+        if n_states == len(states):
             finished = True
-    return next_state
+        else:
+            piv_pos += 1
+    return DFA
 
 
 
