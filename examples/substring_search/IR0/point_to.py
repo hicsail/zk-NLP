@@ -49,7 +49,7 @@ def run_dfa(dfa, text_input, zero_state, found_states, appendedAll_state, accept
             3) Otherwise stay in the current state
         '''
         curr_state = mux(initial_state == error_state, error_state, 
-                     mux(initial_state == accept_state,accept_state,
+                     mux(initial_state == accept_state, accept_state,
                      curr_state))
         
         ''' 

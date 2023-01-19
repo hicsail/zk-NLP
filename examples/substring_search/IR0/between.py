@@ -85,8 +85,8 @@ def main(target_dir, prime, prime_name, size, operation):
         print("Actual text length:", len(corpus))
 
     else:
-        string_a = 'three'
-        string_target =  ['four']
+        string_a = 'two'
+        string_target =  ['three', 'four']
         string_b = 'five'
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()

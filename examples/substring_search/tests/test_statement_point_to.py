@@ -38,6 +38,10 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
         self.assertEqual(val_of(latest_state), accept_state)
+        self.assertNotEqual(val_of(latest_state), appendedAll_state)
+        self.assertFalse(val_of(latest_state) in found_states)
+        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertNotEqual(val_of(latest_state), error_state)
 
         # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
         file_name="point_to"
@@ -72,6 +76,10 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
         self.assertEqual(val_of(latest_state), appendedAll_state)
+        self.assertFalse(val_of(latest_state) in found_states)
+        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertNotEqual(val_of(latest_state), error_state)
+        self.assertNotEqual(val_of(latest_state), accept_state)
 
         # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
         file_name="point_to"
@@ -105,7 +113,11 @@ class TestStatement(unittest.TestCase):
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+        self.assertEqual(val_of(latest_state), error_state)
+        self.assertFalse(val_of(latest_state) in found_states)
         self.assertNotEqual(val_of(latest_state), accept_state)
+        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertNotEqual(val_of(latest_state), appendedAll_state)
 
         # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
         file_name="point_to"
@@ -139,14 +151,17 @@ class TestStatement(unittest.TestCase):
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+        self.assertEqual(val_of(latest_state), error_state)
+        self.assertFalse(val_of(latest_state) in found_states)
         self.assertNotEqual(val_of(latest_state), accept_state)
+        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertNotEqual(val_of(latest_state), appendedAll_state)
 
         # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
         file_name="point_to"
         expected=util.create_exepected_result(file_name, corpus, string_target, string_a)
         test_flag = util.reconcile_secretstack(expected, Secret_str_before)
         self.assertFalse(test_flag)
-
 
 
     def test_fail_intermediate(self):
@@ -174,7 +189,11 @@ class TestStatement(unittest.TestCase):
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+        self.assertEqual(val_of(latest_state), error_state)
+        self.assertFalse(val_of(latest_state) in found_states)
         self.assertNotEqual(val_of(latest_state), accept_state)
+        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertNotEqual(val_of(latest_state), appendedAll_state)
 
         # Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
         file_name="point_to"

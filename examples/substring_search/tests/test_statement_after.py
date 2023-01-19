@@ -33,6 +33,9 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, accept_state, error_state)
         self.assertEqual(val_of(latest_state), accept_state)
+        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertNotEqual(val_of(latest_state), found_state)
+        self.assertNotEqual(val_of(latest_state), error_state)
 
 
     def test_fail(self):
@@ -56,6 +59,9 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, accept_state, error_state)
         self.assertNotEqual(val_of(latest_state), accept_state)
+        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertNotEqual(val_of(latest_state), found_state)
+        self.assertEqual(val_of(latest_state), error_state)
 
 
     def test_fail_intermediate(self):
@@ -65,7 +71,7 @@ class TestStatement(unittest.TestCase):
             'three' comes immediately after 'one' in string_target, skipping 'two'
         '''
 
-        string_a = 'xxx'
+        string_a = 'three'
         string_target =  'one'
         corpus = 'one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen'
         corpus = corpus.split()
@@ -79,6 +85,9 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, accept_state, error_state)
         self.assertNotEqual(val_of(latest_state), accept_state)
+        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertNotEqual(val_of(latest_state), found_state)
+        self.assertEqual(val_of(latest_state), error_state)
 
 
 if __name__ == '__main__':

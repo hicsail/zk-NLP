@@ -36,6 +36,9 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, accept_state, error_state, Secret_str_after_all)
         self.assertEqual(val_of(latest_state), accept_state)
+        self.assertFalse(val_of(latest_state) in found_states)
+        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertNotEqual(val_of(latest_state), error_state)
 
         # Testing SecretStack
         file_name="after_all"
@@ -67,12 +70,16 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, accept_state, error_state, Secret_str_after_all)
         self.assertEqual(val_of(latest_state), accept_state)
+        self.assertFalse(val_of(latest_state) in found_states)
+        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertNotEqual(val_of(latest_state), error_state)
 
         # Testing SecretStack
         file_name="after_all"
         expected = util.create_exepected_result(file_name, corpus, string_target, string_a)
         test_flag = util.reconcile_secretstack(expected, Secret_str_after_all)
         self.assertTrue(test_flag)
+
 
     def test_fail(self):
 
@@ -99,6 +106,9 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, found_states, accept_state, error_state, Secret_str_after_all)
         self.assertNotEqual(val_of(latest_state), accept_state)
+        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertFalse(val_of(latest_state) in found_states)
+        self.assertEqual(val_of(latest_state), error_state)
 
         # Testing SecretStack & Converting strings, target, and corpus into integers, and creating expected list to reconcile the result
         file_name="after_all"
