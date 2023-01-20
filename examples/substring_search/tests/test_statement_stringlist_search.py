@@ -33,7 +33,7 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_target, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, accept)
         self.assertEqual(val_of(latest_state), accept)
-
+        self.assertNotEqual(val_of(latest_state), zero_state)
 
     def test_intermediate(self):
 
@@ -56,6 +56,7 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_target, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, accept)
         self.assertEqual(val_of(latest_state), accept)
+        self.assertNotEqual(val_of(latest_state), zero_state)
 
 
     def test_intermediate2(self):
@@ -78,6 +79,7 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_target, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, accept)
         self.assertEqual(val_of(latest_state), accept)
+        self.assertNotEqual(val_of(latest_state), zero_state)
 
 
     def test_advance(self):
@@ -101,6 +103,7 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_target, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, accept)
         self.assertEqual(val_of(latest_state), accept)
+        self.assertNotEqual(val_of(latest_state), zero_state)
 
 
     def test_fail(self):
@@ -123,6 +126,7 @@ class TestStatement(unittest.TestCase):
 
         dfa = statement.dfa_from_string(string_target, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, accept)
+        self.assertEqual(val_of(latest_state), zero_state)
         self.assertNotEqual(val_of(latest_state), accept)
 
 

@@ -30,6 +30,8 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_target, zero_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, error_state)
         self.assertEqual(val_of(latest_state), accept_state)
+        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertNotEqual(val_of(latest_state), error_state)
 
 
     def test_fail(self):
@@ -50,6 +52,8 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_target, zero_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, error_state)
         self.assertNotEqual(val_of(latest_state), accept_state)
+        self.assertEqual(val_of(latest_state), error_state)
+        self.assertNotEqual(val_of(latest_state), zero_state)
 
 if __name__ == '__main__':
     unittest.main()

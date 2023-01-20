@@ -6,6 +6,8 @@ from . import SecretTensor, Prim, val_of, AST
 
 old_relu = F.relu
 def my_relu(x):
+    params['options'].add('relu')
+    params['options'].add('boolean')
     #print('ReLU Override successful')
     if isinstance(x, AST):
         return Prim('relu', [x], old_relu(val_of(x)))

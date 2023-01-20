@@ -41,11 +41,9 @@ def dfa_from_string(stringlist, accept_state):
     pointer = [0] * length
     next_state = {}
     wordlist = set(' '.join(stringlist).split())
-
     states = [pointer]  # keep track of all states
     count = 0
     finished = False  # not all accepted
-
     while not finished:
         state = states[count]
         counter = len(states)

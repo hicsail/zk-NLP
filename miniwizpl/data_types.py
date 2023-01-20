@@ -127,21 +127,27 @@ class SecretStack(AST):
         self.original_val = arr.copy()
         self.name = gensym('stack')
         self.max_size = len(arr)
+        params['options'].add('stack')
+        params['ram_num_allocs'] += 1
+        params['ram_total_alloc_size'] += len(self.val)
 
     def push(self, item):
         """Unconditional push."""
         self.max_size += 1
         self.val.append(val_of(item))
         self.max_size = max(self.max_size, len(self.val))
+        params['ram_total_alloc_size'] += 1
 
         params['all_statements'].append(Prim('stack_push', [self, item], None))
 
     def cond_push(self, condition, item):
         """Conditional push."""
+        self.max_size += 1
 
         if val_of(condition):
             self.val.append(val_of(item))
-            self.max_size = max(self.max_size, len(self.val))
+
+        params['ram_total_alloc_size'] += 1
 
         params['all_statements'].append(Prim('stack_cond_push', [self, condition, item], None))
 
