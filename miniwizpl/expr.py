@@ -79,15 +79,13 @@ class AST:
         return Prim('not_equals', [other, self], val_of(other) != val_of(self))
 
     def __and__(self, other):
-        return Prim('and', [self, other], val_of(self) & val_of(other))
+        return Prim('and', [self, other], val_of(self) and val_of(other))
     def __rand__(self, other):
-        return Prim('and', [self, other], val_of(other) & val_of(self))
-
+        return Prim('and', [self, other], val_of(other) and val_of(self))
     def __or__(self, other):
-        return Prim('or', [self, other], val_of(self) | val_of(other))
+        return Prim('or', [self, other], val_of(self) or val_of(other))
     def __ror__(self, other):
-        return Prim('or', [self, other], val_of(other) | val_of(self))
-    
+        return Prim('or', [self, other], val_of(other) or val_of(self))
     def __invert__(self):
         return Prim('not', [self], not val_of(self))
 

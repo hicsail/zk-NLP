@@ -102,7 +102,7 @@ def main(target_dir, prime, prime_name, size, operation):
     print("Traversing DFA")
     latest_state = run_dfa(dfa, file_string, accept_state)
     print("Output Assertion")
-    assert0(latest_state == accept_state)
+    assert0(latest_state - accept_state)
     print("Running Poseidon Hash")
     run_poseidon_hash(file_string)
     print("\n", "Latest State: ",val_of(latest_state), "\n")
