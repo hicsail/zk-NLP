@@ -30,19 +30,19 @@ def word_to_integer(word_to_convert):
 
 
 
-def is_in_found_states(initial_state, found_states):
+def is_in_target_states(initial_state, target_states):
 
     '''
         This function generates a conditional statement used in cond_push of SecretStack
-        Since the size of found_states varies, it requires to concatenate iteratively
+        Since the size of target_states varies, it requires to concatenate iteratively
     '''
 
-    if len(found_states)==0:
+    if len(target_states)==0:
       return False
 
     else:
       res="("
-      for val in found_states:
+      for val in target_states:
           res += "(initial_state=="
           res += f"{val}"
           res += ")|"

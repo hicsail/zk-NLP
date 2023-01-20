@@ -79,7 +79,7 @@ def run_dfa(dfa, text_input):
             Adding sub string if in one of found states
             If you're initially in accept state, it should fail into error state because you were not reading the last word in the text in the previous iteration
         '''
-        Secret_str_after.cond_push(is_in_found_states(initial_state, found_states),string)
+        Secret_str_after.cond_push(is_in_target_states(initial_state, found_states),string)
         return curr_state
     if len(sys.argv)==3 and sys.argv[2] =="debug":
         latest_state=reduce_unroll(next_state_fun, text_input, zero_state)

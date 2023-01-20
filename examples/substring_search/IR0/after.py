@@ -5,9 +5,9 @@ sys.path.append("/usr/src/app/examples/substring_search/common")
 from util import *
 
 
-def dfa_from_string(first, target, zero_state, found_state, accept_state):
+def dfa_from_string(string_a, target, zero_state, found_state, accept_state):
     next_state = {}
-    next_state[(zero_state, word_to_integer(first))]=found_state
+    next_state[(zero_state, word_to_integer(string_a))]=found_state
     next_state[(found_state, word_to_integer(target))]=accept_state
     return next_state
 

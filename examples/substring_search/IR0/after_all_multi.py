@@ -8,9 +8,19 @@ from util import *
 def dfa_from_string(string_a, target, zero_state, found_states, accept_state):
     next_state = {}
     assert(len(target)>0)
-    next_state[(zero_state, word_to_integer(string_a))]=found_states[0]
+    
+    # defining zero states traversal
+    for i in range(0,len(zero_state)-1):
+      next_state[(zero_state[i], word_to_integer(string_a[i]))]=zero_state[i+1]
+
+    # when the last element in string_a found, move to the first found states
+    next_state[(zero_state[-1], word_to_integer(string_a[-1]))]=found_states[0]
+
+    # defining found states traversal
     for i in range(0,len(target)-1):
       next_state[(found_states[i], word_to_integer(target[i]))]=found_states[i+1]
+    
+    # when the last element in target found, move to the accepted states
     next_state[(found_states[-1], word_to_integer(target[-1]))]=accept_state
     return next_state
 
@@ -82,10 +92,11 @@ def main(target_dir, prime, prime_name, size, operation):
         print("Actual text length:", len(corpus))
 
     else:
-        string_a = 'three'
-        string_target =  ['four', 'five']
+        string_a = ['three', 'four']
+        string_target =  ['five']
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()
+        string_a = string_a.split()
         corpus = corpus.split()
         print("Text: ", corpus, "\n")
 
@@ -96,8 +107,9 @@ def main(target_dir, prime, prime_name, size, operation):
     
     file_string = SecretList([word_to_integer(_str) for _str in corpus])
 
-    zero_state = 0
-    found_states=[i for i in range(1,len(string_target)+1)]
+    zero_state = [i for i in range(0,len(string_a))]
+    found_states=[i for i in range(zero_state[-1]+1,zero_state[-1]+1+len(string_target)+1)]
+
     if len(found_states)==0:
         accept_state = 100
         error_state = 101

@@ -8,16 +8,16 @@ import util
 
 class TestUtil(unittest.TestCase):
 
-    def test_is_in_found_states(self):
+    def test_is_in_target_states(self):
         initial_state = 5
-        found_states = [3, 4, 5, 6]
-        self.assertTrue(util.is_in_found_states(initial_state, found_states))
+        target_states = [3, 4, 5, 6]
+        self.assertTrue(util.is_in_target_states(initial_state, target_states))
         
         initial_state = 7
-        self.assertFalse(util.is_in_found_states(initial_state, found_states))
+        self.assertFalse(util.is_in_target_states(initial_state, target_states))
         
-        found_states = []
-        self.assertFalse(util.is_in_found_states(initial_state, found_states))
+        target_states = []
+        self.assertFalse(util.is_in_target_states(initial_state, target_states))
     
 
     def test_reconcile_secretstack_base(self):

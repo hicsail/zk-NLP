@@ -5,14 +5,14 @@ sys.path.append("/usr/src/app/examples/substring_search/common")
 from util import *
 
 
-def dfa_from_string(first, target, last, zero_state, found_states, appendedAll_state, accept_state):
+def dfa_from_string(string_a, target, string_b, zero_state, found_states, appendedAll_state, accept_state):
     next_state = {}
     assert(len(target)>0)
-    next_state[(zero_state, word_to_integer(first))]=found_states[0]
+    next_state[(zero_state, word_to_integer(string_a))]=found_states[0]
     for i in range(0,len(target)-1):
       next_state[(found_states[i], word_to_integer(target[i]))]=found_states[i+1]
     next_state[(found_states[-1], word_to_integer(target[-1]))]=appendedAll_state
-    next_state[(appendedAll_state, word_to_integer(last))]=accept_state
+    next_state[(appendedAll_state, word_to_integer(string_b))]=accept_state
     return next_state
 
 
@@ -48,7 +48,7 @@ def run_dfa(dfa, text_input, zero_state, found_states, appendedAll_state, accept
         ''' 
             Add substring if in one of found states or accept state and reading the last word in the text
         '''
-        Secret_str_between.cond_push(is_in_found_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
+        Secret_str_between.cond_push(is_in_target_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
         return curr_state
     latest_state=reduce(next_state_fun, text_input, zero_state)
 
