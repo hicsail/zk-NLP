@@ -269,13 +269,20 @@ def create_exepected_result(file_name, corpus, string_target, string_a, string_b
         between and point_to require a unique preparation to create an expected list of strings.
         The list is compared with the content in a Secret Stack in the reconcile_secretstack function.
     '''
+    if not isinstance(corpus, list):
+        corpus = corpus.split()
 
     expected=[word_to_integer(x) for x in string_target] 
     corpus_int=[word_to_integer(_str) for _str in corpus]
+    
 
+    if file_name=='after_all':
 
-    if file_name=='between':
+        pass # after_all statement returns this original expected list
+    
 
+    elif file_name=='between':
+        
         assert(string_b!=None)
         int_a = word_to_integer(string_a)
         int_b = word_to_integer(string_b)
@@ -286,18 +293,17 @@ def create_exepected_result(file_name, corpus, string_target, string_a, string_b
             idx_a=corpus_int.index(int_a)
             
             if int_b not in corpus_int[idx_a+1:]: # Checking if string_b exists after string_a
-                expected = expected[:-1] # between algo excludes the last string if string_b does not exist
+
+                expected = corpus_int[idx_a:-1] # between algo excludes the last string if string_b does not exist
 
 
-    if file_name=='point_to':
+    elif file_name=='point_to':
+
         int_a = word_to_integer(string_a)
 
         if int_a not in corpus_int:
+            
             expected = corpus_int[:-1] # point_to algo returns everything except the last string if string_a does not exist
-        
-
-    if file_name=='after_all':
-        pass # after_all statement returns this original expected list
 
 
     return expected
@@ -317,8 +323,6 @@ def reconcile_secretstack(expected, secretstack):
         curr_str=secretstack.cond_pop(len(secretstack.val) > 0)
         expected_val = expected[-idx-1]
         assert0(expected_val - curr_str)
-        print("SecretStack element", val_of(curr_str))
-        print("Expected List element", expected_val)
 
         # The following control flow is just for the sake of testing
         if expected_val - val_of(curr_str)!=0:
