@@ -68,11 +68,11 @@ class TestStatement(unittest.TestCase):
 
         '''
             An intermediate case to fail, string_a does not exist in the corpus 
-            'three' comes immediately after 'one' in string_target, skipping 'two'
+            
         '''
 
-        string_a = 'three'
-        string_target =  'one'
+        string_a = 'hundred'
+        string_target =  'three'
         corpus = 'one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen'
         corpus = corpus.split()
         file_string = SecretList([util.word_to_integer(_str) for _str in corpus])
@@ -85,9 +85,9 @@ class TestStatement(unittest.TestCase):
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_state, accept_state)
         latest_state = statement.run_dfa(dfa, file_string, zero_state, accept_state, error_state)
         self.assertNotEqual(val_of(latest_state), accept_state)
-        self.assertNotEqual(val_of(latest_state), zero_state)
+        self.assertEqual(val_of(latest_state), zero_state)
         self.assertNotEqual(val_of(latest_state), found_state)
-        self.assertEqual(val_of(latest_state), error_state)
+        self.assertNotEqual(val_of(latest_state), error_state)
 
 
 if __name__ == '__main__':

@@ -36,6 +36,42 @@ origin=$local"IR0/"
 dest=$container"/IR0/"
 
 
+# after all multi
+test_file='test_statement_after_all_multi.py'
+statement='after_all_multi.py'
+
+cp $origin$statement $dest$statement
+echo "testing with $test_file .... ";
+python3 $container$testdir$test_file
+
+
+# after multi
+test_file='test_statement_after_multi.py'
+statement='after_multi.py'
+
+cp $origin$statement $dest$statement
+echo "testing with $test_file .... ";
+python3 $container$testdir$test_file
+
+
+# begins multi
+test_file='test_statement_begins_multi.py'
+statement='begins_multi.py'
+
+cp $origin$statement $dest$statement
+echo "testing with $test_file .... ";
+python3 $container$testdir$test_file
+
+
+# between multi
+test_file='test_statement_between_multi.py'
+statement='between_multi.py'
+
+cp $origin$statement $dest$statement
+echo "testing with $test_file .... ";
+python3 $container$testdir$test_file
+
+
 ## after all
 test_file='test_statement_after_all.py'
 statement='after_all.py'

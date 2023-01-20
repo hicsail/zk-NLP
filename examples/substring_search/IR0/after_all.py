@@ -53,6 +53,10 @@ def run_dfa(dfa, text_input, zero_state, found_states, accept_state, error_state
         Secret_str_after_all.cond_push(is_in_target_states(initial_state, found_states),string)
         return curr_state
     latest_state=reduce(next_state_fun, text_input, zero_state)
+    
+    # Push negative value if you end up in the error state
+    Secret_str_after_all.cond_push(latest_state==error_state, -1)
+    
     return latest_state
 
 

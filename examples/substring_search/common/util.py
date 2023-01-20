@@ -117,6 +117,36 @@ def generate_target(txt, file_name, length=1, n_string=1):
         return string_a, string_target
 
 
+    if file_name=="after_all_multi":
+
+        '''
+            n_string is used for the length of string_a, NOT the number of string_a
+            length is the length of the target string after string_a
+        '''
+
+        if length>len(txt)-1:
+            length=len(txt)-1
+            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
+            
+        elif length<=0:
+            print(f'The length value must be positive integer. The length value is set to 1')
+            length=1
+
+        if n_string<=0:
+            print(f'The n_string value must be positive integer. The n_string value is set to 1')
+            n_string=1
+
+        if n_string+length>len(txt):
+            n_strint=len(txt)-length-1
+            print(f'The length of input corpus is {len(txt)}. The n_strint value is set to {n_strint}')
+
+        # This method returns a list of string_a
+        string_a=txt[-length-n_string: -length]
+        string_target=txt[-length:]
+
+        return string_a, string_target
+        
+        
     elif file_name=="after":
 
         string_a=random.sample(txt[:-1], 1) # Avoiding the last substring to be picked as target
@@ -126,11 +156,48 @@ def generate_target(txt, file_name, length=1, n_string=1):
 
         return string_a, string_target
 
+    elif file_name=="after_multi":
+
+        '''
+            n_string is used for the length of string_a, NOT the number of string_a
+            length is the length of the target string after string_a
+        '''
+
+        if length>len(txt)-1:
+            length=len(txt)-1
+            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
+            
+        elif length<=0:
+            print(f'The length value must be positive integer. The length value is set to 1')
+            length=1
+
+        if n_string<=0:
+            print(f'The n_string value must be positive integer. The n_string value is set to 1')
+            n_string=1
+
+        if n_string+length>len(txt):
+            n_strint=len(txt)-length
+            print(f'The length of input corpus is {len(txt)}. The n_strint value is set to {n_strint}')
+
+
+        # This method returns a list of string_a and string_target
+        idx_a=random.randint(0, len(txt)-n_string-length)
+        string_a=txt[idx_a:idx_a+n_string]
+        string_target=txt[idx_a+n_string:idx_a+n_string+length]
+
+        return string_a, string_target
+
 
     elif file_name=="begins":
 
         return txt[0]
 
+    elif file_name=="begins_multi":
+        '''
+            n_string is used for the length of a target string
+        '''
+
+        return txt[:n_string]
 
     elif file_name=="between":
 
@@ -157,6 +224,56 @@ def generate_target(txt, file_name, length=1, n_string=1):
         else:
             string_b=txt[idx_b]
             string_target=txt[idx_a+1:idx_b]
+
+        return string_a, string_target, string_b
+
+
+    elif file_name=="between_multi":
+
+        '''
+            n_string is used for the length of string_a, NOT the number of string_a
+            length is the length of the target string after string_a
+        '''
+
+        if length>len(txt)-1:
+            length=len(txt)-1
+            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
+            
+        elif length<=0:
+            print(f'The length value must be positive integer. The length value is set to 1')
+            length=1
+
+        if n_string<=0:
+            print(f'The n_string value must be positive integer. The n_string value is set to 1')
+            n_string=1
+
+        if n_string+length+1>len(txt):
+            n_strint=len(txt)-length
+            print(f'The length of input corpus is {len(txt)}. The n_strint value is set to {n_strint}')
+
+        if length>len(txt)-1:
+            length=len(txt)-1
+            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
+
+        elif length<=0:
+            print(f'The length value must be positive integer. The length value is set to 1')
+            length=1
+
+        idx_a=random.randint(-len(txt),-length-n_string-1) # Avoiding index out of range
+        string_a=txt[idx_a:idx_a+n_string]
+        idx_b=idx_a+n_string+length
+        
+        '''
+            If idx_a + length use up the space of idx_b, then string_b will be set empty
+        '''
+
+        if idx_b>+len(txt):
+            string_b=''
+            string_target=txt[idx_a+n_string:]
+
+        else:
+            string_b=txt[idx_b]
+            string_target=txt[idx_a+n_string:idx_b]
 
         return string_a, string_target, string_b
 
@@ -197,6 +314,11 @@ def generate_target(txt, file_name, length=1, n_string=1):
 
 
     elif file_name=="stringlist_search":
+
+        '''
+            n_string is used for the number of string_a, NOT the length of string_a
+
+        '''
 
         if length>len(txt):
             length=len(txt)
@@ -276,7 +398,7 @@ def create_exepected_result(file_name, corpus, string_target, string_a, string_b
     corpus_int=[word_to_integer(_str) for _str in corpus]
     
 
-    if file_name=='after_all':
+    if file_name=='after_all' or file_name=='after_all_multi':
 
         pass # after_all statement returns this original expected list
     
@@ -295,6 +417,29 @@ def create_exepected_result(file_name, corpus, string_target, string_a, string_b
             if int_b not in corpus_int[idx_a+1:]: # Checking if string_b exists after string_a
 
                 expected = corpus_int[idx_a:-1] # between algo excludes the last string if string_b does not exist
+
+
+    elif file_name=='between_multi':
+        
+        assert(string_b!=None)
+        int_a_lst = [word_to_integer(x) for x in string_a] 
+        length=len(int_a_lst)
+        int_b = word_to_integer(string_b)
+
+        a_exist=False
+
+        for idx_a in range(0, len(corpus_int)-length):
+            if corpus_int[idx_a:idx_a+length]==int_a_lst:
+                a_exist=True
+                break
+        
+        if a_exist:
+            
+            expected=int_a_lst+expected # between algo returns a substring including string_a if it exists
+            
+            if int_b not in corpus_int[idx_a+length:]: # Checking if string_b exists after string_a
+
+                expected = corpus_int[idx_a+length:-1] # between algo excludes the last string if string_b does not exist
 
 
     elif file_name=='point_to':
