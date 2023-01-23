@@ -72,6 +72,15 @@ echo "testing with $test_file .... ";
 python3 $container$testdir$test_file
 
 
+# point_to multi
+test_file='test_statement_point_to_multi.py'
+statement='point_to_multi.py'
+
+cp $origin$statement $dest$statement
+echo "testing with $test_file .... ";
+python3 $container$testdir$test_file
+
+
 ## after all
 test_file='test_statement_after_all.py'
 statement='after_all.py'

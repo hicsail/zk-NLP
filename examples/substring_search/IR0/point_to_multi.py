@@ -5,24 +5,31 @@ sys.path.append("/usr/src/app/examples/substring_search/common")
 from util import *
 
 
-def dfa_from_string(string_a, target, zero_state, found_states, appendedAll_state, accept_state):
+def dfa_from_string(string_a, target, zero_states, found_states, appendedAll_state, accept_state):
     next_state = {}
     assert(len(target)>0)
-    if len(target)==1:
-        next_state[(zero_state, word_to_integer(target[0]))]=appendedAll_state
-        next_state[(appendedAll_state, word_to_integer(string_a))]=accept_state
-        return next_state
-    else:
-        next_state[(zero_state, word_to_integer(target[0]))]=found_states[0]
-        for i in range(1,len(target)-1):
-            next_state[(found_states[i-1], word_to_integer(target[i]))]=found_states[i]
-        next_state[(found_states[-1], word_to_integer(target[-1]))]=appendedAll_state
-        next_state[(appendedAll_state, word_to_integer(string_a))]=accept_state
-        return next_state
+
+    for i in range(0,len(zero_states)-1):
+        next_state[(zero_states[i], word_to_integer(target[i]))]=zero_states[i+1]
+
+    # when the last element in target is found, move to the appendedall states
+    next_state[(zero_states[-1], word_to_integer(target[-1]))]=appendedAll_state
+    next_state[(appendedAll_state, word_to_integer(string_a[0]))]=found_states[0]
+
+    for i in range(1,len(string_a)):
+
+      if len(string_a)-1==i:
+        # When all string_a is found, then move to the accept state
+        next_state[(found_states[i-1], word_to_integer(string_a[i]))]=accept_state
+
+      else:
+        next_state[(found_states[i-1], word_to_integer(string_a[i]))]=found_states[i]
+
+    return next_state
 
 
 
-def run_dfa(dfa, text_input, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_before):
+def run_dfa(dfa, text_input, zero_states, found_states, appendedAll_state, accept_state, error_state, Secret_str_before):
     def next_state_fun(string, initial_state):
         curr_state=initial_state
         
@@ -38,7 +45,7 @@ def run_dfa(dfa, text_input, zero_state, found_states, appendedAll_state, accept
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state, 
                          mux((initial_state == dfa_state) & (string != dfa_str),
-                         error_state, 
+                         error_state,
                          curr_state))
 
             # print("Updated state: ", val_of(curr_state))
@@ -55,10 +62,10 @@ def run_dfa(dfa, text_input, zero_state, found_states, appendedAll_state, accept
         ''' 
             Adding sub string if in one of found states or accept state and reading the last word in the text
         '''
-        Secret_str_before.cond_push(is_in_target_states(curr_state, found_states)|(curr_state == appendedAll_state), string)
+        Secret_str_before.cond_push((curr_state != error_state) & (initial_state != accept_state), string)
 
         return curr_state
-    latest_state=reduce(next_state_fun, text_input, zero_state)
+    latest_state=reduce(next_state_fun, text_input, zero_states[0])
     ''' 
         Pop the last element if no string_a found and if you're reading the last substring of the target strings
         Push negative value if you end up in the error state
@@ -75,7 +82,7 @@ def main(target_dir, prime, prime_name, size, operation):
 
     assert len(sys.argv) == 6, "Invalid arguments"
     _, target_dir, prime, prime_name, size, operation = sys.argv
-    file_name="point_to"
+    file_name="point_to_multi"
     set_field(int(prime))
 
     try:
@@ -89,13 +96,13 @@ def main(target_dir, prime, prime_name, size, operation):
 
     if operation =="test":
         corpus=generate_text(int(size))
-        string_a, string_target=generate_target(corpus, file_name, length=5)
+        string_a, string_target=generate_target(corpus, file_name, length=5, n_string=2)
         print("Test (First 10 Strings): ",corpus[0:10])
         print("Actual text length:", len(corpus))
 
     else:
-        string_target =  ['one', 'two'] 
-        string_a = 'three'
+        string_target =  ['one'] 
+        string_a = ['three']
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()
         corpus = corpus.split()
@@ -105,8 +112,8 @@ def main(target_dir, prime, prime_name, size, operation):
     # Transform the text file to search into miniwizpl format
     file_string = SecretList([word_to_integer(_str) for _str in corpus])
 
-    zero_state = 0
-    found_states=[i for i in range(1,len(string_target))]
+    zero_states = [i for i in range(0,len(string_target))]
+    found_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_a)+1)]
 
     if len(found_states)==0:
         appendedAll_state=10
@@ -122,10 +129,10 @@ def main(target_dir, prime, prime_name, size, operation):
 
     # Build and traverse a DFA
 
-    dfa = dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
-    # print("\n", "DFA: ",dfa, "\n")
+    dfa = dfa_from_string(string_a, string_target, zero_states, found_states, appendedAll_state, accept_state)
+    print("\n", "DFA: ",dfa, "\n")
     print("Traversing DFA")
-    latest_state = run_dfa(dfa, file_string, zero_state, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+    latest_state = run_dfa(dfa, file_string, zero_states, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
     print("Output Assertion")
     assert0((latest_state - accept_state)*(latest_state - appendedAll_state))
     print("Running Poseidon Hash")

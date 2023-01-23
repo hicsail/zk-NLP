@@ -305,6 +305,47 @@ def generate_target(txt, file_name, length=1, n_string=1):
         return string_a, string_target
     
 
+    elif file_name=="point_to_multi":
+
+        '''
+            n_string is used for the length of string_a, NOT the number of string_a
+            length is the length of the target string before string_a
+        '''
+
+        if length>len(txt)-1:
+            length=len(txt)-1
+            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
+            
+        elif length<=0:
+            print(f'The length value must be positive integer. The length value is set to 1')
+            length=1
+
+        if n_string<=0:
+            print(f'The n_string value must be positive integer. The n_string value is set to 1')
+            n_string=1
+
+        if n_string+length>len(txt):
+            n_strint=len(txt)-length
+            print(f'The length of input corpus is {len(txt)}. The n_strint value is set to {n_strint}')
+
+
+        idx_a=length
+
+        '''
+            If idx_a == txt length, then string_a will be set empty
+        '''
+
+        if idx_a==len(txt):
+            string_a=''
+            string_target=txt[:idx_a]
+        
+        else:
+            string_a=txt[idx_a:idx_a+n_string]
+            string_target=txt[:idx_a]
+
+        return string_a, string_target
+
+
     elif file_name=="string_search":
 
         string_target=random.sample(txt, 1)
@@ -451,6 +492,19 @@ def create_exepected_result(file_name, corpus, string_target, string_a, string_b
             expected = corpus_int[:-1] # point_to algo returns everything except the last string if string_a does not exist
 
 
+    elif file_name=='point_to_multi':
+
+        int_a_lst = [word_to_integer(x) for x in string_a]
+        length=len(expected)
+
+        if int_a_lst == corpus_int[length:length+len(int_a_lst)]: # Checking if string_a exists after target string
+
+            expected=expected+int_a_lst
+
+        else:
+
+            expected = corpus_int[:-1] # point_to algo excludes the last string if string_a does not exist
+
     return expected
 
 
@@ -472,5 +526,5 @@ def reconcile_secretstack(expected, secretstack):
         # The following control flow is just for the sake of testing
         if expected_val - val_of(curr_str)!=0:
             test_flag=False
-    
+        
     return test_flag
