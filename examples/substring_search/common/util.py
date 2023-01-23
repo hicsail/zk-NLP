@@ -83,16 +83,16 @@ def generate_text(scale=0, file_name=None):
 
 
 
-def generate_target(txt, file_name, length=1, n_string=1):
+def generate_target(txt, file_name, substring_len=1, piv_len=1):
 
     '''
-        This function takes an optional parameter "length" and "n_string" to to pick target texts and respective pivot words, depending on statement type. 
+        This function takes an optional parameter "substring_len" and "piv_len" to to pick target texts and respective pivot words, depending on statement type. 
         
-        length represents the length of substring for such algorithms as between, after all, point to.
-        When the length is 2 in between algorithm for the corpus lenth of 4, this function will pick string_a either at index 0 or 1, so it can accomodate substring length of 2 after it.
-        Those numbers shall be positive integer and shall not exceed the length of the corpus text, and there is correction method in case value exceeding the boundary is chosen.
+        substring_len represents the size of substring for such algorithms as between, after all, point to.
+        When the substring_len is 2 in between algorithm for the corpus lenth of 4, this function will pick string_a either at index 0 or 1, so it can accomodate substring substring_len of 2 after it.
+        Those numbers shall be positive integer and shall not exceed the size of the corpus text, and there is correction method in case value exceeding the boundary is chosen.
 
-        n_string represents the number of strings to look for in stringlist_search algorithm. 
+        piv_len represents the number of strings to look for in stringlist_search algorithm. 
         Those numbers shall be positive integer, and there is correction method in case negative value is chosen.
 
     '''
@@ -103,16 +103,16 @@ def generate_target(txt, file_name, length=1, n_string=1):
     
     if file_name=="after_all":
 
-        if length>len(txt)-1:
-            length=len(txt)-1
-            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
+        if substring_len>len(txt)-1:
+            substring_len=len(txt)-1 # Leaving minimum one string space for the pivot word
+            print(f'The length of input corpus is {len(txt)}. The substring_len value is set to {substring_len}')
             
-        elif length<=0:
-            print(f'The length value must be positive integer. The length value is set to 1')
-            length=1
+        elif substring_len<=0:
+            print(f'The substring_len value must be positive integer. The substring_len value is set to 1')
+            substring_len=1
 
-        string_a=txt[-length-1]
-        string_target=txt[-length:]
+        string_a=txt[-substring_len-1]
+        string_target=txt[-substring_len:]
 
         return string_a, string_target
 
@@ -120,36 +120,36 @@ def generate_target(txt, file_name, length=1, n_string=1):
     if file_name=="after_all_multi":
 
         '''
-            n_string is used for the length of string_a, NOT the number of string_a
-            length is the length of the target string after string_a
+            piv_len is used for the length of string_a, NOT the number of string_a
+            substring_len is the length of the target string after string_a
         '''
 
-        if length>len(txt)-1:
-            length=len(txt)-1
-            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
+        if substring_len>len(txt)-1:
+            substring_len=len(txt)-1 # Leaving minimum one string space for the pivot word
+            print(f'The length of input corpus is {len(txt)}. The substring_len value is set to {substring_len}')
             
-        elif length<=0:
-            print(f'The length value must be positive integer. The length value is set to 1')
-            length=1
+        elif substring_len<=0:
+            print(f'The length value must be positive integer. The substring_len value is set to 1')
+            substring_len=1
 
-        if n_string<=0:
-            print(f'The n_string value must be positive integer. The n_string value is set to 1')
-            n_string=1
+        if piv_len<=0:
+            print(f'The piv_len value must be positive integer. The piv_len value is set to 1')
+            piv_len=1
 
-        if n_string+length>len(txt):
-            n_strint=len(txt)-length-1
-            print(f'The length of input corpus is {len(txt)}. The n_strint value is set to {n_strint}')
+        if piv_len+substring_len>len(txt):
+            piv_len=len(txt)-substring_len
+            print(f'The length of input corpus is {len(txt)}. The piv_len value is set to {piv_len}')
 
         # This method returns a list of string_a
-        string_a=txt[-length-n_string: -length]
-        string_target=txt[-length:]
+        string_a=txt[-substring_len-piv_len: -substring_len]
+        string_target=txt[-substring_len:]
 
         return string_a, string_target
         
         
     elif file_name=="after":
 
-        string_a=random.sample(txt[:-1], 1) # Avoiding the last substring to be picked as target
+        string_a=random.sample(txt[:-1], 1) # Leaving minimum one string space for the pivot word at the end
         string_a=string_a[0]
         idx_a=txt.index(string_a)
         string_target=txt[idx_a+1]
@@ -159,31 +159,35 @@ def generate_target(txt, file_name, length=1, n_string=1):
     elif file_name=="after_multi":
 
         '''
-            n_string is used for the length of string_a, NOT the number of string_a
-            length is the length of the target string after string_a
+            piv_len is used for the length of string_a, NOT the number of string_a
+            substring_len is the length of the target string after string_a
         '''
 
-        if length>len(txt)-1:
-            length=len(txt)-1
-            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
+        if substring_len>len(txt)-1:
+            substring_len=len(txt)-1 # Leaving minimum one string space for the pivot word
+            print(f'The length of input corpus is {len(txt)}. The substring_len value is set to {substring_len}')
             
-        elif length<=0:
-            print(f'The length value must be positive integer. The length value is set to 1')
-            length=1
+        elif substring_len<=0:
+            print(f'The length value must be positive integer. The substring_len value is set to 1')
+            substring_len=1
 
-        if n_string<=0:
-            print(f'The n_string value must be positive integer. The n_string value is set to 1')
-            n_string=1
+        if piv_len<=0:
+            print(f'The piv_len value must be positive integer. The piv_len value is set to 1')
+            piv_len=1
 
-        if n_string+length>len(txt):
-            n_strint=len(txt)-length
-            print(f'The length of input corpus is {len(txt)}. The n_strint value is set to {n_strint}')
+        if piv_len+substring_len>len(txt):
+            piv_len=len(txt)-substring_len
+            print(f'The length of input corpus is {len(txt)}. The piv_len value is set to {piv_len}')
 
 
         # This method returns a list of string_a and string_target
-        idx_a=random.randint(0, len(txt)-n_string-length)
-        string_a=txt[idx_a:idx_a+n_string]
-        string_target=txt[idx_a+n_string:idx_a+n_string+length]
+        if len(txt)-piv_len-substring_len==0:
+            idx_a=0
+        else:
+            idx_a=random.randint(0, len(txt)-piv_len-substring_len)
+
+        string_a=txt[idx_a:idx_a+piv_len]
+        string_target=txt[idx_a+piv_len:idx_a+piv_len+substring_len]
 
         return string_a, string_target
 
@@ -194,36 +198,32 @@ def generate_target(txt, file_name, length=1, n_string=1):
 
     elif file_name=="begins_multi":
         '''
-            n_string is used for the length of a target string
+            piv_len is used for the length of a target string
         '''
 
-        return txt[:n_string]
+        return txt[:piv_len]
 
     elif file_name=="between":
+        assert(len(txt)>2) #If less than 3, it cannot form between statement
 
-        if length>len(txt)-1:
-            length=len(txt)-1
-            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
+        if substring_len>len(txt)-2:
+            substring_len=len(txt)-2
+            print(f'The length of input corpus is {len(txt)}. The substring_len value is set to {substring_len}')
 
-        elif length<=0:
-            print(f'The length value must be positive integer. The length value is set to 1')
-            length=1
+        elif substring_len<=0:
+            print(f'The length value must be positive integer. The substring_len value is set to 1')
+            substring_len=1
 
-        idx_a=random.randint(-len(txt),-length-1) # Avoiding index out of range
+        idx_a=random.randint(-len(txt),-substring_len-2) # Leaving minimum two strings-space for the pivot word and closing word
         string_a=txt[idx_a]
-        idx_b=idx_a+1+length
+        idx_b=idx_a+1+substring_len
         
         '''
-            If idx_a + length use up the space of idx_b, then string_b will be set empty
+            If idx_a + substring_len use up the space of idx_b, then string_b will be set empty
         '''
 
-        if idx_b==0:
-            string_b=''
-            string_target=txt[idx_a+1:]
-
-        else:
-            string_b=txt[idx_b]
-            string_target=txt[idx_a+1:idx_b]
+        string_b=txt[idx_b]
+        string_target=txt[idx_a+1:idx_b]
 
         return string_a, string_target, string_b
 
@@ -231,76 +231,51 @@ def generate_target(txt, file_name, length=1, n_string=1):
     elif file_name=="between_multi":
 
         '''
-            n_string is used for the length of string_a, NOT the number of string_a
-            length is the length of the target string after string_a
+            piv_len is used for the length of string_a and string_b, NOT the number of string_a
+            substring_len is the length of the target string after string_a
         '''
+        assert(len(txt)>2) #If less than 3, it cannot form between statement
 
-        if length>len(txt)-1:
-            length=len(txt)-1
-            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
+        if substring_len*2>len(txt)-1:
+            substring_len=len(txt)-2 # Leaving minimum two strings-space for the pivot word and closing word
+            print(f'The length of input corpus is {len(txt)}. The substring_len value is set to {substring_len}')
             
-        elif length<=0:
-            print(f'The length value must be positive integer. The length value is set to 1')
-            length=1
+        elif substring_len<=0:
+            print(f'The length value must be positive integer. The substring_len value is set to 1')
+            substring_len=1
 
-        if n_string<=0:
-            print(f'The n_string value must be positive integer. The n_string value is set to 1')
-            n_string=1
+        if piv_len<=0:
+            print(f'The piv_len value must be positive integer. The piv_len value is set to 1')
+            piv_len=1
 
-        if n_string+length+1>len(txt):
-            n_strint=len(txt)-length
-            print(f'The length of input corpus is {len(txt)}. The n_strint value is set to {n_strint}')
+        if piv_len+substring_len*2>len(txt):
+            piv_len=len(txt)-substring_len*2
+            print(f'The length of input corpus is {len(txt)}. The piv_len value is set to {piv_len}')
 
-        if length>len(txt)-1:
-            length=len(txt)-1
-            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
 
-        elif length<=0:
-            print(f'The length value must be positive integer. The length value is set to 1')
-            length=1
-
-        idx_a=random.randint(-len(txt),-length-n_string-1) # Avoiding index out of range
-        string_a=txt[idx_a:idx_a+n_string]
-        idx_b=idx_a+n_string+length
-        
-        '''
-            If idx_a + length use up the space of idx_b, then string_b will be set empty
-        '''
-
-        if idx_b>+len(txt):
-            string_b=''
-            string_target=txt[idx_a+n_string:]
-
-        else:
-            string_b=txt[idx_b]
-            string_target=txt[idx_a+n_string:idx_b]
+        idx_a=random.randint(-len(txt),-substring_len-piv_len-2) # Leaving a space for string_b
+        string_a=txt[idx_a:idx_a+piv_len]
+        idx_b=idx_a+piv_len+substring_len
+        string_b=txt[idx_b:idx_b+piv_len]
+        string_target=txt[idx_a+piv_len:idx_b]
 
         return string_a, string_target, string_b
 
 
     elif file_name=="point_to":
 
-        if length>len(txt):
-            length=len(txt)
-            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
+        if substring_len>len(txt)-1:
+            substring_len=len(txt)-1 # Leaving minimum one string space for the pivot word
+            print(f'The length of input corpus is {len(txt)}. The substring_len value is set to {substring_len}')
 
-        elif length<=0:
-            print(f'The length value must be positive integer. The length value is set to 1')
-            length=1
+        elif substring_len<=0:
+            print(f'The length value must be positive integer. The substring_len value is set to 1')
+            substring_len=1
 
-        idx_a=length
+        idx_a=substring_len
 
-        '''
-            If idx_a == txt length, then string_a will be set empty
-        '''
-
-        if idx_a==len(txt):
-            string_a=''
-            string_target=txt[:idx_a]
-        
-        else:
-            string_a=txt[idx_a]
-            string_target=txt[:idx_a]
+        string_a=txt[idx_a]
+        string_target=txt[:idx_a]
 
         return string_a, string_target
     
@@ -308,40 +283,31 @@ def generate_target(txt, file_name, length=1, n_string=1):
     elif file_name=="point_to_multi":
 
         '''
-            n_string is used for the length of string_a, NOT the number of string_a
-            length is the length of the target string before string_a
+            piv_len is used for the length of string_a, NOT the number of string_a
+            substring_len is the length of the target string before string_a
         '''
 
-        if length>len(txt)-1:
-            length=len(txt)-1
-            print(f'The length of input corpus is {len(txt)}. The length value is set to {length}')
+        if substring_len>len(txt)-1:
+            substring_len=len(txt)-1 # Leaving minimum one string space for the pivot word
+            print(f'The length of input corpus is {len(txt)}. The substring_len value is set to {substring_len}')
             
-        elif length<=0:
-            print(f'The length value must be positive integer. The length value is set to 1')
-            length=1
+        elif substring_len<=0:
+            print(f'The substring_len value must be positive integer. The substring_len value is set to 1')
+            substring_len=1
 
-        if n_string<=0:
-            print(f'The n_string value must be positive integer. The n_string value is set to 1')
-            n_string=1
+        if piv_len<=0:
+            print(f'The piv_len value must be positive integer. The piv_len value is set to 1')
+            piv_len=1
 
-        if n_string+length>len(txt):
-            n_strint=len(txt)-length
-            print(f'The length of input corpus is {len(txt)}. The n_strint value is set to {n_strint}')
+        if piv_len+substring_len>len(txt):
+            piv_len=len(txt)-substring_len
+            print(f'The length of input corpus is {len(txt)}. The piv_len value is set to {piv_len}')
 
 
-        idx_a=length
+        idx_a=substring_len
 
-        '''
-            If idx_a == txt length, then string_a will be set empty
-        '''
-
-        if idx_a==len(txt):
-            string_a=''
-            string_target=txt[:idx_a]
-        
-        else:
-            string_a=txt[idx_a:idx_a+n_string]
-            string_target=txt[:idx_a]
+        string_a=txt[idx_a:idx_a+piv_len]
+        string_target=txt[:idx_a]
 
         return string_a, string_target
 
@@ -357,32 +323,32 @@ def generate_target(txt, file_name, length=1, n_string=1):
     elif file_name=="stringlist_search":
 
         '''
-            n_string is used for the number of string_a, NOT the length of string_a
+            piv_len is used for the number of string_a, NOT the length of string_a
 
         '''
 
-        if length>len(txt):
-            length=len(txt)
-            print(f'The length of input corpus is {len(txt)}. The n_strint value is set to {length}')
+        if substring_len>len(txt):
+            substring_len=len(txt)
+            print(f'The length of input corpus is {len(txt)}. The substring_len value is set to {substring_len}')
 
-        if n_string*length>len(txt):
-            n_strint=int(len(txt)/n_string)
-            print(f'The length of input corpus is {len(txt)}. The n_strint value is set to {n_strint}')
+        if piv_len*substring_len>len(txt):
+            piv_len=int(len(txt)/piv_len)
+            print(f'The length of input corpus is {len(txt)}. The piv_len value is set to {piv_len}')
 
-        if length<0:
-            print(f'The length value must be positive integer. The length value is set to 1')
-            length=1
+        if substring_len<0:
+            print(f'The length value must be positive integer. The substring_len value is set to 1')
+            substring_len=1
 
-        if n_string<0:
-            print(f'The n_string value must be positive integer. The n_string value is set to 1')
-            n_string=1
+        if piv_len<0:
+            print(f'The piv_len value must be positive integer. The piv_len value is set to 1')
+            piv_len=1
 
         res=[]
 
-        for i in range(0, n_string):
+        for i in range(0, piv_len):
             curr_str =""
-            idx_a=random.randint(0, len(txt)-length) # Avoiding index out of range
-            curr_lst=txt[idx_a:idx_a+length]
+            idx_a=random.randint(0, len(txt)-substring_len) # Avoiding index out of range
+            curr_lst=txt[idx_a:idx_a+substring_len]
             curr_str=" ".join([str(item) for item in curr_lst])
             res.append(curr_str)
         
@@ -446,64 +412,24 @@ def create_exepected_result(file_name, corpus, string_target, string_a, string_b
 
     elif file_name=='between':
         
-        assert(string_b!=None)
         int_a = word_to_integer(string_a)
-        int_b = word_to_integer(string_b)
-
-        if int_a in corpus_int:
-            
-            expected.insert(0, int_a) # between algo returns a substring including string_a if it exists
-            idx_a=corpus_int.index(int_a)
-            
-            if int_b not in corpus_int[idx_a+1:]: # Checking if string_b exists after string_a
-
-                expected = corpus_int[idx_a:-1] # between algo excludes the last string if string_b does not exist
+        expected.insert(0, int_a)
 
 
     elif file_name=='between_multi':
-        
-        assert(string_b!=None)
         int_a_lst = [word_to_integer(x) for x in string_a] 
-        length=len(int_a_lst)
-        int_b = word_to_integer(string_b)
-
-        a_exist=False
-
-        for idx_a in range(0, len(corpus_int)-length):
-            if corpus_int[idx_a:idx_a+length]==int_a_lst:
-                a_exist=True
-                break
-        
-        if a_exist:
-            
-            expected=int_a_lst+expected # between algo returns a substring including string_a if it exists
-            
-            if int_b not in corpus_int[idx_a+length:]: # Checking if string_b exists after string_a
-
-                expected = corpus_int[idx_a+length:-1] # between algo excludes the last string if string_b does not exist
+        expected=int_a_lst+expected
 
 
     elif file_name=='point_to':
 
         int_a = word_to_integer(string_a)
 
-        if int_a not in corpus_int:
-            
-            expected = corpus_int[:-1] # point_to algo returns everything except the last string if string_a does not exist
-
 
     elif file_name=='point_to_multi':
 
         int_a_lst = [word_to_integer(x) for x in string_a]
-        length=len(expected)
-
-        if int_a_lst == corpus_int[length:length+len(int_a_lst)]: # Checking if string_a exists after target string
-
-            expected=expected+int_a_lst
-
-        else:
-
-            expected = corpus_int[:-1] # point_to algo excludes the last string if string_a does not exist
+        expected=expected+int_a_lst
 
     return expected
 
