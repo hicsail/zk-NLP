@@ -5,15 +5,28 @@ sys.path.append("/usr/src/app/examples/substring_search/common")
 from util import *
 
 
-def dfa_from_string(string_a, target, zero_state, found_state, accept_state):
+def dfa_from_string(string_a, target, zero_states, found_states, accept_state):
     next_state = {}
-    next_state[(zero_state, word_to_integer(string_a))]=found_state
-    next_state[(found_state, word_to_integer(target))]=accept_state
+    assert(len(target)>0)
+
+    # defining zero states traversal
+    for i in range(0,len(zero_states)-1):
+        next_state[(zero_states[i], word_to_integer(string_a[i]))]=zero_states[i+1]
+    
+    # when the last element in string_a found, move to the first found states
+    next_state[(zero_states[-1], word_to_integer(string_a[-1]))]=found_states[0]
+    
+    # defining found states traversal
+    for i in range(0,len(target)-1):
+        next_state[(found_states[i], word_to_integer(target[i]))]=found_states[i+1]
+    
+    # when the last element in target found, move to the accepted states
+    next_state[(found_states[-1], word_to_integer(target[-1]))]=accept_state
     return next_state
 
 
 
-def run_dfa(dfa, text_input, zero_state, accept_state, error_state):
+def run_dfa(dfa, text_input, zero_states, accept_state, error_state):
     def next_state_fun(string, initial_state):
         curr_state=initial_state
         for (dfa_state, dfa_str), next_state in dfa.items():
@@ -26,7 +39,7 @@ def run_dfa(dfa, text_input, zero_state, accept_state, error_state):
 
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
-                         mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_state),
+                         mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_states[0]),
                          error_state,
                          curr_state))
             
@@ -42,7 +55,7 @@ def run_dfa(dfa, text_input, zero_state, accept_state, error_state):
                      curr_state))
         
         return curr_state
-    latest_state=reduce(next_state_fun, text_input, zero_state)
+    latest_state=reduce(next_state_fun, text_input, zero_states[0])
     return latest_state
 
 
@@ -53,7 +66,7 @@ def main(target_dir, prime, prime_name, size, operation):
 
     assert len(sys.argv) == 6, "Invalid arguments"
     _, target_dir, prime, prime_name, size, operation = sys.argv
-    file_name="after"
+    file_name="after_multi"
     set_field(int(prime))
 
     try:
@@ -74,8 +87,8 @@ def main(target_dir, prime, prime_name, size, operation):
         print("Actual text length:", len(corpus))
 
     else:
-        string_a = 'one'
-        string_target =  'two'
+        string_a = ['two','three']
+        string_target =  ['four', 'five']
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()
         corpus = corpus.split()
@@ -88,18 +101,23 @@ def main(target_dir, prime, prime_name, size, operation):
 
     file_string = SecretList([word_to_integer(_str) for _str in corpus])
 
-    zero_state = 0
-    found_state=1 
-    accept_state=100
-    error_state=101
+    zero_states = [i for i in range(0,len(string_a))]
+    found_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_target)+1)]
+
+    if len(found_states)==0:
+        accept_state = 100
+        error_state = 101
+    else:
+        accept_state = found_states[-1]*10
+        error_state = found_states[-1]*100
 
 
     # Build and traverse a DFA
 
-    dfa = dfa_from_string(string_a, string_target, zero_state, found_state, accept_state)
-    # print("\n", "DFA: ",dfa, "\n")
+    dfa = dfa_from_string(string_a, string_target, zero_states, found_states, accept_state)
+    print("\n", "DFA: ",dfa, "\n")
     print("Traversing DFA")
-    latest_state = run_dfa(dfa, file_string, zero_state, accept_state, error_state)
+    latest_state = run_dfa(dfa, file_string, zero_states, accept_state, error_state)
     print("Output Assertion")
     assert0(latest_state - accept_state)
     print("Running Poseidon Hash")

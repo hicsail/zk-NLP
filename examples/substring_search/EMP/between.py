@@ -83,7 +83,7 @@ def run_dfa(dfa, text_input):
         ''' 
             Add substring if in one of found states or accept state and reading the last word in the text
         '''
-        Secret_str_between.cond_push(is_in_found_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
+        Secret_str_between.cond_push(is_in_target_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
         return curr_state
 
     if len(sys.argv)==3 and sys.argv[2] =="debug":
