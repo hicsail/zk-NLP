@@ -65,7 +65,9 @@ def main(target_dir, prime, prime_name, size, operation):
 
     if operation =="test":
         corpus=generate_text(int(size))
-        target_strings=generate_target(corpus, file_name, n_string=2)
+        substring_len=1
+        piv_len=1
+        target_strings =generate_target(corpus, file_name, substring_len=substring_len, piv_len=piv_len)
         print("Test (First 10 Strings): ",corpus[0:10])
         print("Actual text length:", len(corpus))
 

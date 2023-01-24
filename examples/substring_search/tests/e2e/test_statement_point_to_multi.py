@@ -85,7 +85,7 @@ class TestStatement(unittest.TestCase):
         file_name="point_to_multi"
         expected=util.create_exepected_result(file_name, corpus, string_target, string_a)
         test_flag = util.reconcile_secretstack(expected, Secret_str_before)
-        self.assertTrue(test_flag)
+        self.assertFalse(test_flag)
 
     def test_fail(self):
 

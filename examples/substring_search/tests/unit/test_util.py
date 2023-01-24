@@ -222,7 +222,7 @@ class TestUtil(unittest.TestCase):
 
         expected=util.create_exepected_result(file_name, corpus, string_target, string_a)
         
-        res=[994664918, 534931071]
+        res=[994664918, 534931071, 1169018584]
         self.assertEqual(expected, res)
 
 

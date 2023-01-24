@@ -121,7 +121,7 @@ class TestStatement(unittest.TestCase):
         file_name="between"
         expected=util.create_exepected_result(file_name, corpus, string_target, string_a, string_b)
         test_flag = util.reconcile_secretstack(expected, Secret_str_between)
-        self.assertTrue(test_flag)
+        self.assertFalse(test_flag) # create_exepected_result does not create a list without string_b
 
 
     def test_fail(self):

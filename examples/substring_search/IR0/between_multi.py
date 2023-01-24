@@ -107,7 +107,9 @@ def main(target_dir, prime, prime_name, size, operation):
 
     if operation =="test":
         corpus=generate_text(int(size))
-        string_a, string_target, string_b =generate_target(corpus, file_name, n_string=2, length=2)
+        substring_len=1
+        piv_len=1
+        string_a, string_target, string_b =generate_target(corpus, file_name, substring_len=substring_len, piv_len=piv_len)
         print("Test (First 10 Strings): ",corpus[0:10])
         print("Actual text length:", len(corpus))
 
@@ -131,7 +133,6 @@ def main(target_dir, prime, prime_name, size, operation):
     found_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_target)+1)]
     appendedAll_state=found_states[-1]*10
     closing_states=[i for i in range(appendedAll_state+1, appendedAll_state+len(string_b)+1)]
-    print("closing_states",closing_states)
     accept_state = found_states[-1]*100
     error_state = found_states[-1]*100+1
 

@@ -86,15 +86,18 @@ def generate_text(scale=0, file_name=None):
 def generate_target(txt, file_name, substring_len=1, piv_len=1):
 
     '''
-        This function takes an optional parameter "substring_len" and "piv_len" to to pick target texts and respective pivot words, depending on statement type. 
+        This method takes an optional parameter "substring_len" and "piv_len" to pick target texts and pivot words for respective statement type. 
         
-        substring_len represents the size of substring for such algorithms as between, after all, point to.
-        When the substring_len is 2 in between algorithm for the corpus lenth of 4, this function will pick string_a either at index 0 or 1, so it can accomodate substring substring_len of 2 after it.
-        Those numbers shall be positive integer and shall not exceed the size of the corpus text, and there is correction method in case value exceeding the boundary is chosen.
+        substring_len represents the size of a target substring for such algorithms as between, after all, point to.
+        When the substring_len is 2 in the between algorithm for the corpus size of 4, this function will pick string_a either at index 0 or 1, so it can accomodate substring substring_len of 2 after it.
+        Its value shall be positive integer and shall not exceed the size of the corpus text, and there is correction method in case value exceeding the boundary is chosen.
 
-        piv_len represents the number of strings to look for in stringlist_search algorithm. 
-        Those numbers shall be positive integer, and there is correction method in case negative value is chosen.
+        piv_len represents different things depending on statements.
+        For stringlist_search algorithm, it represents the number of strings to look for
+        For others, it represents the size of pivot word(s)
+        Its value shall be positive integer, and there is correction method in case negative value is chosen.
 
+        substring_len gets priority when the combined sum of the length of substring_len and pivot_len exceeds the input text size
     '''
 
     if isinstance(txt, str):
@@ -120,8 +123,8 @@ def generate_target(txt, file_name, substring_len=1, piv_len=1):
     if file_name=="after_all_multi":
 
         '''
-            piv_len is used for the length of string_a, NOT the number of string_a
-            substring_len is the length of the target string after string_a
+            substring_len represents the length of the target string after string_a
+            piv_len represents the length of string_a
         '''
 
         if substring_len>len(txt)-1:
@@ -159,8 +162,8 @@ def generate_target(txt, file_name, substring_len=1, piv_len=1):
     elif file_name=="after_multi":
 
         '''
-            piv_len is used for the length of string_a, NOT the number of string_a
-            substring_len is the length of the target string after string_a
+            substring_len represents the length of the target string after string_a
+            piv_len represents the length of string_a
         '''
 
         if substring_len>len(txt)-1:
@@ -196,12 +199,14 @@ def generate_target(txt, file_name, substring_len=1, piv_len=1):
 
         return txt[0]
 
+
     elif file_name=="begins_multi":
         '''
-            piv_len is used for the length of a target string
+            piv_len represents the length of substrings to look at in the beginning of the corpus
         '''
 
         return txt[:piv_len]
+
 
     elif file_name=="between":
         assert(len(txt)>2) #If less than 3, it cannot form between statement
@@ -217,10 +222,6 @@ def generate_target(txt, file_name, substring_len=1, piv_len=1):
         idx_a=random.randint(-len(txt),-substring_len-2) # Leaving minimum two strings-space for the pivot word and closing word
         string_a=txt[idx_a]
         idx_b=idx_a+1+substring_len
-        
-        '''
-            If idx_a + substring_len use up the space of idx_b, then string_b will be set empty
-        '''
 
         string_b=txt[idx_b]
         string_target=txt[idx_a+1:idx_b]
@@ -231,8 +232,8 @@ def generate_target(txt, file_name, substring_len=1, piv_len=1):
     elif file_name=="between_multi":
 
         '''
-            piv_len is used for the length of string_a and string_b, NOT the number of string_a
-            substring_len is the length of the target string after string_a
+            substring_len represents the length of the target string between string_a and string_b
+            piv_len represents the length of string_a and string_b
         '''
         assert(len(txt)>2) #If less than 3, it cannot form between statement
 
@@ -249,11 +250,11 @@ def generate_target(txt, file_name, substring_len=1, piv_len=1):
             piv_len=1
 
         if piv_len+substring_len*2>len(txt):
-            piv_len=len(txt)-substring_len*2
+            piv_len=int((len(txt)-substring_len)/2)
             print(f'The length of input corpus is {len(txt)}. The piv_len value is set to {piv_len}')
 
 
-        idx_a=random.randint(-len(txt),-substring_len-piv_len-2) # Leaving a space for string_b
+        idx_a=random.randint(0,len(txt)-substring_len-piv_len*2) # Leaving a space for string_b
         string_a=txt[idx_a:idx_a+piv_len]
         idx_b=idx_a+piv_len+substring_len
         string_b=txt[idx_b:idx_b+piv_len]
@@ -263,6 +264,10 @@ def generate_target(txt, file_name, substring_len=1, piv_len=1):
 
 
     elif file_name=="point_to":
+
+        '''
+            substring_len represents the length of the target string before string_a
+        '''
 
         if substring_len>len(txt)-1:
             substring_len=len(txt)-1 # Leaving minimum one string space for the pivot word
@@ -283,8 +288,8 @@ def generate_target(txt, file_name, substring_len=1, piv_len=1):
     elif file_name=="point_to_multi":
 
         '''
-            piv_len is used for the length of string_a, NOT the number of string_a
-            substring_len is the length of the target string before string_a
+            substring_len represents the length of the target string before string_a
+            piv_len represents the length of string_a
         '''
 
         if substring_len>len(txt)-1:
@@ -323,8 +328,7 @@ def generate_target(txt, file_name, substring_len=1, piv_len=1):
     elif file_name=="stringlist_search":
 
         '''
-            piv_len is used for the number of string_a, NOT the length of string_a
-
+            substring_len represents the number of substrings to look for, named string_a
         '''
 
         if substring_len>len(txt):
@@ -343,16 +347,16 @@ def generate_target(txt, file_name, substring_len=1, piv_len=1):
             print(f'The piv_len value must be positive integer. The piv_len value is set to 1')
             piv_len=1
 
-        res=[]
+        string_a=[]
 
         for i in range(0, piv_len):
             curr_str =""
             idx_a=random.randint(0, len(txt)-substring_len) # Avoiding index out of range
             curr_lst=txt[idx_a:idx_a+substring_len]
             curr_str=" ".join([str(item) for item in curr_lst])
-            res.append(curr_str)
+            string_a.append(curr_str)
         
-        return res
+        return string_a
 
 
 

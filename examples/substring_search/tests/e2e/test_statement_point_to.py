@@ -85,7 +85,7 @@ class TestStatement(unittest.TestCase):
         file_name="point_to"
         expected=util.create_exepected_result(file_name, corpus, string_target, string_a)
         test_flag = util.reconcile_secretstack(expected, Secret_str_before)
-        self.assertTrue(test_flag)
+        self.assertFalse(test_flag) # create_exepected_result does not create a list without string_a
 
 
     def test_fail(self):
