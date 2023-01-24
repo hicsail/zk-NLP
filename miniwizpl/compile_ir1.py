@@ -220,7 +220,7 @@ def print_exp_ir1_(e):
 
     elif isinstance(e, int):
         r = next_wire()
-        emit(f'  {r} <- < {e} >;')
+        emit(f'  {r} <- < {int(e)} >;')
         return r
 
     elif isinstance(e, galois.Array):
