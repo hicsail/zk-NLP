@@ -33,7 +33,7 @@ class TestGenerateTarget(unittest.TestCase):
         self.assertEqual(string_target, ["New", "World"])
 
 
-        # Test case 4: Check if the correct message is printed when substring_len <= 0
+        # Test case 4: Check if substring_len is adjusted correctly when substring_len <= 0
         txt = "Hello New World"
         substring_len = -1
         string_a, string_target = util.generate_target(txt, type, substring_len)
@@ -87,6 +87,7 @@ class TestGenerateTarget(unittest.TestCase):
         self.assertTrue(isinstance(string_a, str))
         self.assertEqual(string_a, "Hello")
         self.assertEqual(string_target, "World")
+
 
         # Test case 2: Check if substring_len value has no influence
         txt = "Hello World"
@@ -178,24 +179,23 @@ class TestGenerateTarget(unittest.TestCase):
         txt = "Hello New World"
         string_a, string_target, string_b = util.generate_target(txt, type)
         self.assertTrue(isinstance(string_target, list))
-        self.assertTrue((string_a == "Hello" and string_target == ["New"] and string_b== "World") or
-        (string_a == "New" and string_target == ["World"] and string_b== ""))
+        self.assertTrue(string_a == "Hello" and string_target == ["New"] and string_b== "World")
 
 
         # Test case 2: Check if the target is correct when substring_len > 1
-        txt = "Hello New World"
+        txt = "Hello New World Yes"
         substring_len = 2
         string_a, string_target, string_b = util.generate_target(txt, type, substring_len)
         self.assertTrue(isinstance(string_target, list))
-        self.assertTrue(string_a == "Hello" and string_target == ["New"] and string_b== "World")
+        self.assertTrue(string_a == "Hello" and string_target == ["New", "World"] and string_b== "Yes")
 
 
         # Test case 3: Check if substring_len correctly adjusted when lsubstring_len > len(txt)-1
-        txt = "Hello New World"
+        txt = "Hello New World Yes"
         substring_len = 10
         string_a, string_target, string_b = util.generate_target(txt, type, substring_len)
         self.assertTrue(isinstance(string_target, list))
-        self.assertTrue(string_a == "Hello" and string_target == ["New"] and string_b== "World")
+        self.assertTrue(string_a == "Hello" and string_target == ["New", "World"] and string_b== "Yes")
 
 
         # Test case 4: Check if substring_len correctly adjusted when substring_len <= 0
@@ -229,7 +229,7 @@ class TestGenerateTarget(unittest.TestCase):
         self.assertEqual(string_b, ["World"])
 
 
-        # Test case 3: Check if the correct message is printed when substring_len > len(txt)-1
+        # Test case 3: Check if the correct message is printed when substring_len and piv_len are both > 1
         txt = "one two three four five six"
         substring_len = 2
         piv_len=2
@@ -239,9 +239,9 @@ class TestGenerateTarget(unittest.TestCase):
         self.assertEqual(string_b, ["five", "six"])
 
 
-        # Test case 4: Check if substring_len and piv_len correctly adjusted when substring_len > len(txt)-1
+        # Test case 4: Check if substring_len and piv_len correctly adjusted when substring_len >= len(txt) and when substring_len + piv_len > len(txt) after the adjustment
         txt = "one two three four five six"
-        substring_len = 10
+        substring_len = 6
         piv_len=2
         string_a, string_target, string_b = util.generate_target(txt, type, substring_len, piv_len)
         self.assertEqual(string_a, ["one"])
@@ -327,13 +327,14 @@ class TestGenerateTarget(unittest.TestCase):
         self.assertEqual(string_target, ["one", "two", "three", "four", "five"])
 
 
-        # Test case 4: Check if substring_len and piv_len correctly adjusted when substring_len <= 0
+        # Test case 4: Check if substring_len correctly adjusted when substring_len <= 0
         txt = "Hello New World"
         substring_len = -1
         piv_len=2
         string_a, string_target = util.generate_target(txt, type, substring_len, piv_len)
         self.assertEqual(string_a, ["New", "World"])
         self.assertEqual(string_target, ["Hello"])
+
 
 
     def test_generate_target_string_search(self):

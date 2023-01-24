@@ -87,6 +87,7 @@ class TestStatement(unittest.TestCase):
         test_flag = util.reconcile_secretstack(expected, Secret_str_before)
         self.assertFalse(test_flag)
 
+
     def test_fail(self):
 
         '''

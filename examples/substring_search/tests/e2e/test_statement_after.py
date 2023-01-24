@@ -51,8 +51,8 @@ class TestStatement(unittest.TestCase):
         corpus = corpus.split()
         file_string = SecretList([util.word_to_integer(_str) for _str in corpus])
 
-        zero_state = 0
-        found_state=1 
+        zero_state =0
+        found_state=1
         accept_state=100
         error_state=101
 
