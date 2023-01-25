@@ -40,9 +40,11 @@ def run_dfa(dfa, text_input, zero_states, found_states, accept_state, error_stat
 
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
-                         mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_states[0]),
-                         error_state,
-                         curr_state))
+                            mux((initial_state == dfa_state) & (string != dfa_str) & is_in_target_states(initial_state, zero_states),
+                            zero_states[0], 
+                                mux((initial_state == dfa_state) & (string != dfa_str),
+                                error_state,
+                                    curr_state)))
                          
             # print("Updated state: ", val_of(curr_state))
 
@@ -98,8 +100,8 @@ def main(target_dir, prime, prime_name, size, operation):
         print("Actual text length:", len(corpus))
 
     else:
-        string_a = ['two', 'three']
-        string_target =  ['four','five']
+        string_a = ['across', 'marriage', 'field', 'amount', 'ground', 'Style', 'job', 'manager'] 
+        string_target =  ['bring', 'improve', 'sister', 'pick', 'likely', 'because', 'Executive', 'spring'] 
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()
         corpus = corpus.split()
@@ -148,7 +150,7 @@ def main(target_dir, prime, prime_name, size, operation):
         print("DFA successfully reached the accept state \n")
     else:
         print("DFA did not reached the accept state \n")
-
+    
     print("Generating Output for",file_name, "\n")
     print_ir0(target_dir + "/" + f"{file_name}_{prime_name}_{size}")
 

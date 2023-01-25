@@ -54,9 +54,11 @@ def run_dfa(dfa, text_input, zero_states, found_states, appendedAll_state, closi
 
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
-                         mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_states[0]),
-                         error_state,
-                         curr_state))
+                            mux((initial_state == dfa_state) & (string != dfa_str) & is_in_target_states(initial_state, zero_states),
+                               zero_states[0],
+                                    mux((initial_state == dfa_state) & (string != dfa_str),
+                                    error_state,
+                                        curr_state)))
                          
             # print("Updated state: ", val_of(curr_state))                     
 
@@ -114,9 +116,9 @@ def main(target_dir, prime, prime_name, size, operation):
         print("Actual text length:", len(corpus))
 
     else:
-        string_a = ['one']
-        string_target =  ['two']
-        string_b = ['three']
+        string_a = ['across', 'marriage', 'field', 'amount', 'ground', 'Style', 'job', 'manager'] 
+        string_target =  ['bring', 'improve', 'sister'] 
+        string_b = ['pick', 'likely', 'because', 'Executive', 'spring']
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()
         corpus = corpus.split()
