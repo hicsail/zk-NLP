@@ -6,6 +6,33 @@
   "ccc": "./ccc.txt",
 
   "test-families" : {
+
+    "after_all_multi": {
+      "primes": ["p1"],
+      "size_note": "2**N (Increases the size of a corpus text, target and pivot word)",
+      "sizes": [0]
+    },
+      "after_multi": {
+        "primes": ["p1"],
+        "size_note": "2**N (Increases the size of a corpus text, target and pivot word)",
+        "sizes": [0]
+      },
+      "begins_multi": {
+        "primes": ["p1"],
+        "size_note": "2**N (Increases the size of a corpus text, target and pivot word)",
+        "sizes": [0]
+      },
+      "between_multi": {
+        "primes": ["p1"],
+        "size_note": "2**N (Increases the size of a corpus text, target and pivot words)",
+        "sizes": [0]
+      },
+      "point_to_multi": {
+        "primes": ["p1"],
+        "size_note": "2**N (Increases the size of a corpus text, target and pivot word)",
+        "sizes": [0]
+      },
+
       "string_search": {
         "primes": ["p1"],
         "size_note": "2**N (Increases the size of a corpus text)",

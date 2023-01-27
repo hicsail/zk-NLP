@@ -57,7 +57,7 @@ def run_dfa(dfa, text_input, zero_state, found_states, appendedAll_state, accept
         Push negative value if you end up in the error state
     '''
     Secret_str_between.cond_pop(latest_state==appendedAll_state)
-    Secret_str_between.cond_push(latest_state==error_state, -1)
+    Secret_str_between.cond_push(latest_state==error_state, 1)
     return latest_state
 
 
@@ -87,7 +87,7 @@ def main(target_dir, prime, prime_name, size, operation):
         string_a, string_target, string_b =generate_target(corpus, file_name, substring_len=substring_len, piv_len=piv_len)
         print("Test (First 10 Strings): ",corpus[0:10])
         print("Actual text length:", len(corpus))
-
+#Maintain relate card Rock series development alone maintain realize Next participant wide else various bring Girl yeah case effort democratic ten much Benefit husband dinner continue difficult Say already material product positive Pretty animal toward talk Factor each recent film defense teach star Skill professional case manager Agent member size positive fish little South down war sure fire Every first bar few Media former across marriage field amount ground Style job manager bring improve sister pick likely because Executive spring
     else:
         string_a = 'two'
         string_target =  ['three', 'four']
@@ -115,7 +115,7 @@ def main(target_dir, prime, prime_name, size, operation):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*100+1
 
-    Secret_str_between = SecretStack([])
+    Secret_str_between = SecretStack([], max_size=50)
     
 
     #Build and traverse a DFA

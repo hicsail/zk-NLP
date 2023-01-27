@@ -67,7 +67,7 @@ def run_dfa(dfa, text_input, zero_states, found_states, accept_state, error_stat
     latest_state=reduce(next_state_fun, text_input, zero_states[0])
     
     # Push negative value if you end up in the error state
-    Secret_str_after_all.cond_push(latest_state==error_state, -1)
+    Secret_str_after_all.cond_push(latest_state==error_state, 1)
 
     return latest_state
 
@@ -123,7 +123,8 @@ def main(target_dir, prime, prime_name, size, operation):
     else:
         accept_state = found_states[-1]*10
         error_state = found_states[-1]*100
-    Secret_str_after_all = SecretStack([])
+
+    Secret_str_after_all = SecretStack([], max_size=50)
 
 
     # Build and traverse a DFA
