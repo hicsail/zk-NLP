@@ -74,7 +74,20 @@ def run_dfa(dfa, text_input, zero_states, found_states, appendedAll_state, closi
             Add substring if in one of zero_state(except first), found states, and accept state
         '''
         Secret_str_between.cond_push(is_in_target_states(curr_state, zero_states[1:])|is_in_target_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
+
+        ''' 
+            When there is a duplicated word(s) and the word is the part of string_a, this algorithm pushes it to the secret stack 
+            As soon as the algorithm identifies that the duplicated word it was reading is not part of string_a, then it moves back to zero_state[0]
+            Therefore, whenever it's in zero_states[0] and the secretstack is not empty, all contents shall be removed
+            The following for loop implements this emptying process
+        '''
+
+        for i in range(len(zero_states)):
+           
+            Secret_str_between.cond_pop((curr_state== zero_states[0]) & (len(Secret_str_between.val) > 0))
+
         return curr_state
+
     latest_state=reduce(next_state_fun, text_input, zero_states[0])
 
     ''' 
@@ -116,7 +129,7 @@ def main(target_dir, prime, prime_name, size, operation):
         print("Actual text length:", len(corpus))
 
     else:
-        string_a = ['across', 'marriage', 'field', 'amount', 'ground', 'Style', 'job', 'manager'] 
+        string_a = [ 'across', 'manager', 'marriage', 'field', 'amount', 'ground', 'Style', 'job'] 
         string_target =  ['bring', 'improve', 'sister'] 
         string_b = ['pick', 'likely', 'because', 'Executive', 'spring']
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:

@@ -57,7 +57,9 @@ def run_dfa(dfa, text_input, zero_states, accept_state, error_state):
                      curr_state))
         
         return curr_state
+
     latest_state=reduce(next_state_fun, text_input, zero_states[0])
+
     return latest_state
 
 

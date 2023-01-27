@@ -63,7 +63,20 @@ def run_dfa(dfa, text_input, zero_states, found_states, accept_state, error_stat
             If you're initially in accept state, it should fail into error state because you were not reading the last word in the text in the previous iteration
         '''
         Secret_str_after_all.cond_push(is_in_target_states(initial_state, found_states),string)
+
+        ''' 
+            When there is a duplicated word(s) and the word is the part of string_a, this algorithm pushes it to the secret stack 
+            As soon as the algorithm identifies that the duplicated word it was reading is not part of string_a, then it moves back to zero_state[0]
+            Therefore, whenever it's in zero_states[0] and the secretstack is not empty, all contents shall be removed
+            The following for loop implements this emptying process
+        '''
+
+        for i in range(len(zero_states)):
+           
+            Secret_str_after_all.cond_pop((curr_state== zero_states[0]) & (len(Secret_str_after_all.val) > 0))
+
         return curr_state
+
     latest_state=reduce(next_state_fun, text_input, zero_states[0])
     
     # Push negative value if you end up in the error state
@@ -100,7 +113,7 @@ def main(target_dir, prime, prime_name, size, operation):
         print("Actual text length:", len(corpus))
 
     else:
-        string_a = ['across', 'marriage', 'field', 'amount', 'ground', 'Style', 'job', 'manager'] 
+        string_a = ['manager', 'across', 'marriage', 'field', 'amount', 'ground', 'Style', 'job'] 
         string_target =  ['bring', 'improve', 'sister', 'pick', 'likely', 'because', 'Executive', 'spring'] 
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()
