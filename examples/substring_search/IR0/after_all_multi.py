@@ -113,8 +113,8 @@ def main(target_dir, prime, prime_name, size, operation):
         print("Actual text length:", len(corpus))
 
     else:
-        string_a = ['manager', 'across', 'marriage', 'field', 'amount', 'ground', 'Style', 'job'] 
-        string_target =  ['bring', 'improve', 'sister', 'pick', 'likely', 'because', 'Executive', 'spring'] 
+        string_a = ['twelve','thirteen']
+        string_target =  ['fourteen', 'fifteen']
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()
         corpus = corpus.split()

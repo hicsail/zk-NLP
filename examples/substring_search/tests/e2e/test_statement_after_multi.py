@@ -36,6 +36,29 @@ class TestStatement(unittest.TestCase):
         self.assertNotEqual(val_of(latest_state), error_state)
 
 
+    def test_advanced(self):
+
+        '''
+            An advanced case to pass, one of string_a appears twice and the first should be ignored
+        '''
+
+        string_a = ['two','three']
+        string_target =  ['four', 'five']
+        corpus = 'two one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen'
+        corpus = corpus.split()
+        file_string = SecretList([util.word_to_integer(_str) for _str in corpus])
+
+        zero_states = [i for i in range(0,len(string_a))]
+        found_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_target)+1)]
+        accept_state = found_states[-1]*10
+        error_state = found_states[-1]*100
+        
+        dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, accept_state)
+        latest_state = statement.run_dfa(dfa, file_string, zero_states, accept_state, error_state)
+        self.assertEqual(val_of(latest_state), accept_state)
+        self.assertTrue(val_of(latest_state) not in zero_states)
+        self.assertNotEqual(val_of(latest_state), error_state)
+
     def test_fail(self):
 
         '''

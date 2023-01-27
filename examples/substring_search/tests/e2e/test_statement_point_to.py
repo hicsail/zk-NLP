@@ -32,7 +32,7 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*101
 
-        Secret_str_before = SecretStack([])
+        Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
@@ -70,7 +70,7 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*101
 
-        Secret_str_before = SecretStack([])
+        Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
@@ -108,7 +108,7 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*101
 
-        Secret_str_before = SecretStack([])
+        Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
@@ -146,7 +146,7 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*101
 
-        Secret_str_before = SecretStack([])
+        Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)
@@ -184,7 +184,7 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*101
 
-        Secret_str_before = SecretStack([])
+        Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_state, found_states, appendedAll_state, accept_state)

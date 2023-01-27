@@ -32,11 +32,11 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*101
 
-        Secret_str_before = SecretStack([])
+        Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, appendedAll_state, accept_state)
-        latest_state = statement.run_dfa(dfa, file_string, zero_states, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+        latest_state = statement.run_dfa(dfa, file_string, zero_states, appendedAll_state, accept_state, error_state, Secret_str_before)
         self.assertEqual(val_of(latest_state), accept_state)
         self.assertNotEqual(val_of(latest_state), appendedAll_state)
         self.assertFalse(val_of(latest_state) in found_states)
@@ -70,11 +70,11 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*101
 
-        Secret_str_before = SecretStack([])
+        Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, appendedAll_state, accept_state)
-        latest_state = statement.run_dfa(dfa, file_string, zero_states, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+        latest_state = statement.run_dfa(dfa, file_string, zero_states, appendedAll_state, accept_state, error_state, Secret_str_before)
         self.assertEqual(val_of(latest_state), appendedAll_state)
         self.assertNotEqual(val_of(latest_state), accept_state)
         self.assertFalse(val_of(latest_state) in found_states)
@@ -108,11 +108,11 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*101
 
-        Secret_str_before = SecretStack([])
+        Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, appendedAll_state, accept_state)
-        latest_state = statement.run_dfa(dfa, file_string, zero_states, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+        latest_state = statement.run_dfa(dfa, file_string, zero_states, appendedAll_state, accept_state, error_state, Secret_str_before)
         self.assertEqual(val_of(latest_state), error_state)
         self.assertNotEqual(val_of(latest_state), appendedAll_state)
         self.assertFalse(val_of(latest_state) in found_states)
@@ -146,11 +146,11 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*101
 
-        Secret_str_before = SecretStack([])
+        Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, appendedAll_state, accept_state)
-        latest_state = statement.run_dfa(dfa, file_string, zero_states, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+        latest_state = statement.run_dfa(dfa, file_string, zero_states, appendedAll_state, accept_state, error_state, Secret_str_before)
         self.assertEqual(val_of(latest_state), error_state)
         self.assertNotEqual(val_of(latest_state), appendedAll_state)
         self.assertFalse(val_of(latest_state) in found_states)

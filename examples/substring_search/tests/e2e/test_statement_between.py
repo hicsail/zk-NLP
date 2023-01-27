@@ -33,7 +33,7 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*100+1
 
-        Secret_str_between = SecretStack([])
+        Secret_str_between = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, string_b, zero_state, found_states, appendedAll_state, accept_state)
@@ -70,7 +70,7 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*100+1
 
-        Secret_str_between = SecretStack([])
+        Secret_str_between = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, string_b, zero_state, found_states, appendedAll_state, accept_state)
@@ -107,7 +107,7 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*100+1
 
-        Secret_str_between = SecretStack([])
+        Secret_str_between = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, string_b, zero_state, found_states, appendedAll_state, accept_state)
@@ -145,7 +145,7 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*100+1
 
-        Secret_str_between = SecretStack([])
+        Secret_str_between = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, string_b, zero_state, found_states, appendedAll_state, accept_state)

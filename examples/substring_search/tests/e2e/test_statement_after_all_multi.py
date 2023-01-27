@@ -30,7 +30,7 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*10
         error_state = found_states[-1]*100
 
-        Secret_str_after_all = SecretStack([])
+        Secret_str_after_all = SecretStack([], max_size=50)
         
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, accept_state)
@@ -64,7 +64,41 @@ class TestStatement(unittest.TestCase):
         accept_state = found_states[-1]*10
         error_state = found_states[-1]*100
 
-        Secret_str_after_all = SecretStack([])
+        Secret_str_after_all = SecretStack([], max_size=50)
+
+        # Testing final state
+        dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, accept_state)
+        latest_state = statement.run_dfa(dfa, file_string, zero_states, found_states, accept_state, error_state, Secret_str_after_all)
+        self.assertEqual(val_of(latest_state), accept_state)
+        self.assertFalse(val_of(latest_state) in found_states)
+        self.assertNotEqual(val_of(latest_state), zero_states)
+        self.assertNotEqual(val_of(latest_state), error_state)
+
+        # Testing SecretStack
+        file_name="after_all_multi"
+        expected = util.create_exepected_result(file_name, corpus, string_target, string_a)
+        test_flag = util.reconcile_secretstack(expected, Secret_str_after_all)
+        self.assertTrue(test_flag)
+
+
+    def test_advanced(self):
+
+        '''
+            An advanced case to pass, one of string_a appears twice and the first should be ignored
+        '''
+
+        string_a = ['twelve','thirteen']
+        string_target =  ['fourteen', 'fifteen']
+        corpus = 'one twelve three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen'
+        corpus = corpus.split()
+        file_string = SecretList([util.word_to_integer(_str) for _str in corpus])
+
+        zero_states = [i for i in range(0,len(string_a))]
+        found_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_target)+1)]
+        accept_state = found_states[-1]*10
+        error_state = found_states[-1]*100
+
+        Secret_str_after_all = SecretStack([], max_size=50)
 
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, accept_state)
@@ -100,7 +134,7 @@ class TestStatement(unittest.TestCase):
         error_state = found_states[-1]*100
 
         
-        Secret_str_after_all = SecretStack([])
+        Secret_str_after_all = SecretStack([], max_size=50)
         
         # Testing final state
         dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, accept_state)
