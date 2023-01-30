@@ -39,9 +39,11 @@ def run_dfa(dfa, text_input, zero_states, accept_state, error_state):
 
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
-                         mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_states[0]),
-                         error_state,
-                         curr_state))
+                            mux((initial_state == dfa_state) & (string != dfa_str) & is_in_target_states(initial_state, zero_states),
+                                zero_states[0],
+                                    mux((initial_state == dfa_state) & (string != dfa_str),
+                                    error_state,
+                                        curr_state)))
             
             # print("Updated state: ", val_of(curr_state))
         
@@ -55,7 +57,9 @@ def run_dfa(dfa, text_input, zero_states, accept_state, error_state):
                      curr_state))
         
         return curr_state
+
     latest_state=reduce(next_state_fun, text_input, zero_states[0])
+
     return latest_state
 
 
@@ -80,15 +84,15 @@ def main(target_dir, prime, prime_name, size, operation):
 
     if operation =="test":
         corpus=generate_text(int(size))
-        substring_len=1
-        piv_len=1
+        substring_len=2**int(size)
+        piv_len=2**int(size)
         string_a, string_target =generate_target(corpus, file_name, substring_len=substring_len, piv_len=piv_len)
         print("Test (First 10 Strings): ",corpus[0:10])
         print("Actual text length:", len(corpus))
 
     else:
-        string_a = ['two','three']
-        string_target =  ['four', 'five']
+        string_a = ['across', 'marriage', 'field', 'amount', 'ground', 'Style', 'job', 'manager']
+        string_target =  ['bring', 'improve', 'sister', 'pick', 'likely', 'because', 'Executive', 'spring'] 
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()
         corpus = corpus.split()
@@ -130,7 +134,7 @@ def main(target_dir, prime, prime_name, size, operation):
     else:
         print("DFA did not reached the accept state \n")
 
-    print("Generating Output \n")
+    print("Generating Output for",file_name, "\n")
     print_ir0(target_dir + "/" + f"{file_name}_{prime_name}_{size}")
 
 

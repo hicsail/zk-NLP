@@ -57,7 +57,7 @@ def run_dfa(dfa, text_input, zero_state, found_states, appendedAll_state, accept
         Push negative value if you end up in the error state
     '''
     Secret_str_between.cond_pop(latest_state==appendedAll_state)
-    Secret_str_between.cond_push(latest_state==error_state, -1)
+    Secret_str_between.cond_push(latest_state==error_state, 1)
     return latest_state
 
 
@@ -82,8 +82,8 @@ def main(target_dir, prime, prime_name, size, operation):
 
     if operation =="test":
         corpus=generate_text(int(size))
-        substring_len=1
-        piv_len=1
+        substring_len=2**int(size)
+        piv_len=2**int(size)
         string_a, string_target, string_b =generate_target(corpus, file_name, substring_len=substring_len, piv_len=piv_len)
         print("Test (First 10 Strings): ",corpus[0:10])
         print("Actual text length:", len(corpus))
@@ -115,7 +115,7 @@ def main(target_dir, prime, prime_name, size, operation):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*100+1
 
-    Secret_str_between = SecretStack([])
+    Secret_str_between = SecretStack([], max_size=50)
     
 
     #Build and traverse a DFA
@@ -147,7 +147,7 @@ def main(target_dir, prime, prime_name, size, operation):
     else:
         print("DFA did not reached the accept state \n")
 
-    print("Generating Output \n")
+    print("Generating Output for",file_name, "\n")
     print_ir0(target_dir + "/" + f"{file_name}_{prime_name}_{size}")
 
 

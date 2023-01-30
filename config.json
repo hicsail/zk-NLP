@@ -6,16 +6,37 @@
   "ccc": "./ccc.txt",
 
   "test-families" : {
-      "string_search": {
+    "after_all_multi": {
+      "primes": ["p1"],
+      "size_note": "2**N (Increases the size of a corpus text, target and pivot word)",
+      "sizes": [0, 1, 2, 3, 4]
+    },
+      "after_multi": {
         "primes": ["p1"],
-        "size_note": "2**N (Increases the size of a corpus text)",
-        "sizes": [0]
+        "size_note": "2**N (Increases the size of a corpus text, target and pivot word)",
+        "sizes": [0, 1, 2, 3, 4]
       },
-      "after_all": {
+      "begins_multi": {
         "primes": ["p1"],
-        "size_note": "2**N (Increases the size of a corpus text)",
-        "sizes": [0]
+        "size_note": "2**N (Increases the size of a corpus text, target and pivot word)",
+        "sizes": [0, 1, 2, 3, 4]
       },
+      "between_multi": {
+        "primes": ["p1"],
+        "size_note": "2**N (Increases the size of a corpus text, target and pivot words)",
+        "sizes": [0, 1, 2, 3, 4]
+      },
+      "point_to_multi": {
+        "primes": ["p1"],
+        "size_note": "2**N (Increases the size of a corpus text, target and pivot word)",
+        "sizes": [0, 1, 2, 3, 4]
+      },
+
+    "after_all": {
+      "primes": ["p1"],
+      "size_note": "2**N (Increases the size of a corpus text and target)",
+      "sizes": [0, 1, 2, 3, 4]
+    },
       "after": {
         "primes": ["p1"],
         "size_note": "The length of a corpus text does not affect complexity",
@@ -28,17 +49,22 @@
       },
       "between": {
         "primes": ["p1"],
-        "size_note": "2**N (Increases the size of a corpus text)",
-        "sizes": [0]
+        "size_note": "2**N (Increases the size of a corpus text and target)",
+        "sizes": [0, 1, 2, 3, 4]
       },
       "point_to": {
         "primes": ["p1"],
-        "size_note": "2**N (Increases the size of a corpus text)",
-        "sizes": [0]
+        "size_note": "2**N (Increases the size of a corpus text and target)",
+        "sizes": [0, 1, 2, 3, 4]
       },
-      "stringlist_search": {
+      "stringlist": {
         "primes": ["p1"],
-        "size_note": "2**N (Increases the size of a corpus text)",
+        "size_note": "2**N (Increases the size of each target and the number of targets)",
+        "sizes": [0,1]
+      },
+      "string": {
+        "primes": ["p1"],
+        "size_note": "The length of a corpus text does not affect complexity",
         "sizes": [0]
       }
   }

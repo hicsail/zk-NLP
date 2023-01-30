@@ -40,9 +40,11 @@ def run_dfa(dfa, text_input, zero_states, found_states, accept_state, error_stat
 
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
-                         mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_states[0]),
-                         error_state,
-                         curr_state))
+                            mux((initial_state == dfa_state) & (string != dfa_str) & is_in_target_states(initial_state, zero_states),
+                            zero_states[0], 
+                                mux((initial_state == dfa_state) & (string != dfa_str),
+                                error_state,
+                                    curr_state)))
                          
             # print("Updated state: ", val_of(curr_state))
 
@@ -61,11 +63,24 @@ def run_dfa(dfa, text_input, zero_states, found_states, accept_state, error_stat
             If you're initially in accept state, it should fail into error state because you were not reading the last word in the text in the previous iteration
         '''
         Secret_str_after_all.cond_push(is_in_target_states(initial_state, found_states),string)
+
+        ''' 
+            When there is a duplicated word(s) and the word is the part of string_a, this algorithm pushes it to the secret stack 
+            As soon as the algorithm identifies that the duplicated word it was reading is not part of string_a, then it moves back to zero_state[0]
+            Therefore, whenever it's in zero_states[0] and the secretstack is not empty, all contents shall be removed
+            The following for loop implements this emptying process
+        '''
+
+        for i in range(len(zero_states)):
+           
+            Secret_str_after_all.cond_pop((curr_state== zero_states[0]) & (len(Secret_str_after_all.val) > 0))
+
         return curr_state
+
     latest_state=reduce(next_state_fun, text_input, zero_states[0])
     
     # Push negative value if you end up in the error state
-    Secret_str_after_all.cond_push(latest_state==error_state, -1)
+    Secret_str_after_all.cond_push(latest_state==error_state, 1)
 
     return latest_state
 
@@ -91,15 +106,15 @@ def main(target_dir, prime, prime_name, size, operation):
 
     if operation =="test":
         corpus=generate_text(int(size))
-        substring_len=1
-        piv_len=1
+        substring_len=2**int(size)
+        piv_len=2**int(size)
         string_a, string_target=generate_target(corpus, file_name, substring_len=substring_len, piv_len=piv_len)
         print("Test (First 10 Strings): ",corpus[0:10])
         print("Actual text length:", len(corpus))
 
     else:
-        string_a = ['two', 'three']
-        string_target =  ['four','five']
+        string_a = ['twelve','thirteen']
+        string_target =  ['fourteen', 'fifteen']
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()
         corpus = corpus.split()
@@ -121,7 +136,8 @@ def main(target_dir, prime, prime_name, size, operation):
     else:
         accept_state = found_states[-1]*10
         error_state = found_states[-1]*100
-    Secret_str_after_all = SecretStack([])
+
+    Secret_str_after_all = SecretStack([], max_size=50)
 
 
     # Build and traverse a DFA
@@ -148,7 +164,7 @@ def main(target_dir, prime, prime_name, size, operation):
         print("DFA successfully reached the accept state \n")
     else:
         print("DFA did not reached the accept state \n")
-
+    
     print("Generating Output for",file_name, "\n")
     print_ir0(target_dir + "/" + f"{file_name}_{prime_name}_{size}")
 

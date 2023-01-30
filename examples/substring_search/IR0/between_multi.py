@@ -54,9 +54,11 @@ def run_dfa(dfa, text_input, zero_states, found_states, appendedAll_state, closi
 
             curr_state = mux((initial_state == dfa_state) & (string == dfa_str),
                          next_state,
-                         mux((initial_state == dfa_state) & (string != dfa_str) & (initial_state!=zero_states[0]),
-                         error_state,
-                         curr_state))
+                            mux((initial_state == dfa_state) & (string != dfa_str) & is_in_target_states(initial_state, zero_states),
+                               zero_states[0],
+                                    mux((initial_state == dfa_state) & (string != dfa_str),
+                                    error_state,
+                                        curr_state)))
                          
             # print("Updated state: ", val_of(curr_state))                     
 
@@ -72,7 +74,20 @@ def run_dfa(dfa, text_input, zero_states, found_states, appendedAll_state, closi
             Add substring if in one of zero_state(except first), found states, and accept state
         '''
         Secret_str_between.cond_push(is_in_target_states(curr_state, zero_states[1:])|is_in_target_states(curr_state, found_states)|(curr_state == appendedAll_state),string)
+
+        ''' 
+            When there is a duplicated word(s) and the word is the part of string_a, this algorithm pushes it to the secret stack 
+            As soon as the algorithm identifies that the duplicated word it was reading is not part of string_a, then it moves back to zero_state[0]
+            Therefore, whenever it's in zero_states[0] and the secretstack is not empty, all contents shall be removed
+            The following for loop implements this emptying process
+        '''
+
+        for i in range(len(zero_states)):
+           
+            Secret_str_between.cond_pop((curr_state== zero_states[0]) & (len(Secret_str_between.val) > 0))
+
         return curr_state
+
     latest_state=reduce(next_state_fun, text_input, zero_states[0])
 
     ''' 
@@ -82,7 +97,7 @@ def run_dfa(dfa, text_input, zero_states, found_states, appendedAll_state, closi
     for i in range(0, len(closing_states)):
         Secret_str_between.cond_pop(latest_state==appendedAll_state)
 
-    Secret_str_between.cond_push(latest_state==error_state, -1)
+    Secret_str_between.cond_push(latest_state==error_state, 1)
     return latest_state
 
 
@@ -107,16 +122,16 @@ def main(target_dir, prime, prime_name, size, operation):
 
     if operation =="test":
         corpus=generate_text(int(size))
-        substring_len=1
-        piv_len=1
+        substring_len=2**int(size)
+        piv_len=2**int(size)
         string_a, string_target, string_b =generate_target(corpus, file_name, substring_len=substring_len, piv_len=piv_len)
         print("Test (First 10 Strings): ",corpus[0:10])
         print("Actual text length:", len(corpus))
 
     else:
-        string_a = ['one']
-        string_target =  ['two']
-        string_b = ['three']
+        string_a = [ 'across', 'manager', 'marriage', 'field', 'amount', 'ground', 'Style', 'job'] 
+        string_target =  ['bring', 'improve', 'sister'] 
+        string_b = ['pick', 'likely', 'because', 'Executive', 'spring']
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()
         corpus = corpus.split()
@@ -136,7 +151,7 @@ def main(target_dir, prime, prime_name, size, operation):
     accept_state = found_states[-1]*100
     error_state = found_states[-1]*100+1
 
-    Secret_str_between = SecretStack([])
+    Secret_str_between = SecretStack([], max_size=50)
     
 
     #Build and traverse a DFA
@@ -168,7 +183,7 @@ def main(target_dir, prime, prime_name, size, operation):
     else:
         print("DFA did not reached the accept state \n")
 
-    print("Generating Output \n")
+    print("Generating Output for",file_name, "\n")
     print_ir0(target_dir + "/" + f"{file_name}_{prime_name}_{size}")
 
 

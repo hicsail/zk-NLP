@@ -27,7 +27,7 @@ class TestUtil(unittest.TestCase):
 
         expected = [0, 1, 2, 3]
 
-        SecretStack_ = SecretStack([])
+        SecretStack_ = SecretStack([], max_size=50)
         SecretStack_.push(0)
         SecretStack_.push(1)
         SecretStack_.push(2)
@@ -43,7 +43,7 @@ class TestUtil(unittest.TestCase):
         '''
         expected = []
 
-        SecretStack_ = SecretStack([])
+        SecretStack_ = SecretStack([], max_size=50)
 
         test_flag = util.reconcile_secretstack(expected, SecretStack_)
         self.assertTrue(test_flag)
@@ -56,7 +56,7 @@ class TestUtil(unittest.TestCase):
 
         expected = [0, 1, 2, 3]
 
-        SecretStack_ = SecretStack([])
+        SecretStack_ = SecretStack([], max_size=50)
         SecretStack_.push(0)
         SecretStack_.push(1)
         SecretStack_.push(2)
@@ -72,7 +72,7 @@ class TestUtil(unittest.TestCase):
         '''
         expected = [0, 1, 2, 3]
 
-        SecretStack_ = SecretStack([])
+        SecretStack_ = SecretStack([], max_size=50)
         SecretStack_.push(3)
         SecretStack_.push(2)
         SecretStack_.push(1)
@@ -88,7 +88,7 @@ class TestUtil(unittest.TestCase):
         '''
         expected = [0, 1, 2, 3]
 
-        SecretStack_ = SecretStack([])
+        SecretStack_ = SecretStack([], max_size=50)
         SecretStack_.push(0)
         SecretStack_.push(1)
         SecretStack_.push(2)
@@ -103,7 +103,7 @@ class TestUtil(unittest.TestCase):
         '''
         expected = [0, 1, 2]
 
-        SecretStack_ = SecretStack([])
+        SecretStack_ = SecretStack([], max_size=50)
         SecretStack_.push(0)
         SecretStack_.push(1)
         SecretStack_.push(2)

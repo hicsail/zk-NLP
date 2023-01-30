@@ -183,7 +183,7 @@ def print_exp_ir1_(e):
 
         emit(f'  {r} <- @call(init_ram_{rn}, {print_exp_ir1(0)});')
         emit()
-        emit(f'  @call(write_ram, {r}, {print_exp_ir1(0)}, {print_exp_ir1(len(wvs) + 1)}); // stack top')
+        emit(f'  @call(write_ram, {r}, {print_exp_ir1(0)}, {print_exp_ir1(len(wvs))}); // stack top')
         for i, w in enumerate(wvs):
             emit(f'  @call(write_ram, {r}, {print_exp_ir1(i+1)}, {w});')
         emit('  // end init stack')
@@ -220,7 +220,7 @@ def print_exp_ir1_(e):
 
     elif isinstance(e, int):
         r = next_wire()
-        emit(f'  {r} <- < {e} >;')
+        emit(f'  {r} <- < {int(e)} >;')
         return r
 
     elif isinstance(e, galois.Array):
@@ -457,7 +457,7 @@ def print_exp_ir1_(e):
             r = next_wire()
             emit(f'  {tmp1} <- @add({x1}, {x2});')
             emit(f'  {tmp2} <- @mul({x1}, {x2});')
-            emit(f'  {neg_tmp2} <- @addc({tmp2}, < {c} >);')
+            emit(f'  {neg_tmp2} <- @mulc({tmp2}, < {c} >);')
             emit(f'  {r} <- @add({tmp1}, {neg_tmp2});')
             return r
         elif e.op == 'log_softmax':

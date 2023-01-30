@@ -14,22 +14,28 @@ def dfa_from_string(string_a, target, zero_states, found_states, appendedAll_sta
 
     # when the last element in target is found, move to the appendedall states
     next_state[(zero_states[-1], word_to_integer(target[-1]))]=appendedAll_state
-    next_state[(appendedAll_state, word_to_integer(string_a[0]))]=found_states[0]
 
-    for i in range(1,len(string_a)):
+    if len(string_a)==1:
+        next_state[(appendedAll_state, word_to_integer(string_a[0]))]=accept_state
 
-      if len(string_a)-1==i:
-        # When all string_a is found, then move to the accept state
-        next_state[(found_states[i-1], word_to_integer(string_a[i]))]=accept_state
+    else:
+        next_state[(appendedAll_state, word_to_integer(string_a[0]))]=found_states[0]
 
-      else:
-        next_state[(found_states[i-1], word_to_integer(string_a[i]))]=found_states[i]
+        for i in range(1,len(string_a)):
+
+            if len(string_a)-1==i:
+                # When all string_a is found, then move to the accept state
+                next_state[(found_states[i-1], word_to_integer(string_a[i]))]=accept_state
+
+            else:
+                # When traversing through string_a, then move to the next found_state
+                next_state[(found_states[i-1], word_to_integer(string_a[i]))]=found_states[i]
 
     return next_state
 
 
 
-def run_dfa(dfa, text_input, zero_states, found_states, appendedAll_state, accept_state, error_state, Secret_str_before):
+def run_dfa(dfa, text_input, zero_states, appendedAll_state, accept_state, error_state, Secret_str_before):
     def next_state_fun(string, initial_state):
         curr_state=initial_state
         
@@ -71,7 +77,7 @@ def run_dfa(dfa, text_input, zero_states, found_states, appendedAll_state, accep
         Push negative value if you end up in the error state
     '''
     Secret_str_before.cond_pop(latest_state==appendedAll_state)
-    Secret_str_before.cond_push(latest_state==error_state, -1)
+    Secret_str_before.cond_push(latest_state==error_state, 1)
     return latest_state
 
 
@@ -96,15 +102,15 @@ def main(target_dir, prime, prime_name, size, operation):
 
     if operation =="test":
         corpus=generate_text(int(size))
-        substring_len=1
-        piv_len=1
+        substring_len=2**int(size)
+        piv_len=2**int(size)
         string_a, string_target=generate_target(corpus, file_name, substring_len=substring_len, piv_len=piv_len)
         print("Test (First 10 Strings): ",corpus[0:10])
         print("Actual text length:", len(corpus))
 
     else:
-        string_target =  ['one'] 
-        string_a = ['three']
+        string_target = ['Heart']
+        string_a = ['among']
         with open("/usr/src/app/examples/dfa_test_input.txt", 'r') as f:
             corpus = f.read()
         corpus = corpus.split()
@@ -126,7 +132,7 @@ def main(target_dir, prime, prime_name, size, operation):
         accept_state = found_states[-1]*100
         error_state = found_states[-1]*101
 
-    Secret_str_before = SecretStack([])
+    Secret_str_before = SecretStack([], max_size=50)
 
 
     # Build and traverse a DFA
@@ -134,7 +140,7 @@ def main(target_dir, prime, prime_name, size, operation):
     dfa = dfa_from_string(string_a, string_target, zero_states, found_states, appendedAll_state, accept_state)
     print("\n", "DFA: ",dfa, "\n")
     print("Traversing DFA")
-    latest_state = run_dfa(dfa, file_string, zero_states, found_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+    latest_state = run_dfa(dfa, file_string, zero_states, appendedAll_state, accept_state, error_state, Secret_str_before)
     print("Output Assertion")
     assert0((latest_state - accept_state)*(latest_state - appendedAll_state))
     print("Running Poseidon Hash")
@@ -158,7 +164,7 @@ def main(target_dir, prime, prime_name, size, operation):
     else:
         print("DFA did not reached the accept state \n")
 
-    print("Generating Output \n")
+    print("Generating Output for",file_name, "\n")
     print_ir0(target_dir + "/" + f"{file_name}_{prime_name}_{size}")
 
 

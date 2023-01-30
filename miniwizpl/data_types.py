@@ -120,13 +120,18 @@ class SecretStack(AST):
     An oblivious stack with conditional push and pop. The maximum size of the stack
     is public.
     """
-    def __init__(self, arr):
+    def __init__(self, arr, max_size=None):
         global all_defs
         all_defs.append(self)
         self.val = arr.copy()
         self.original_val = arr.copy()
         self.name = gensym('stack')
-        self.max_size = len(arr)
+        if max_size == None:
+            if params['produce_warnings']:
+                print('Warning: secret stack constructed without max_size limit (may reveal information about the witness)')
+            self.max_size = len(arr)
+        else:
+            self.max_size = max_size
         params['options'].add('stack')
         params['ram_num_allocs'] += 1
         params['ram_total_alloc_size'] += len(self.val)
@@ -135,7 +140,6 @@ class SecretStack(AST):
         """Unconditional push."""
         self.max_size += 1
         self.val.append(val_of(item))
-        self.max_size = max(self.max_size, len(self.val))
         params['ram_total_alloc_size'] += 1
 
         params['all_statements'].append(Prim('stack_push', [self, item], None))
@@ -167,7 +171,7 @@ class SecretStack(AST):
         if val_of(condition):
             v = self.val.pop()
         else:
-            v = None
+            v = 0
 
         x = SymVar(xn, int, v)
         params['all_statements'].append(Prim('assign', [x, Prim('stack_cond_pop',

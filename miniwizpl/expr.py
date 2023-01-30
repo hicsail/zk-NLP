@@ -7,7 +7,7 @@ from .globals import *
 def val_of(x):
     if isinstance(x, AST):
         if x.val is None:
-            return 0      ######## TODO: FIX THIS HACK
+            raise Exception('Attempt to find value of None')
         else:
             return x.val
     else:
