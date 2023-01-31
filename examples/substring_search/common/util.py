@@ -456,5 +456,7 @@ def reconcile_secretstack(expected, secretstack):
         # The following control flow is just for the sake of testing
         if expected_val - val_of(curr_str)!=0:
             test_flag=False
-        
+    
+    assert0(0 - secretstack.cond_pop(len(secretstack.val) > 0)) # this is to ensure that secret stack is empty
+    
     return test_flag
