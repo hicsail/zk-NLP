@@ -148,8 +148,8 @@ def main(target_dir, prime, prime_name, size, operation):
     found_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_target)+1)]
     appendedAll_state=found_states[-1]*10
     closing_states=[i for i in range(appendedAll_state+1, appendedAll_state+len(string_b)+1)]
-    accept_state = found_states[-1]*100
-    error_state = found_states[-1]*100+1
+    accept_state = closing_states[-1]*100
+    error_state = closing_states[-1]*100+1
 
     Secret_str_between = SecretStack([], max_size=50)
     
