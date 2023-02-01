@@ -121,7 +121,7 @@ def main(target_dir, prime, prime_name, size, operation):
     file_string = SecretList([word_to_integer(_str) for _str in corpus])
 
     zero_states = [i for i in range(0,len(string_target))]
-    found_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_a)+1)]
+    found_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_a))]
 
     if len(found_states)==0:
         appendedAll_state=10
