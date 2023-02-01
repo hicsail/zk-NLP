@@ -86,8 +86,8 @@ def main(target_dir, prime, prime_name, size, operation):
     file_string = SecretList([word_to_integer(_str) for _str in corpus])
 
     zero_states = [i for i in range(0,len(target_strings))]
-    accept_state=100
-    error_state=101
+    accept_state=zero_states[-1]*10
+    error_state=zero_states[-1]*100
 
 
     # Build and traverse a DFA
