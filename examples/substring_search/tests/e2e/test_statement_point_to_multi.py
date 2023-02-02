@@ -26,20 +26,20 @@ class TestStatement(unittest.TestCase):
         file_string = SecretList([util.word_to_integer(_str) for _str in corpus])
 
         zero_states = [i for i in range(0,len(string_target))]
-        found_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_a)+1)]
+        closing_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_a)+1)]
 
-        appendedAll_state=found_states[-1]*10
-        accept_state = found_states[-1]*100
-        error_state = found_states[-1]*101
+        appendedAll_state=closing_states[-1]*10
+        accept_state = closing_states[-1]*100
+        error_state = closing_states[-1]*101
 
         Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
-        dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, appendedAll_state, accept_state)
-        latest_state = statement.run_dfa(dfa, file_string, zero_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+        dfa = statement.dfa_from_string(string_a, string_target, zero_states, closing_states, appendedAll_state, accept_state)
+        latest_state = statement.run_dfa(dfa, file_string, zero_states, appendedAll_state, closing_states, accept_state, error_state, Secret_str_before)
         self.assertEqual(val_of(latest_state), accept_state)
         self.assertNotEqual(val_of(latest_state), appendedAll_state)
-        self.assertFalse(val_of(latest_state) in found_states)
+        self.assertFalse(val_of(latest_state) in closing_states)
         self.assertFalse(val_of(latest_state) in zero_states)
         self.assertNotEqual(val_of(latest_state), error_state)
 
@@ -64,20 +64,20 @@ class TestStatement(unittest.TestCase):
         file_string = SecretList([util.word_to_integer(_str) for _str in corpus])
 
         zero_states = [i for i in range(0,len(string_target))]
-        found_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_a)+1)]
+        closing_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_a)+1)]
 
-        appendedAll_state=found_states[-1]*10
-        accept_state = found_states[-1]*100
-        error_state = found_states[-1]*101
+        appendedAll_state=closing_states[-1]*10
+        accept_state = closing_states[-1]*100
+        error_state = closing_states[-1]*101
 
         Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
-        dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, appendedAll_state, accept_state)
-        latest_state = statement.run_dfa(dfa, file_string, zero_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+        dfa = statement.dfa_from_string(string_a, string_target, zero_states, closing_states, appendedAll_state, accept_state)
+        latest_state = statement.run_dfa(dfa, file_string, zero_states, appendedAll_state, closing_states, accept_state, error_state, Secret_str_before)
         self.assertEqual(val_of(latest_state), appendedAll_state)
         self.assertNotEqual(val_of(latest_state), accept_state)
-        self.assertFalse(val_of(latest_state) in found_states)
+        self.assertFalse(val_of(latest_state) in closing_states)
         self.assertFalse(val_of(latest_state) in zero_states)
         self.assertNotEqual(val_of(latest_state), error_state)
 
@@ -102,20 +102,20 @@ class TestStatement(unittest.TestCase):
         file_string = SecretList([util.word_to_integer(_str) for _str in corpus])
 
         zero_states = [i for i in range(0,len(string_target))]
-        found_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_a)+1)]
+        closing_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_a)+1)]
 
-        appendedAll_state=found_states[-1]*10
-        accept_state = found_states[-1]*100
-        error_state = found_states[-1]*101
+        appendedAll_state=closing_states[-1]*10
+        accept_state = closing_states[-1]*100
+        error_state = closing_states[-1]*101
 
         Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
-        dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, appendedAll_state, accept_state)
-        latest_state = statement.run_dfa(dfa, file_string, zero_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+        dfa = statement.dfa_from_string(string_a, string_target, zero_states, closing_states, appendedAll_state, accept_state)
+        latest_state = statement.run_dfa(dfa, file_string, zero_states, appendedAll_state, closing_states, accept_state, error_state, Secret_str_before)
         self.assertEqual(val_of(latest_state), error_state)
         self.assertNotEqual(val_of(latest_state), appendedAll_state)
-        self.assertFalse(val_of(latest_state) in found_states)
+        self.assertFalse(val_of(latest_state) in closing_states)
         self.assertFalse(val_of(latest_state) in zero_states)
         self.assertNotEqual(val_of(latest_state), accept_state)
 
@@ -140,20 +140,20 @@ class TestStatement(unittest.TestCase):
         file_string = SecretList([util.word_to_integer(_str) for _str in corpus])
 
         zero_states = [i for i in range(0,len(string_target))]
-        found_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_a)+1)]
+        closing_states=[i for i in range(zero_states[-1]+1,zero_states[-1]+len(string_a)+1)]
 
-        appendedAll_state=found_states[-1]*10
-        accept_state = found_states[-1]*100
-        error_state = found_states[-1]*101
+        appendedAll_state=closing_states[-1]*10
+        accept_state = closing_states[-1]*100
+        error_state = closing_states[-1]*101
 
         Secret_str_before = SecretStack([], max_size=50)
 
         # Testing final state
-        dfa = statement.dfa_from_string(string_a, string_target, zero_states, found_states, appendedAll_state, accept_state)
-        latest_state = statement.run_dfa(dfa, file_string, zero_states, appendedAll_state, accept_state, error_state, Secret_str_before)
+        dfa = statement.dfa_from_string(string_a, string_target, zero_states, closing_states, appendedAll_state, accept_state)
+        latest_state = statement.run_dfa(dfa, file_string, zero_states, appendedAll_state, closing_states, accept_state, error_state, Secret_str_before)
         self.assertEqual(val_of(latest_state), error_state)
         self.assertNotEqual(val_of(latest_state), appendedAll_state)
-        self.assertFalse(val_of(latest_state) in found_states)
+        self.assertFalse(val_of(latest_state) in closing_states)
         self.assertFalse(val_of(latest_state) in zero_states)
         self.assertNotEqual(val_of(latest_state), accept_state)
 
