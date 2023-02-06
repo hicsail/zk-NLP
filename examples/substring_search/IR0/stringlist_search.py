@@ -35,6 +35,13 @@ def stateCal(s):
         result += (s[i] << 8 * i)
     return result
 
+def stateCalReverse(s, length):
+    result = [0]*length
+    mask = (1 << 8)-1
+    for i in range(length):
+        result[i] = (s & mask)
+        s = (s >> 8)
+    return result
 
 def dfa_from_string(target_list, accept_state):
 
@@ -146,37 +153,41 @@ def run_dfa(dfa, string, zero_state, accept):
         curr_state = initial_state  
 
         for (dfa_state, dfa_word), next_state in dfa.items():
-            
+   
             # print(
             #     "curr state: ", val_of(curr_state),
             #     "dfa state: ", dfa_state,"\n",
             #     "input string: ", val_of(word),
             #     "dfa string: ", dfa_word,"\n",
-            #     "next_state", next_state,"\n")
+            #     "next_state", next_state,"\n")         
             # transform all tuples to numbers
             dfa_state = stateCal(dfa_state)
             next_state = stateCal(next_state)
 
-            curr_state = mux((initial_state == dfa_state) & (word == dfa_word),
-                         next_state, 
-                         curr_state)
-                         
-            # curr_state = mux((initial_state == dfa_state) & (word == dfa_word),
-            #              next_state,
-            #              mux((initial_state == dfa_state) & (word != dfa_word) & (initial_state!=zero_state),
-            #              error_state, 
-            #              curr_state))  # output here is a number, not a tuple
+            if (val_of(initial_state) == dfa_state) & (word == dfa_word):
+                curr_state = mux((initial_state == dfa_state) & (word == dfa_word),
+                            next_state,
+                            curr_state)
+
+            elif (val_of(initial_state) == dfa_state) & (word != dfa_word):
+                reverse= stateCalReverse(val_of(curr_state), 2)
+                for r in range(len(reverse)):
+                    if reverse[r]!=255:
+                        reverse[r]=0
+                        curr_state = mux((initial_state == dfa_state) & (word != dfa_word),
+                            stateCal(reverse),
+                            curr_state)
+                        break
 
             # print("Updated state: ", val_of(curr_state))
 
             # TODO: check if output has any accept state for a single string: need to use the reverse version of
             #  stateCal()
-            # TODO: if any accept state, actual_counter[index]++ and change the state back to 0
 
         curr_state = mux(initial_state == accept, accept, curr_state)  # TODO: this line might need to be changed for the counter.
 
         return curr_state
-    latest_state=reduce(next_state_fun,string, zero_state)
+    latest_state=reduce(next_state_fun, string, zero_state)
     return latest_state
 
 def main(target_dir, prime, prime_name, size, operation):
@@ -225,7 +236,6 @@ def main(target_dir, prime, prime_name, size, operation):
     accept = stateCal(accept)
     zero_state = tuple([0] * len(string_target))
     zero_state = stateCal(zero_state)
-    error_state = 1000
 
     # TODO: a reverse version of stateCal() to transform a number back to a state tuple.
     # TODO: actual_counter = [0,0,0,...]
