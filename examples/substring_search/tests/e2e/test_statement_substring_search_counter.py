@@ -6,7 +6,7 @@ from miniwizpl import *
 from miniwizpl.expr import *
 
 sys.path.append("/usr/src/app/examples/substring_search/IR0")
-import counter_stringlist_search as statement
+import substring_search_counter as statement
 
 sys.path.append("/usr/src/app/examples/substring_search/common")
 import util

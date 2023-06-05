@@ -377,7 +377,7 @@ def main(target_dir, prime, prime_name, size, operation):
     if operation == "test":
         corpus = generate_text(int(size))
         stringList = generate_target(
-            corpus, file_name, length=2, n_string=4)
+            corpus, file_name, substring_len=2, piv_len=4)
         target_counterList = [1 for i in stringList]
         print("Test (First 10 Strings): ", corpus[0:10])
         print("Actual text length:", len(corpus))
