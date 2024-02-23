@@ -1,21 +1,30 @@
 # SIEVE
 
-SIEVE project provides an E2E pipeline to implement Zero-Knowledge Proof.
+zk-NLP provides an E2E pipeline to implement Zero-Knowledge Proof.
 
 ----
 
 ## 📖 Setting up
 
+<strong> Option A Use published docker image </strong>
+
+Run this in command line:
+```
+docker run --platform linux/amd64 -it hicsail/zk-nlp:main      
+```
+
+<strong> Option B Clone Repo </strong>
+
 Clone this repo:
 
 ```
-git clone https://github.com/hicsail/SIEVE.git
+git clone https://github.com/hicsail/zk-NLP.git
 ```
 
 Move into the root directory of the project
 
 ```
-cd SIEVE
+cd zk-NLP
 ```
 
 Inside the root directory, run build image:
