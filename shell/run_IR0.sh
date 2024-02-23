@@ -29,8 +29,8 @@ fi
 
 if [ -z "$target" ]
     then
-        target="./tests"
-        echo "test directory is set to './tests' "
+        target="./irs"
+        echo "test directory is set to './irs' "
 fi
 
 if [ -z "$size" ]
@@ -39,22 +39,7 @@ if [ -z "$size" ]
         echo "test size is set to 0 "
 fi
 
-
-
-# Copying the latest util.py into the container
-
-local="/code/substring_search/common/util.py"
-container="/usr/src/app/examples/substring_search/common/util.py"
-cp $local $container
-
-
-
-# Copying a designated statement file
-
 dir="/usr/src/app/examples/substring_search/IR0/"
-orig="/code/substring_search/IR0/"
-cp $orig$file.py $dir$file.py
-
 
 prime=2305843009213693951
 prime_fam="p1"
