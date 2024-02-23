@@ -1,6 +1,6 @@
-# SIEVE
+# zk-NLP
 
-zk-NLP provides an E2E pipeline to implement Zero-Knowledge Proof.
+zk-NLP provides an E2E pipeline to implement natural language processing (NLP) analysis under the Zero-Knowledge Proof.
 
 ----
 
