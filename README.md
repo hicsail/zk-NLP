@@ -89,8 +89,17 @@ cd ..
 
 ## 🏋️‍♀️ Run your python script inside the container
 
-You can run your python script in docker shell and compile by miniwizpl in the following command. 
-It entails the following four tags:
+You can run your Python script in the docker shell and compile it into zk statements by 'miniwizpl'.
+All of the main scripts to run are stored in the <a href="https://github.com/hicsail/zk-NLP/tree/main/examples/substring_search/IR0"> example/substring_search/IR0 directory </a>.
+
+You may run any of them in the docker shell either way described hereunder:
+
+
+<strong> Option 1) Shell Script </strong> 
+
+The following command will run the Python script and make the firearm app check an output if already installed (Otherwise, it will notify you to do so).
+
+The grammar of the shell script includes the following four tags:
 
 ```
 /bin/bash ./run_emp.sh -f <Name of your Python script to run> 
@@ -99,44 +108,44 @@ It entails the following four tags:
                        -t <Optional: Target Directory>
 ```
 
-<strong> -f (Required) </strong> : Name of your Python script to run (such as "between" and "after")
-
-<strong> -o (Optional) </strong> : Choose a mode to run your python script: 
-  <ul>
-    <li> "test" produces a synthetic test case, including an input text and target substrings. 
-    <li> "debug" uses your own text corpus input in <a href="https://github.com/hicsail/SIEVE/blob/main/examples/dfa_test_input.txt"> dfa_test_input.txt</a>
-    <li> If the second argument is empty, it will assume "debug" operation
-  </ul>
-
-For example, copy and paste the command into your terminal:
+For example, copy and paste the command into your terminal, which will run <a href="https://github.com/hicsail/SIEVE/blob/main/examples/substring_search/IR0/between.py">    between.py</a> in debug mode.<br>
 
 ```
    /bin/bash ./shell/run_IR0.sh -f between -o debug
 ```
 
-This runs <a href="https://github.com/hicsail/SIEVE/blob/main/examples/substring_search/IR0_stringlist_search_between.py">    IR0_stringlist_search_between.py</a> in debug mode.<br>
+Here are the meanings of the four tags:
 
-<strong> -s (Optional) </strong> : Choose a scale of test complexity (e.g., 0 and 1, default = 0)
+<strong> -f (Required) </strong>: Name of your Python script to run (such as "between" and "after")
+
+<strong> -o (Optional) </strong>: Choose a mode to run your python script: 
+  <ul>
+    <li> "test" produces a synthetic test case, including an input text and target substrings. 
+    <li> "debug" uses your own text corpus input in <a href="https://github.com/hicsail/SIEVE/blob/main/examples/dfa_test_input.txt"> dfa_test_input.txt</a>
+    <li> If the second argument is empty, it will assume a "debug" operation
+  </ul>
+
+<strong> -s (Optional) </strong>: Choose a scale of test complexity (e.g., 0 and 1, default = 0)
 <ul>
 
-  This value will be used as a parameter by generate_text function
-
-  https://github.com/hicsail/SIEVE/blob/425e0a1e8a163241fc509bffcac28c1e3e6f8962/examples/substring_search/common/util.py#L74
+  This value will be used as a parameter by <a href="https://github.com/hicsail/zk-NLP/blob/425e0a1e8a163241fc509bffcac28c1e3e6f8962/examples/substring_search/common/util.py#L74-L83"> the generate_text function </a>
 
 </ul>
 
 
-<strong> -t (Optional) </strong> : Choose a directory to save interim outputs (.rel, .ins, .wit files)
+<strong> -t (Optional) </strong>: Choose a directory to save interim outputs (.rel, .ins, .wit files)
 
 
-## 🎲 Tuning Testing Scale
+<strong> 2) Python </strong> 
 
-You may choose a scale of test cases (i.e., difficulty of tests) in generate_text() function (default to 0 = original length of text)
+You can also run each script without the shell script. Here is an example:
 
-https://github.com/hicsail/SIEVE/blob/a3c52beb324c2908f695b1422f1fca22fea92a2d/examples/substring_search/stringlist_search_after_all.py#L9
+```
+python3 examples/substring_search/IR0/after_all_multi.py 'irs' 230584300921369395 'p2' 3 test
+```
 
+This will run the after_all_multi algorithm in the field size of '230584300921369395' in test mode and the input scale of 3 ('p2' is not as important a parameter as the rest of the arguments).
 
-----
 
 ## Generating Documentation Re: miniwizpl
 
