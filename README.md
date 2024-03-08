@@ -134,9 +134,10 @@ Move into the root directory of the project and install dependencies
 cd zk-NLP
 python3 -m venv venv           # or pypy3 -m venv myenv
 source venv/bin/activate       # or source myenv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-pip install .
+pip3 install --upgrade pip
+pip3 install -r requirements.txt
+pip3 install .
+pip3 install git+https://github.com/gxavier38/pysnark.git@8a2a571bef430783adf8fe28cb8bb0b0bf8a7c94
 ```
 
 The following will run the main file:
