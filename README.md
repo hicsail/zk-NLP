@@ -2,6 +2,18 @@
 
 zk-NLP repository provides an E2E pipeline, supported by picozk, to test differential privacy under Zero-Knowledge Proof.
 
+## Project Objective
+
+This software is designed to verify that a given string (or strings) occupies a specific position within a corpus.
+For instance, consider a legal dispute where a party seeks to demonstrate that a particular clause in a contract begins with a specific statement. 
+The position is determined using a pivot string and a target string, based on which the software constructs a deterministic finite automaton (DFA) from a corpus (such as a legal document).
+The algorithm traverses the DFA and confirms the presence of the target strings at the designated location by checking if the DFA traversal concludes in a terminal state.
+
+The repository offers twelve categories of zero-knowledge (ZK) statements, categorized into two groups: single-word and multi-word methods.
+<p align="center">
+  <img width="472" alt="image" src="https://github.com/hicsail/zk-NLP/assets/62607343/24b5362a-1317-4bc3-ab24-20743155e169">
+</p>
+
 ----
 
 ## Quick Navigation
