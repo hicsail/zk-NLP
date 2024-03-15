@@ -29,4 +29,6 @@ RUN pip3 install -r requirements.txt
 
 RUN pip3 install git+https://github.com/gxavier38/pysnark.git@8a2a571bef430783adf8fe28cb8bb0b0bf8a7c94
 
+RUN mkdir -p irs
+
 CMD [ "sleep", "infinity" ]
