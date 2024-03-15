@@ -152,11 +152,6 @@ pip3 install .                 # or pypy3 -m pip install .
 pip3 install git+https://github.com/gxavier38/pysnark.git@8a2a571bef430783adf8fe28cb8bb0b0bf8a7c94
 ```
 
-The following will run the main file:
-```
-python3 zk-NLP.py  # or pypy3 zk-NLP.py
-```
-
 ## <strong> EMP-ZK tool (Deprecated) </strong>
 
 In case you want to experiment manually, run inside the docker shell:
